@@ -2,13 +2,14 @@ package com.gitee.cnsukidayo.anylanguageword.entity.local;
 
 import com.gitee.cnsukidayo.anylanguageword.enums.structure.EnglishStructure;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author sukidayo
  * @date 2023/7/28 16:30
  */
-public class WordDTOLocal {
+public class WordDTOLocal implements Serializable {
 
     private String origin;
 
