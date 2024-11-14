@@ -1,6 +1,7 @@
 package com.gitee.cnsukidayo.anylanguageword.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -27,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gitee.cnsukidayo.anylanguageword.R;
+import com.gitee.cnsukidayo.anylanguageword.context.AnyLanguageWordProperties;
 import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.WordContextPath;
 import com.gitee.cnsukidayo.anylanguageword.context.support.factory.StaticFactory;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
@@ -35,14 +37,15 @@ import com.gitee.cnsukidayo.anylanguageword.handler.CategoryFunctionHandler;
 import com.gitee.cnsukidayo.anylanguageword.handler.impl.AbstractCategoryFunctionHandler;
 import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordSearchHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.ui.MainActivity;
-import com.gitee.cnsukidayo.anylanguageword.ui.adapter.ChineseAnswerRecyclerViewAdapter;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.SimpleItemTouchHelperCallback;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StarChineseAnswerRecyclerViewAdapter;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StartSingleCategoryAdapter;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.listener.RecycleViewItemClickCallBack;
+import com.gitee.cnsukidayo.anylanguageword.ui.adapter.wordsearch.ChineseAnswerHandler;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.wordsearch.SelectWordListAdapter;
 import com.gitee.cnsukidayo.anylanguageword.utils.JsonUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -74,13 +77,14 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
     private AlertDialog loadingDialog = null;
     private WebView chineseAnswer;
     private RecyclerView chineseAnswerDrawer, starSingleCategory;
-    private ChineseAnswerRecyclerViewAdapter chineseAnswerAdapter;
+    // 新型中文显示处理器
+    private ChineseAnswerHandler chineseAnswerHandler;
     // 收藏夹列表单词显示适配器
     private StarChineseAnswerRecyclerViewAdapter chineseAnswerAdapterDrawer;
     private StartSingleCategoryAdapter startSingleCategoryAdapter;
     private Handler updateUIHandler;
     private LinearLayout analysisWord, openStarDrawer;
-    private TextView sourceWord, sourceWordPhonetics, sourceWordDrawer, sourceWordPhoneticsDrawer;
+    private TextView sourceWord, sourceWordDrawer, sourceWordPhoneticsDrawer;
     private TextView drawerPhraseHint, drawerPhraseAnswer, addNewCategory;
     // 收藏界抽屉布局
     private DrawerLayout startDrawer;
@@ -110,6 +114,8 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
     private volatile boolean isRunning = false;
     // 单词搜索handler
     private WordSearchHandlerImpl wordSearchHandler;
+    // 单词音频播放器
+    private final MediaPlayer mediaPlayer = new MediaPlayer();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -173,6 +179,9 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         } else if (itemId == R.id.fragment_search_word_click_star) {
             starSingleCategory.setVisibility(View.VISIBLE);
             startDrawer.openDrawer(GravityCompat.END);
+        } else if (itemId == R.id.fragment_search_word_play_word) {
+            mediaPlayer.seekTo(0);
+            mediaPlayer.start();
         }
     }
 
@@ -237,9 +246,8 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         updateUIHandler = new Handler();
         startDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         // 隐藏单词的附加显示内容、隐藏收藏界面的答案信息
-        hideLinearLayoutTree(rootView.findViewById(R.id.fragment_search_word_answer_area));
+        chineseAnswerHandler = new ChineseAnswerHandler(rootView);
         sourceWord.setText("");
-        sourceWordPhonetics.setText("");
         sourceWordDrawer.setText("");
         sourceWordPhoneticsDrawer.setText("");
         drawerPhraseHint.setVisibility(View.GONE);
@@ -255,7 +263,6 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
             categoryFunctionHandler.setCurrentLanguageId(2L);
             categoryFunctionHandler.addWordQueryCache(allWordDict);
             wordSearchHandler = new WordSearchHandlerImpl(getContext(), allWordDict);
-            this.chineseAnswerAdapter = new ChineseAnswerRecyclerViewAdapter(getContext());
             this.startSingleCategoryAdapter = new StartSingleCategoryAdapter(getContext());
             // 初始化单词列表的adapter
             this.selectWordListAdapter = new SelectWordListAdapter(getContext());
@@ -312,53 +319,27 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         selectWordList.setVisibility(View.GONE);
         chineseAnswer.setVisibility(View.VISIBLE);
         sourceWord.setVisibility(View.VISIBLE);
-        sourceWordPhonetics.setVisibility(View.VISIBLE);
         // 设置单词原文
         Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> sourceWord
                         .setText(wordDTOS));
-        // 设置单词音标
-        Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.UK_PHONETIC))
-                .ifPresent(wordDTOS -> sourceWordPhonetics
-                        .setText(wordDTOS));
-        // 设置右侧展开列表单词的原文
+        // 设置收藏夹单词显示
         Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> sourceWordDrawer
                         .setText(wordDTOS));
-        // 设置右侧展开列表单词的音标
-        Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.UK_PHONETIC))
-                .ifPresent(wordDTOS -> sourceWordPhoneticsDrawer
-                        .setText(wordDTOS));
-        // 设置短语
-        String phraseTranslation = Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.PHRASE_TRANSLATION))
-                .orElse("");
-        Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.PHRASE))
-                .ifPresentOrElse(wordDTOS -> {
-                    drawerPhraseAnswer.setText(wordDTOS +
-                            " " +
-                            phraseTranslation);
-                    drawerPhraseHint.setVisibility(View.VISIBLE);
-                    drawerPhraseAnswer.setVisibility(View.VISIBLE);
-                }, () -> {
-                    drawerPhraseHint.setVisibility(View.GONE);
-                    drawerPhraseAnswer.setVisibility(View.GONE);
-                });
-        // 设置中文翻译列表
-        chineseAnswerAdapter.showWordChineseMessage(wordDTOLocal);
+        chineseAnswerHandler.showWordChineseMessage(wordDTOLocal);
         // 设置收藏夹中文翻译
         chineseAnswerAdapterDrawer.addItem(wordDTOLocal);
-        // todo 在这里设置recycleView的宽度
-    }
-
-    private void hideLinearLayoutTree(ViewGroup linearLayout) {
-        for (int i = 0; i < linearLayout.getChildCount(); i++) {
-            View child = linearLayout.getChildAt(i);
-            if (child instanceof TextView) {
-                child.setVisibility(View.GONE);
-            } else if (child instanceof ViewGroup) {
-                hideLinearLayoutTree((ViewGroup) child);
-            }
+        // 播放声音
+        mediaPlayer.reset();
+        try {
+            mediaPlayer.setDataSource(new File(AnyLanguageWordProperties.getExternalFilesDir(),
+                    WordContextPath.WORD_AUDIO.getPath() + wordDTOLocal.getAudioPath()).getAbsolutePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException ignored) {
         }
+        // todo 在这里设置recycleView的宽度
     }
 
     /**
@@ -375,7 +356,6 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
                         selectWordList.setVisibility(View.VISIBLE);
                         chineseAnswer.setVisibility(View.GONE);
                         sourceWord.setVisibility(View.GONE);
-                        sourceWordPhonetics.setVisibility(View.GONE);
                         lastList = page.isLast();
                         if (page.isFirst()) {
                             // 如果是第一页就替换
@@ -396,8 +376,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         this.backToTrace = rootView.findViewById(R.id.toolbar_back_to_trace);
         this.title = rootView.findViewById(R.id.toolbar_title);
         this.sourceWord = rootView.findViewById(R.id.fragment_search_word_source_word);
-        this.sourceWordPhonetics = rootView.findViewById(R.id.fragment_search_word_phonetics);
-        this.chineseAnswer = rootView.findViewById(R.id.fragment_search_word_chinese_answer);
+        this.chineseAnswer = rootView.findViewById(R.id.fragment_word_credit_chinese_answer);
         this.analysisWord = rootView.findViewById(R.id.fragment_search_word_click_analysis_word);
         this.startDrawer = rootView.findViewById(R.id.fragment_search_word_start_drawer);
         this.openStarDrawer = rootView.findViewById(R.id.fragment_search_word_click_star);
@@ -410,6 +389,8 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         this.addNewCategory = rootView.findViewById(R.id.drawer_start_add_category);
         this.searchInput = rootView.findViewById(R.id.fragment_search_word_search_view);
         this.selectWordList = rootView.findViewById(R.id.fragment_search_word_select_recycler_view);
+        // 播放按钮
+        ImageButton playWord = rootView.findViewById(R.id.fragment_search_word_play_word);
 
         this.searchInput.setOnClickListener(this);
         this.searchInput.setOnQueryTextListener(this);
@@ -417,7 +398,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         this.analysisWord.setOnClickListener(this);
         this.openStarDrawer.setOnClickListener(this);
         this.addNewCategory.setOnClickListener(this);
-
+        playWord.setOnClickListener(this);
     }
 
     // ----下面是一些用不到的方法----

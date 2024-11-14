@@ -1,9 +1,7 @@
 package com.gitee.cnsukidayo.anylanguageword.ui.fragment;
 
 import android.annotation.SuppressLint;
-import android.media.AsyncPlayer;
-import android.media.AudioAttributes;
-import android.net.Uri;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -105,11 +103,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      */
     private List<WordStructureDTO> currentWordStructure;
     // 单词音频播放器
-    private final AsyncPlayer asyncPlayer = new AsyncPlayer("单词音频播放器");
-    private final AudioAttributes audioAttributes = new AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build();
+    private final MediaPlayer mediaPlayer = new MediaPlayer();
 
     /*
     以下是所有功能按钮的变量声明
@@ -624,9 +618,15 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     break;
             }
             // 播放音频
-            asyncPlayer.stop();
-            asyncPlayer.play(getContext(), Uri.fromFile(new File(AnyLanguageWordProperties.getExternalFilesDir(),
-                    WordContextPath.WORD_AUDIO.getPath() + wordDTOLocal.getAudioPath())), false, audioAttributes);
+            mediaPlayer.reset();
+            try {
+                mediaPlayer.setDataSource(new File(AnyLanguageWordProperties.getExternalFilesDir(),
+                        WordContextPath.WORD_AUDIO.getPath() + wordDTOLocal.getAudioPath()).getAbsolutePath());
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             /*
             不管是什么状态,如果当前旗帜是打开的,那么都需要刷新旗帜(颜色标记)的状态.
             不管是什么状态,都需要显示当前背诵的位置和总的单词个数.

@@ -33,7 +33,6 @@ public class ChineseAnswerHandler {
         this.context = rootView.getContext();
         this.chineseAnswer = rootView.findViewById(R.id.fragment_word_credit_chinese_answer);
         WebSettings webSettings = this.chineseAnswer.getSettings();
-        webSettings.setJavaScriptEnabled(true);
         webSettings.setJavaScriptEnabled(true);//支持javascript
         webSettings.setUseWideViewPort(true);// 设置可以支持缩放
         webSettings.setLoadWithOverviewMode(true);
