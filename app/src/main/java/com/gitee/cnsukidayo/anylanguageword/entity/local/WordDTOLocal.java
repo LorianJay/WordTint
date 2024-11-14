@@ -28,7 +28,14 @@ public class WordDTOLocal implements Serializable {
      */
     private Long id;
 
+    /**
+     * 单词来源
+     */
     private String from;
+    /**
+     * 单词音频
+     */
+    private String audioPath;
 
     public String getOrigin() {
         return origin;
@@ -68,5 +75,13 @@ public class WordDTOLocal implements Serializable {
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    public String getAudioPath() {
+        return audioPath;
+    }
+
+    public void setAudioPath(String audioPath) {
+        this.audioPath = audioPath;
     }
 }

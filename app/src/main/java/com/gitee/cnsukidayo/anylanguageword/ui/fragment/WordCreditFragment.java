@@ -1,6 +1,9 @@
 package com.gitee.cnsukidayo.anylanguageword.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.media.AsyncPlayer;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -31,6 +34,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gitee.cnsukidayo.anylanguageword.R;
+import com.gitee.cnsukidayo.anylanguageword.context.AnyLanguageWordProperties;
 import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.WordContextPath;
 import com.gitee.cnsukidayo.anylanguageword.context.support.factory.StaticFactory;
 import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
@@ -56,6 +60,7 @@ import com.gitee.cnsukidayo.anylanguageword.utils.FileUtils;
 import com.gitee.cnsukidayo.anylanguageword.utils.JsonUtils;
 import com.google.gson.Gson;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -99,6 +104,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 当前语种对应单词的结构信息
      */
     private List<WordStructureDTO> currentWordStructure;
+    // 单词音频播放器
+    private final AsyncPlayer asyncPlayer = new AsyncPlayer("单词音频播放器");
+    private final AudioAttributes audioAttributes = new AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build();
 
     /*
     以下是所有功能按钮的变量声明
@@ -612,6 +623,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     visibleWordAllMessage(wordDTOLocal);
                     break;
             }
+            // 播放音频
+            asyncPlayer.stop();
+            asyncPlayer.play(getContext(), Uri.fromFile(new File(AnyLanguageWordProperties.getExternalFilesDir(),
+                    WordContextPath.WORD_AUDIO.getPath() + wordDTOLocal.getAudioPath())), false, audioAttributes);
             /*
             不管是什么状态,如果当前旗帜是打开的,那么都需要刷新旗帜(颜色标记)的状态.
             不管是什么状态,都需要显示当前背诵的位置和总的单词个数.

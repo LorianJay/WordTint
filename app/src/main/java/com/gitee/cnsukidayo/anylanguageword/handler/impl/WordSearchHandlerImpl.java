@@ -1,33 +1,71 @@
 package com.gitee.cnsukidayo.anylanguageword.handler.impl;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
-import com.gitee.cnsukidayo.anylanguageword.enums.structure.EnglishStructure;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordSearchHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
+import io.github.cnsukidayo.wword.model.dto.support.DataPage;
+import io.github.cnsukidayo.wword.model.params.SearchWordParam;
 
 /**
  * @author cnsukidayo
  * @date 2024/7/21 10:49
  */
-public class WordSearchHandlerImpl implements WordSearchHandler {
+public class WordSearchHandlerImpl extends SQLiteOpenHelper implements WordSearchHandler {
 
-    private final List<WordDTOLocal> dict;
+    private final Map<Long, WordDTOLocal> dict;
 
-    public WordSearchHandlerImpl(Map<Long, WordDTOLocal> dict) {
-        this.dict = new ArrayList<>(dict.values());
+    public WordSearchHandlerImpl(Context context, Map<Long, WordDTOLocal> dict) {
+        super(context, "search.db", null, 3);
+        this.dict = dict;
     }
 
     @Override
-    public List<WordDTOLocal> searchWord(String key) {
-        return dict.stream()
-                .filter(wordDTOLocal -> Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
-                        .orElse("")
-                        .contains(key))
-                .collect(Collectors.toList());
+    public DataPage<WordDTOLocal> searchWord(SearchWordParam searchWordParam) {
+        DataPage<WordDTOLocal> result = new DataPage<>();
+        List<WordDTOLocal> data = new ArrayList<>();
+        String searchSql = "SELECT * FROM \"search\" WHERE word like ? LIMIT ?,?";
+        String countSql = "SELECT count(1) FROM \"search\" WHERE word like ?";
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        String[] searchSqlArgs = new String[]{
+                "%" + searchWordParam.getWord() + "%",
+                String.valueOf((searchWordParam.getCurrent() - 1) * searchWordParam.getSize()),
+                String.valueOf((searchWordParam.getCurrent() * searchWordParam.getSize()))};
+        String[] countArgs = new String[]{"%" + searchWordParam.getWord() + "%"};
+        // 查询所有单词
+        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, searchSqlArgs);
+        int idIndex = searchSqlCursor.getColumnIndex("id");
+        while (searchSqlCursor.moveToNext()) {
+            data.add(dict.get((long) searchSqlCursor.getInt(idIndex)));
+        }
+        // 查询当前单词的数量
+        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, countArgs);
+        countCursor.moveToNext();
+        int count = countCursor.getInt(0);
+        if (count - searchWordParam.getCurrent() * 20 <= 0) {
+            result.setLast(true);
+        }
+        result.setFirst(searchWordParam.getCurrent() == 1);
+        sqLiteDatabase.close();
+        result.setContent(data);
+        return result;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE search (\"word\" TEXT NOT NULL COLLATE NOCASE,\"id\" INTEGER NOT NULL COLLATE RTRIM, PRIMARY KEY (\"word\"));");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
     }
 }

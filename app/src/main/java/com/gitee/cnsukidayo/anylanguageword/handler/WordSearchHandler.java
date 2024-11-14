@@ -2,7 +2,8 @@ package com.gitee.cnsukidayo.anylanguageword.handler;
 
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 
-import java.util.List;
+import io.github.cnsukidayo.wword.model.dto.support.DataPage;
+import io.github.cnsukidayo.wword.model.params.SearchWordParam;
 
 /**
  * @author cnsukidayo
@@ -16,6 +17,6 @@ public interface WordSearchHandler {
      * @param key 关键词
      * @return 返回匹配的单词集合
      */
-    List<WordDTOLocal> searchWord(String key);
+    DataPage<WordDTOLocal> searchWord(SearchWordParam  searchWordParam);
 
 }

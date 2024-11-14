@@ -23,9 +23,9 @@ import com.gitee.cnsukidayo.anylanguageword.handler.RecyclerViewAdapterItemChang
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.gitee.cnsukidayo.anylanguageword.utils.DPUtils;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+
+import io.github.cnsukidayo.wword.model.dto.support.DataPage;
 
 /**
  * 这是一个标准的RecyclerViewAdapter
@@ -35,7 +35,7 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private final Context context;
     // 所有单词选择列表
-    private List<WordDTOLocal> selectWordPage;
+    private DataPage<WordDTOLocal> selectWordPage;
     /**
      * 设置点击子划分的回调事件
      */
@@ -64,7 +64,7 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         if (holder instanceof SelectWordViewHolder) {
             SelectWordViewHolder selectWordViewHolder = (SelectWordViewHolder) holder;
-            WordDTOLocal wordESDTO = selectWordPage.get(position);
+            WordDTOLocal wordESDTO = selectWordPage.getContent().get(position);
             selectWordViewHolder.wordOrigin.setText(wordESDTO.getOrigin());
             // 遍历获取单词的额外信息并展示
             Map<EnglishStructure, String> details = wordESDTO.getValue();
@@ -88,17 +88,30 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public int getItemCount() {
-        return selectWordPage == null ? 0 : selectWordPage.size();
+        if (selectWordPage != null) {
+            // 如果是最后一个元素则不添加最后的loadMore视图
+            if (selectWordPage.isLast()) {
+                return selectWordPage.getContent().size();
+            }
+            // 否则多一个元素,该元素就是最后的LoadMore
+            return selectWordPage.getContent().size() + 1;
+        }
+        return 0;
     }
 
     @Override
     public int getItemViewType(int position) {
         // 如果当前的position是selectWordPage的size表示当前这个组件是LoadMore组件
-        return 0;
+        if (position == selectWordPage.getContent().size()) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public void addItem(WordDTOLocal item) {
+
     }
 
     @Override
@@ -107,12 +120,20 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     @Override
-    public void replaceAll(Collection<WordDTOLocal> wordDTOLocals) {
+    public void addAllWithDataPage(DataPage<WordDTOLocal> dataPage) {
+        // 这里需要拷贝响应的属性
+        selectWordPage.setFirst(dataPage.isFirst());
+        selectWordPage.setLast(dataPage.isLast());
+        selectWordPage.getContent().addAll(dataPage.getContent());
+        notifyItemRangeInserted(selectWordPage.getContent().size() - 1, dataPage.getContent().size());
+    }
+
+    @Override
+    public void replaceAllWithDataPage(DataPage<WordDTOLocal> dataPage) {
         int preCount = getItemCount();
         // 必须先移除旧数据再添加新数据,否则会造成状态不一致
         notifyItemRangeRemoved(0, preCount);
-        this.selectWordPage.clear();
-        this.selectWordPage.addAll(wordDTOLocals);
+        this.selectWordPage = dataPage;
         notifyItemRangeChanged(0, getItemCount());
     }
 
@@ -140,7 +161,7 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void onClick(View v) {
-            recycleViewItemOnClickListener.viewClickCallBack(selectWordPage.get(getAdapterPosition()));
+            recycleViewItemOnClickListener.viewClickCallBack(selectWordPage.getContent().get(getAdapterPosition()));
         }
     }
 

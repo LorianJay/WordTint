@@ -23,6 +23,10 @@ public enum WordContextPath {
      */
     WORD_HISTORY("wordHistory" + File.separator),
     /**
+     * document/wordContext/word_audio/
+     */
+    WORD_AUDIO("word_audio" + File.separator),
+    /**
      * document/wordContext/wordStar/wordStar.json
      */
     WORD_STAR("wordStar" + File.separator + "wordStar.json");

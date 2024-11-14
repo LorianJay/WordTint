@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import io.noties.markwon.Markwon;
 import io.noties.markwon.html.CssInlineStyleParser;
@@ -95,9 +94,9 @@ public class StaticFactory {
                     throw new RuntimeException(e);
                 }
             }
-            ALL_WORD_DICT.putAll(
-                    allWordList.stream()
-                            .collect(Collectors.toMap(WordDTOLocal::getId, wordDTOLocal -> wordDTOLocal)));
+            for (WordDTOLocal wordDTOLocal : allWordList) {
+                ALL_WORD_DICT.put(wordDTOLocal.getId(),wordDTOLocal);
+            }
         }
     }
 
