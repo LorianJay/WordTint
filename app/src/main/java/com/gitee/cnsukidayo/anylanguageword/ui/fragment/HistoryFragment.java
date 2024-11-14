@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.gitee.cnsukidayo.anylanguageword.R;
 import com.gitee.cnsukidayo.anylanguageword.context.AnyLanguageWordProperties;
@@ -41,7 +43,7 @@ import java.util.List;
  */
 public class HistoryFragment extends Fragment implements NavigationItemSelectListener,
         View.OnClickListener,
-        RecycleViewItemClickCallBack<HistoryDTOLocal> {
+        RecycleViewItemClickCallBack<HistoryDTOLocal>, SwipeRefreshLayout.OnRefreshListener {
 
     private View rootView;
     private RecyclerView historyRecyclerView;
@@ -52,6 +54,8 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
     private ProgressBar loadingBar;
     private UserCreditStyle userCreditStyle;
     private final HashSet<HistoryDTOLocal> divideSet = new HashSet<>();
+    // 下拉刷新
+    private SwipeRefreshLayout downRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -124,6 +128,7 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
         this.historyRecyclerView = rootView.findViewById(R.id.single_history_recycler_view);
         this.startLearn = rootView.findViewById(R.id.fragment_history_start_credit);
         this.loadingBar = rootView.findViewById(R.id.history_fragment_loading_bar);
+        this.downRefreshLayout = rootView.findViewById(R.id.fragment_history_swipe_refresh );
     }
 
     private void initView() {
@@ -134,6 +139,10 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
         this.historyRecyclerView.setAdapter(historyListAdapter);
         this.startLearn.setOnClickListener(this);
         this.historyListAdapter.setRecycleViewItemOnClickListener(this);
+
+        downRefreshLayout.setSize(CircularProgressDrawable.LARGE);
+        downRefreshLayout.setColorSchemeResources(R.color.theme_color);
+        downRefreshLayout.setOnRefreshListener(this);
     }
 
     private void requestData() {
@@ -153,7 +162,10 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
                 }
             }
             allWordList.sort((o1, o2) -> o2.getOrder().compareTo(o1.getOrder()));
-            updateUIHandler.post(() -> historyListAdapter.replaceAll(allWordList));
+            updateUIHandler.post(() -> {
+                historyListAdapter.replaceAll(allWordList);
+                downRefreshLayout.setRefreshing(false);
+            });
         });
     }
 
@@ -161,5 +173,10 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
     @Override
     public void onClickCurrentPage(@NonNull MenuItem item) {
 
+    }
+
+    @Override
+    public void onRefresh() {
+        this.requestData();
     }
 }
