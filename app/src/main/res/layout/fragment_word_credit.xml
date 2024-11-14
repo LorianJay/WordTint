@@ -5,7 +5,7 @@
     android:id="@+id/fragment_word_credit_start_drawer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/learn_back_ground"
     tools:context=".ui.fragment.WordCreditFragment"
     tools:openDrawer="end">
 
@@ -302,6 +302,7 @@
             android:id="@+id/fragment_word_credit_more_function_horizontal_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/white"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:scrollbars="none"
@@ -656,7 +657,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_word_credit_bottom_constraint_layout"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:background="@color/white"
             android:orientation="horizontal"
             android:paddingStart="10dp"
@@ -666,7 +667,7 @@
             <ImageButton
                 android:id="@+id/fragment_word_credit_pop_more_function"
                 android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:layout_alignParentStart="true"
                 android:background="@drawable/style_image_padding"
                 android:foreground="@drawable/item_gray_select_radius_18dp"
@@ -703,7 +704,7 @@
             <ImageButton
                 android:id="@+id/fragment_word_credit_play_word"
                 android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:layout_alignParentStart="true"
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/style_image_padding"
@@ -768,9 +769,10 @@
             <TextView
                 android:id="@+id/fragment_word_container_get_answer"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:clickable="true"
                 android:foreground="@drawable/item_gray_select_radius_18dp"
+                android:gravity="center"
                 android:text="@string/get_answer"
                 android:textColor="@color/theme_color"
                 android:textSize="20sp"

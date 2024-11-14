@@ -2,7 +2,7 @@
 <com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@color/learn_back_ground"
     android:theme="@style/ThemeOverlay.AppCompat.Light">
 
     <RelativeLayout
