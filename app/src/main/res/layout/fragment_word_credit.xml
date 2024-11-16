@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/learn_back_ground"
     tools:context=".ui.fragment.WordCreditFragment"
-    tools:openDrawer="end">
+    tools:openDrawer="">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -296,6 +296,37 @@
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.core.widget.NestedScrollView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="20dp"
+                android:clickable="true"
+                app:cardBackgroundColor="@color/semi_transparent"
+                app:cardCornerRadius="30dp"
+                app:cardElevation="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/fragment_word_container_get_answer"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:foreground="@drawable/item_gray_select"
+                    android:gravity="center"
+                    android:paddingStart="5dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="5dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_light"
+                    app:tint="@color/gold" />
+            </androidx.cardview.widget.CardView>
+
         </RelativeLayout>
 
         <HorizontalScrollView
@@ -373,14 +404,23 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/fragment_word_credit_click_chameleon_mode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
-                    android:orientation="vertical">
+                    android:foreground="@drawable/item_gray_select">
+                    <!--<TextView-->
+                    <!--    android:id="@+id/fragment_word_credit_current_index"-->
+                    <!--    android:layout_width="wrap_content"-->
+                    <!--    android:layout_height="wrap_content"-->
+                    <!--    android:layout_marginStart="-12dp"-->
+                    <!--    android:text="12"-->
+                    <!--    android:textColor="@android:color/holo_red_dark"-->
+                    <!--    android:textSize="13sp"-->
+                    <!--    app:layout_constraintStart_toEndOf="@id/fragment_word_credit_play_word"-->
+                    <!--    app:layout_constraintTop_toTopOf="parent" />-->
 
 
                     <ImageView
@@ -391,7 +431,9 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/chameleon" />
+                        android:src="@drawable/chameleon"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -399,10 +441,12 @@
                         android:gravity="center"
                         android:text="@string/chameleon"
                         android:textColor="@color/gray_black"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/fragment_word_credit_imageview_chameleon" />
 
 
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
                     android:id="@+id/fragment_word_credit_jump_next"
@@ -680,7 +724,7 @@
 
             <TextView
                 android:id="@+id/fragment_word_credit_previous_word"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
                 android:layout_gravity="center_vertical"
@@ -703,7 +747,7 @@
 
             <ImageButton
                 android:id="@+id/fragment_word_credit_play_word"
-                android:layout_width="40dp"
+                android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentStart="true"
                 android:layout_gravity="center_vertical"
@@ -713,8 +757,8 @@
                 android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_media_play"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/fragment_word_credit_next_word"
+                app:layout_constraintStart_toEndOf="@+id/fragment_word_credit_previous_word"
                 app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/theme_color" />
 
@@ -723,7 +767,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-12dp"
-                android:text=""
+                android:text="12"
                 android:textColor="@android:color/holo_red_dark"
                 android:textSize="13sp"
                 app:layout_constraintStart_toEndOf="@id/fragment_word_credit_play_word"
@@ -731,7 +775,7 @@
 
             <TextView
                 android:id="@+id/fragment_word_credit_next_word"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
                 android:layout_gravity="center_vertical"
@@ -748,7 +792,7 @@
                 android:textColor="@color/theme_color"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_word_container_get_answer"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_word_credit_play_word"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -766,19 +810,19 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
 
-            <TextView
-                android:id="@+id/fragment_word_container_get_answer"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:foreground="@drawable/item_gray_select_radius_18dp"
-                android:gravity="center"
-                android:text="@string/get_answer"
-                android:textColor="@color/theme_color"
-                android:textSize="20sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <!--<TextView-->
+            <!--    android:id="@+id/fragment_word_container_get_answer"-->
+            <!--    android:layout_width="wrap_content"-->
+            <!--    android:layout_height="match_parent"-->
+            <!--    android:clickable="true"-->
+            <!--    android:foreground="@drawable/item_gray_select_radius_18dp"-->
+            <!--    android:gravity="center"-->
+            <!--    android:text="@string/get_answer"-->
+            <!--    android:textColor="@color/theme_color"-->
+            <!--    android:textSize="20sp"-->
+            <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--    app:layout_constraintEnd_toEndOf="parent"-->
+            <!--    app:layout_constraintTop_toTopOf="parent" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

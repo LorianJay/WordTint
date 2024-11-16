@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -72,7 +73,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import io.github.cnsukidayo.wword.model.dto.WordCategoryDTO;
-import io.github.cnsukidayo.wword.model.dto.WordStructureDTO;
 import io.github.cnsukidayo.wword.model.vo.WordCategoryDetailVO;
 
 public class WordCreditFragment extends Fragment implements View.OnClickListener, KeyEvent.Callback {
@@ -98,10 +98,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * Value:单词详细信息
      */
     private Map<Long, WordDTOLocal> dict;
-    /**
-     * 当前语种对应单词的结构信息
-     */
-    private List<WordStructureDTO> currentWordStructure;
     // 单词音频播放器
     private final MediaPlayer mediaPlayer = new MediaPlayer();
 
@@ -109,14 +105,15 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     以下是所有功能按钮的变量声明
      */
     private ImageButton popBackStack, playWord;
-    private TextView sourceWord, getAnswer, nextWord, previousWord;
+    private TextView sourceWord, nextWord, previousWord;
     private TextView currentIndexTextView, wordCount;
     private TextView sourceWordDrawer, sourceWordPhoneticsDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, viewFlagArea, chameleonMode, shuffle, section, changeMode, start, searchWord, saveProgress;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress;
     private CardView popWindowChangeModeLayout;
-    private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView;
+    private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView, getAnswer;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
+    private ConstraintLayout chameleonMode;
     private long exitLastTime = 0;
     /**
      * 用户的背词风格

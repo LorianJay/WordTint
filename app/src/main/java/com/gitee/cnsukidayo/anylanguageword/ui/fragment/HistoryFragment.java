@@ -140,9 +140,9 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
         this.startLearn.setOnClickListener(this);
         this.historyListAdapter.setRecycleViewItemOnClickListener(this);
 
-        downRefreshLayout.setSize(CircularProgressDrawable.LARGE);
-        downRefreshLayout.setColorSchemeResources(R.color.theme_color);
-        downRefreshLayout.setOnRefreshListener(this);
+        this.downRefreshLayout.setSize(CircularProgressDrawable.LARGE);
+        this.downRefreshLayout.setColorSchemeResources(R.color.theme_color);
+        this.downRefreshLayout.setOnRefreshListener(this);
     }
 
     private void requestData() {

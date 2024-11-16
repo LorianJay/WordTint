@@ -23,4 +23,6 @@
     <color name="halo_brown_dark">#804000</color>
     <color name="theme_color_pink">#FF2F6B</color>
     <color name="learn_back_ground">#5DD34E</color>
+    <color name="gold">#E5B300</color>
+    <color name="semi_transparent">#80FFFFFF</color>
 </resources>
