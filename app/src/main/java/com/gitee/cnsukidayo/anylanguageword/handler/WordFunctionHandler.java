@@ -1,5 +1,6 @@
 package com.gitee.cnsukidayo.anylanguageword.handler;
 
+import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.enums.CreditState;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
@@ -17,7 +18,7 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * @param order 单词在列表中的位序,注意order的顺序是从0开始的.
      * @return 返回单词的引用(单词的信息是一个集合)
      */
-    WordDTOLocal getWordByOrder(int order);
+    WordDTOLocal getWordByIndex(int index);
 
     /**
      * 获取当前指针指向的单词<br>
@@ -51,27 +52,19 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     WordDTOLocal jumpNextWord();
 
     /**
-     * 设置当前指针指向的位序
-     *
-     * @param currentOrder 设置位序
-     */
-    void setCurrentOrder(int currentOrder);
-
-    /**
      * 跳转到某个单词,调用该方法会将指针指向传入的索引位置
      *
-     * @param jumpOrder 跳转的目标位序
+     * @param index 跳转的目标位序
      * @return 返回单词引用
      */
-    WordDTOLocal jumpToWord(int jumpOrder);
+    WordDTOLocal jumpToWord(int index);
 
     /**
-     * 得到当前指针指向的位序,currentOrder是对外显示的方法.
-     * 实现类内部的currentIndex对外是不可见的.
+     * 得到当前指针指向的索引
      *
-     * @return 返回order
+     * @return 返回index
      */
-    int getCurrentOrder();
+    int getCurrentIndex();
 
     /**
      * 得到单词列表长度
@@ -119,21 +112,6 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     FlagColor getChameleon();
 
     /**
-     * 得到当前背诵的变色龙列表
-     *
-     * @return 返回变色龙列表
-     */
-    List<Set<FlagColor>> getAllWordChameleon();
-
-    /**
-     * 设置变色龙列表
-     *
-     * @param flag 变色龙列表
-     */
-    void setAllChameleon(List<Set<FlagColor>> flag);
-
-
-    /**
      * 设置变色龙颜色,此时函数的各个方法的返回值都会因为FlagColor的改变而改变.
      * 每次更改变色龙颜色之后,单词的索引都会从0开始
      *
@@ -175,5 +153,10 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     void setCurrentCreditState(CreditState creditState);
 
     CreditState getCurrentCreditState();
+
+    /**
+     * 得到当前的单词列表
+     */
+    List<FunctionWordDTOLocal> getAllFunctionWordList();
 
 }

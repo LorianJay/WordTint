@@ -23,7 +23,6 @@ import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.UserInfo
 import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.WordContextPath;
 import com.gitee.cnsukidayo.anylanguageword.context.support.factory.StaticFactory;
 import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
-import com.gitee.cnsukidayo.anylanguageword.entity.local.DivideDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.HistoryDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.waper.UserCreditStyleWrapper;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.history.HistoryListAdapter;
@@ -53,7 +52,7 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
     private TextView startLearn;
     private ProgressBar loadingBar;
     private UserCreditStyle userCreditStyle;
-    private final HashSet<HistoryDTOLocal> divideSet = new HashSet<>();
+    private final HashSet<HistoryDTOLocal> historyDTOSet = new HashSet<>();
     // 下拉刷新
     private SwipeRefreshLayout downRefreshLayout;
 
@@ -91,11 +90,11 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
                 // 首先将id转为String类型的List
-                bundle.putSerializable(CreditFragment.CHILD_DIVIDE_SET, divideSet);
+                bundle.putSerializable(CreditFragment.HISTORY_WORD_SET, historyDTOSet);
                 // 统计当前的选词量
                 int selectWordCount = 0;
-                for (DivideDTOLocal divideDTO : divideSet) {
-                    selectWordCount += divideDTO.getWordIdList().size();
+                for (HistoryDTOLocal historyDTOLocal : historyDTOSet) {
+                    selectWordCount += historyDTOLocal.getSerializeWordList().size();
                 }
                 bundle.putInt(CreditFragment.SELECT_WORD_COUNT, selectWordCount);
                 updateUIHandler.post(() -> {
@@ -120,8 +119,8 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
      */
     @Override
     public void viewClickCallBack(HistoryDTOLocal recycleViewOnClick) {
-        divideSet.clear();
-        divideSet.add(recycleViewOnClick);
+        historyDTOSet.clear();
+        historyDTOSet.add(recycleViewOnClick);
     }
 
     private void bindView() {

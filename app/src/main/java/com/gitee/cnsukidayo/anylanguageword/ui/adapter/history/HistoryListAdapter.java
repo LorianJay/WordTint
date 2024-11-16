@@ -64,7 +64,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
         } else {
             holder.childDivideButton.setImageDrawable(null);
         }
-        holder.elementCount.setText(String.valueOf(divideDTO.getWordIdList().size()));
+        holder.elementCount.setText(String.valueOf(divideDTO.getSerializeWordList().size()));
     }
 
     @Override

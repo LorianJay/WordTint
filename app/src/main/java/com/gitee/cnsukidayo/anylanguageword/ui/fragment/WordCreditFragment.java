@@ -38,6 +38,7 @@ import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.WordCont
 import com.gitee.cnsukidayo.anylanguageword.context.support.factory.StaticFactory;
 import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.DivideDTOLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.HistoryDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.waper.UserCreditStyleWrapper;
@@ -63,12 +64,12 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -88,10 +89,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private ChineseAnswerHandler chineseAnswerHandler;
     private StarChineseAnswerRecyclerViewAdapter chineseAnswerAdapterDrawer;
     private StartSingleCategoryAdapter startSingleCategoryAdapter;
-    /**
-     * 当前要背诵的所有单词的id
-     */
-    private List<Long> allWordId;
     /**
      * 所有单词信息详细信息<br>
      * Key:单词的id<br>
@@ -330,7 +327,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                             }
                             // 确定执行区间随机时执行的内容
                             wordFunctionHandler.shuffleRange(minRange, maxRange);
-                            creditWord(wordFunctionHandler.jumpToWord(0));
+                            creditWord(wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
                             this.shuffleImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                             this.sectionImageView.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
                         })
@@ -341,7 +338,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.shuffleImageView.setForeground(null);
                 this.sectionImageView.getDrawable().setTintList(null);
                 this.wordFunctionHandler.restoreWordList();
-                creditWord(wordFunctionHandler.jumpToWord(0));
+                creditWord(wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
             }
         } else if (clickViewId == R.id.toolbar_back_to_trace) {
             new AlertDialog.Builder(getContext())
@@ -395,10 +392,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             // 保存当前的进度
             StaticFactory.getExecutorService().submit(() -> {
                 HistoryDTOLocal historyDTOLocal = new HistoryDTOLocal();
-                historyDTOLocal.setWordIdList(allWordId);
+                historyDTOLocal.setSerializeWordList(wordFunctionHandler.getAllFunctionWordList());
                 historyDTOLocal.setName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss")));
                 historyDTOLocal.setOrder(System.currentTimeMillis());
-                historyDTOLocal.setFlag(wordFunctionHandler.getAllWordChameleon());
                 Gson gson = StaticFactory.getGson();
                 String writer = gson.toJson(historyDTOLocal);
                 String outputPath = "%shistory-%s.json";
@@ -430,7 +426,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.GREEN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -445,7 +440,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.RED);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -460,7 +454,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.ORANGE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -475,7 +468,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.YELLOW);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.YELLOW)) {
@@ -489,7 +481,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.BLUE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -504,7 +495,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.CYAN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -519,7 +509,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.PURPLE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -534,7 +523,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.PINK);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -549,7 +537,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.GRAY);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -564,7 +551,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.BLACK);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 return;
             }
@@ -578,7 +564,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 changingChameleon = false;
                 wordFunctionHandler.setChameleon(FlagColor.BROWN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.halo_brown_dark, null));
-                creditWord(wordFunctionHandler.jumpToWord(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
             }
         }
@@ -648,7 +633,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                         phraseHintDrawer.setVisibility(View.GONE);
                         phraseAnswerDrawer.setVisibility(View.GONE);
                     });
-            currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getCurrentOrder() + 1));
+            currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getCurrentIndex() + 1));
             wordCount.setText(String.valueOf(wordFunctionHandler.size()));
             if (openFlagChange) {
                 openFlagChangeAreaFlush();
@@ -668,28 +653,39 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         StaticFactory.getExecutorService().submit(() -> {
             // 根据自定义风格背诵,获取当前要加载的所有单词
             Bundle bundle = getArguments();
-            List<Set<FlagColor>> flag = null;
+            List<FunctionWordDTOLocal> allFunctionWordList = new ArrayList<>(30);
             if (bundle != null) {
                 // 如果获取为null则整个逻辑都不对了
                 UserCreditStyleWrapper userCreditStyleWrapper = bundle.getParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, UserCreditStyleWrapper.class);
                 this.userCreditStyle = userCreditStyleWrapper.getUserCreditStyle();
+
+                // 初始化单词操作
                 HashSet<DivideDTOLocal> divideList = bundle.getSerializable(CreditFragment.CHILD_DIVIDE_SET, HashSet.class);
-                // 当前背诵的单词列表
-                allWordId = divideList.stream()
-                        .map(DivideDTOLocal::getWordIdList)
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList());
-                // 设置变色龙
-                DivideDTOLocal divideDTOLocal = divideList.stream()
-                        .findFirst()
-                        .orElse(new DivideDTOLocal());
-                if (divideDTOLocal instanceof HistoryDTOLocal) {
-                    flag = ((HistoryDTOLocal) divideDTOLocal).getFlag();
+                HashSet<HistoryDTOLocal> historyDTOSet = bundle.getSerializable(CreditFragment.HISTORY_WORD_SET, HashSet.class);
+                // 新的背词
+                if (divideList != null) {
+                    // 初始化
+                    List<Long> initWordList = divideList.stream()
+                            .map(DivideDTOLocal::getWordIdList)
+                            .flatMap(List::stream)
+                            .collect(Collectors.toList());
+                    for (int i = 0; i < initWordList.size(); i++) {
+                        FunctionWordDTOLocal functionWordDTOLocal = new FunctionWordDTOLocal();
+                        functionWordDTOLocal.setId(initWordList.get(i));
+                        functionWordDTOLocal.setWordsFlagList(new HashSet<>(List.of(FlagColor.GREEN, FlagColor.BROWN)));
+                        allFunctionWordList.add(functionWordDTOLocal);
+                    }
+                }
+                // 历史记录
+                if (historyDTOSet != null) {
+                    for (HistoryDTOLocal historyDTOLocal : historyDTOSet) {
+                        allFunctionWordList.addAll(historyDTOLocal.getSerializeWordList());
+                    }
                 }
                 // 读取字典
                 dict = StaticFactory.getAllWordDict();
                 if (userCreditStyle.getCreditOrder() == CreditOrder.DISORDER) {
-                    Collections.shuffle(allWordId);
+                    Collections.shuffle(allFunctionWordList);
                 } else if (userCreditStyle.getCreditOrder() == CreditOrder.LEXICOGRAPHIC) {
                 }
                 if (userCreditStyle.getCreditFilter() == CreditFilter.PHRASE) {
@@ -697,8 +693,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
 //                    wordList = wordList.stream().filter(word -> !TextUtils.isEmpty(word.getPhrase())).collect(Collectors.toList());
                 }
             }
-            this.wordFunctionHandler = new WordFunctionHandlerImpl(allWordId, dict);
-            this.wordFunctionHandler.setAllChameleon(flag);
+            this.wordFunctionHandler = new WordFunctionHandlerImpl(allFunctionWordList, dict);
             if (userCreditStyle != null) {
                 this.wordFunctionHandler.setCurrentCreditState(userCreditStyle.getCreditState());
             }
@@ -719,7 +714,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.chineseAnswerDrawer.setAdapter(chineseAnswerAdapterDrawer);
                 this.starSingleCategory.setAdapter(startSingleCategoryAdapter);
                 touchHelper.attachToRecyclerView(starSingleCategory);
-                creditWord(wordFunctionHandler.getWordByOrder(0));
+                creditWord(wordFunctionHandler.getWordByIndex(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 flagChangeArea.setVisibility(View.GONE);
                 closeFlagChangeAreaFlush();

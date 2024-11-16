@@ -1,24 +1,46 @@
 package com.gitee.cnsukidayo.anylanguageword.entity.local;
 
-import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
-
+import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author cnsukidayo
  * @date 2024/7/16 23:05
  */
-public class HistoryDTOLocal extends DivideDTOLocal {
+public class HistoryDTOLocal implements Serializable {
+    /**
+     * 当前历史记录的名称
+     */
+    private String name;
+    /**
+     * 当前历史记录的顺序
+     */
+    private Long order;
     /**
      * 当前历史的文件路径
      */
     private String path;
 
-    /**
-     * 变色龙相关功能持久化
-     */
-    private List<Set<FlagColor>> flag;
+    private List<FunctionWordDTOLocal> serializeWordList;
+
+    public HistoryDTOLocal() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getOrder() {
+        return order;
+    }
+
+    public void setOrder(Long order) {
+        this.order = order;
+    }
 
     public String getPath() {
         return path;
@@ -28,11 +50,11 @@ public class HistoryDTOLocal extends DivideDTOLocal {
         this.path = path;
     }
 
-    public List<Set<FlagColor>> getFlag() {
-        return flag;
+    public List<FunctionWordDTOLocal> getSerializeWordList() {
+        return serializeWordList;
     }
 
-    public void setFlag(List<Set<FlagColor>> flag) {
-        this.flag = flag;
+    public void setSerializeWordList(List<FunctionWordDTOLocal> serializeWordList) {
+        this.serializeWordList = serializeWordList;
     }
 }

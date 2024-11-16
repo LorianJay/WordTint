@@ -79,6 +79,10 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
      */
     public static final String CHILD_DIVIDE_SET = "CHILD_DIVIDE_SET";
     /**
+     * 历史单词
+     */
+    public static final String HISTORY_WORD_SET = "HISTORY_WORD_SET";
+    /**
      * 选中的单词数量
      */
     public static final String SELECT_WORD_COUNT = "SELECT_WORD_COUNT";
