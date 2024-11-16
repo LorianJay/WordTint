@@ -22,7 +22,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -103,14 +102,13 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      */
     private ImageButton popBackStack, playWord;
     private TextView sourceWord, nextWord, previousWord;
-    private TextView currentIndexTextView, wordCount;
+    private TextView currentIndexTextView, wordCount, chameleonCount;
     private TextView sourceWordDrawer, sourceWordPhoneticsDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress;
     private CardView popWindowChangeModeLayout;
     private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView, getAnswer;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
-    private ConstraintLayout chameleonMode;
     private long exitLastTime = 0;
     /**
      * 用户的背词风格
@@ -427,6 +425,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GREEN)) {
@@ -441,6 +440,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.RED)) {
@@ -455,6 +455,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.ORANGE)) {
@@ -469,6 +470,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.YELLOW)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(0.0f);
@@ -482,6 +484,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLUE)) {
@@ -496,6 +499,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.CYAN)) {
@@ -510,6 +514,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PURPLE)) {
@@ -524,6 +529,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PINK)) {
@@ -538,6 +544,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GRAY)) {
@@ -552,6 +559,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
                 return;
             }
             if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLACK)) {
@@ -565,6 +573,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.BROWN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.halo_brown_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
             }
         }
 
@@ -634,6 +643,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                         phraseAnswerDrawer.setVisibility(View.GONE);
                     });
             currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getCurrentIndex() + 1));
+            chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
             wordCount.setText(String.valueOf(wordFunctionHandler.size()));
             if (openFlagChange) {
                 openFlagChangeAreaFlush();
@@ -853,6 +863,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.addNewStartCategory = rootView.findViewById(R.id.fragment_word_credit_start_add);
         this.searchWord = rootView.findViewById(R.id.fragment_word_credit_search_word);
         this.saveProgress = rootView.findViewById(R.id.fragment_word_credit_click_save_progress);
+        this.chameleonCount = rootView.findViewById(R.id.fragment_word_credit_chameleon_word_count);
 
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
         this.sourceWordPhoneticsDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_phonetics);

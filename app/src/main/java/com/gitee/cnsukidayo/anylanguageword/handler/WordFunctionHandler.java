@@ -159,4 +159,19 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      */
     List<FunctionWordDTOLocal> getAllFunctionWordList();
 
+    /**
+     * 得到当前变色龙的单词的数量
+     *
+     * @return 返回单词数量
+     */
+    int getChameleonSize();
+
+    /**
+     * 得到当前单词在当前变色龙列表中的顺序
+     *
+     * @return 返回单词顺序
+     */
+    int getChameleonOrder();
+
+
 }

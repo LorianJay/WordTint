@@ -220,4 +220,26 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         return this.allFunctionWordList;
     }
 
+    @Override
+    public int getChameleonSize() {
+        int result = 0;
+        for (int i = start; i <= end; i++) {
+            if (allFunctionWordList.get(i).getWordsFlagList().contains(getChameleon())) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public int getChameleonOrder() {
+        int result = 0;
+        for (int i = start; i < currentIndex; i++) {
+            if (allFunctionWordList.get(i).getWordsFlagList().contains(getChameleon())) {
+                result++;
+            }
+        }
+        return result + 1;
+    }
+
 }
