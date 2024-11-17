@@ -172,14 +172,14 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         this.allFunctionWordList = this.dummyWordList;
         this.dummyWordList = temp;
         Collections.shuffle(this.allFunctionWordList);
+        this.start = 0;
+        this.end = allFunctionWordList.size() - 1;
+        this.currentIndex = 0;
     }
 
     @Override
     public void shuffleRange(int start, int end) {
         this.wordFunctionState = WordFunctionState.RANGE;
-        this.start = start;
-        this.end = end;
-        this.currentIndex = 0;
         this.dummyWordList = new ArrayList<>(end - start + 1);
         for (int i = start; i <= end; i++) {
             dummyWordList.add(allFunctionWordList.get(i));
@@ -188,6 +188,9 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         this.allFunctionWordList = this.dummyWordList;
         this.dummyWordList = temp;
         Collections.shuffle(this.allFunctionWordList);
+        this.start = 0;
+        this.end = allFunctionWordList.size() - 1;
+        this.currentIndex = 0;
     }
 
     @Override
