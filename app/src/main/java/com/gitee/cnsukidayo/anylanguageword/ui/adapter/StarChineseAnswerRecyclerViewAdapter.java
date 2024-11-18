@@ -67,13 +67,14 @@ public class StarChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<R
     @Override
     public void addItem(WordDTOLocal item) {
         currentWord = item;
-        notifyItemChanged(0, getItemCount());
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     @Override
     public void removeItem(WordDTOLocal item) {
 
     }
+
 
     public static class StarChineseAnswerViewHolder extends RecyclerView.ViewHolder {
         private final TextView meaningCategoryHint, meaningCategoryAnswer;

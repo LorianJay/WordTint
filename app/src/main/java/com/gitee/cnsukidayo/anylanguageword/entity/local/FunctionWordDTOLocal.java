@@ -2,6 +2,7 @@ package com.gitee.cnsukidayo.anylanguageword.entity.local;
 
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Set;
  * @author cnsukidayo
  * @date 2024/7/21 15:28
  */
-public class FunctionWordDTOLocal {
+public class FunctionWordDTOLocal implements Serializable {
 
     /**
      * 单词的id
