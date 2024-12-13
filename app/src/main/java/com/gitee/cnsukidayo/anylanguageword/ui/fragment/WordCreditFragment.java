@@ -424,8 +424,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.GREEN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GREEN)) {
@@ -439,8 +439,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.RED);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.RED)) {
@@ -454,8 +454,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.ORANGE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.ORANGE)) {
@@ -469,8 +469,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.YELLOW);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.YELLOW)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(0.0f);
@@ -483,8 +483,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.BLUE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLUE)) {
@@ -498,8 +498,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.CYAN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.CYAN)) {
@@ -513,8 +513,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.PURPLE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PURPLE)) {
@@ -528,8 +528,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.PINK);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PINK)) {
@@ -543,8 +543,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.GRAY);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GRAY)) {
@@ -558,8 +558,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 wordFunctionHandler.setChameleon(FlagColor.BLACK);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
             if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLACK)) {
@@ -572,8 +572,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 changingChameleon = false;
                 wordFunctionHandler.setChameleon(FlagColor.BROWN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.halo_brown_dark, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
+                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+                currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
             }
         }
 
@@ -642,9 +642,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                         phraseHintDrawer.setVisibility(View.GONE);
                         phraseAnswerDrawer.setVisibility(View.GONE);
                     });
-            currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getCurrentIndex() + 1));
-            chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getChameleonOrder(), wordFunctionHandler.getChameleonSize()));
-            wordCount.setText(String.valueOf(wordFunctionHandler.size()));
+            wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
+            currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
+            chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getCurrentIndex() + 1, wordFunctionHandler.size()));
             if (openFlagChange) {
                 openFlagChangeAreaFlush();
             } else {

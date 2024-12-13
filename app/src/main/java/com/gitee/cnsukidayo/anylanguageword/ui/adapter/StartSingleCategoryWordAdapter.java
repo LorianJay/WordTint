@@ -69,8 +69,6 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
         WordDTOLocal wordDTOLocal = categoryWordFunctionHandler.getWordFromCategory(functionContentCallBack.getCurrentWordCategoryPosition(), position);
         Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(holder.wordOrigin::setText);
-        Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.UK_PHONETIC))
-                .ifPresent(holder.wordPhonetics::setText);
         // 最后一个嵌套,单词中文意思的嵌套
         holder.chineseAnswerRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         holder.starChineseAnswerRecyclerViewAdapter = new StarChineseAnswerRecyclerViewAdapter(context, 2L);
@@ -138,7 +136,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
             StateChangedListener, View.OnTouchListener, View.OnClickListener {
         // separator颜色线条
         private final View itemView, scroller, separator;
-        private final TextView delete, wordOrigin, wordPhonetics, phraseAnswer, phraseHint;
+        private final TextView delete, wordOrigin, phraseAnswer, phraseHint;
         private final ImageButton move;
         private final RecyclerView chineseAnswerRecyclerView;
         private StarChineseAnswerRecyclerViewAdapter starChineseAnswerRecyclerViewAdapter;
@@ -150,7 +148,6 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
             this.scroller = itemView.findViewById(R.id.fragment_word_credit_start_single_category_word_scroller);
             this.move = itemView.findViewById(R.id.fragment_word_credit_start_word_move);
             this.wordOrigin = itemView.findViewById(R.id.fragment_word_credit_start_single_category_word_origin);
-            this.wordPhonetics = itemView.findViewById(R.id.fragment_word_credit_start_single_category_word_phonetics);
             this.chineseAnswerRecyclerView = itemView.findViewById(R.id.fragment_word_credit_start_category_chinese_answer);
             this.phraseHint = itemView.findViewById(R.id.fragment_word_credit_start_phrase_hint);
             this.phraseAnswer = itemView.findViewById(R.id.fragment_word_credit_start_phrase_answer);

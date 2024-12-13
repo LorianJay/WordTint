@@ -25,28 +25,21 @@
             android:orientation="horizontal">
 
             <LinearLayout
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/fragment_word_credit_start_single_category_word_origin"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:maxLines="1"
+                    android:gravity="center"
                     android:text="@string/show_word_origin"
                     android:textColor="@color/black"
-                    android:textSize="22sp" />
-
-                <TextView
-                    android:id="@+id/fragment_word_credit_start_single_category_word_phonetics"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:maxLines="1"
-                    android:text="@string/word_phonetics"
-                    android:textColor="@color/gray_black"
-                    android:textSize="18sp" />
+                    android:textSize="26sp" />
             </LinearLayout>
         </LinearLayout>
 
