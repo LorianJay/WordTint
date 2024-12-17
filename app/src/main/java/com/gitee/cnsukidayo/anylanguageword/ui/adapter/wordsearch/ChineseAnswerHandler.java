@@ -46,7 +46,6 @@ public class ChineseAnswerHandler {
 
     public void showWordChineseMessage(WordDTOLocal wordDTOLocal) {
         String jsonMessage = StaticFactory.getGson().toJson(wordDTOLocal);
-        this.chineseAnswer.setVisibility(View.VISIBLE);
         DocumentContext documentContext = JsonPath.parse(jsonMessage);
         List<String> htmlRegexList = RegularUtils.match(template, "\\{\\{.+\\}\\}");
         String renderHtml = template;
@@ -62,6 +61,7 @@ public class ChineseAnswerHandler {
             renderHtml = renderHtml.replace(htmlRegex, readValue);
         }
         chineseAnswer.loadData(renderHtml, "text/html", StandardCharsets.UTF_8.name());
+        this.chineseAnswer.setVisibility(View.VISIBLE);
     }
 
     public void gone() {

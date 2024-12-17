@@ -592,31 +592,30 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 case LISTENING:
                     // 听写模式只播放音频
                     chineseAnswerHandler.gone();
+                    playWordAudio(wordDTOLocal);
                     break;
                 case ENGLISH_TRANSLATION_CHINESE:
                     // 先展示单词的所有信息,然后将单词的中文意思进行隐藏,再将单词额外信息进行隐藏(必须在UI线程中隐藏)
                     visibleWordAllMessage(wordDTOLocal);
                     chineseAnswerHandler.gone();
+                    playWordAudio(wordDTOLocal);
                     break;
                 case CHINESE_TRANSLATION_ENGLISH:
-                    // 先展示所有单词信息,然后将英文原文和音标进行隐藏
+                    // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
+                    // 这里设置模式是为了防止播放音频
+                    wordFunctionHandler.setCurrentCreditState(CreditState.CREDIT);
+                    String phaseValue = wordDTOLocal.getValue().get(EnglishStructure.PHRASE);
+                    wordDTOLocal.getValue().remove(EnglishStructure.PHRASE);
                     visibleWordAllMessage(wordDTOLocal);
+                    wordDTOLocal.getValue().put(EnglishStructure.PHRASE, phaseValue);
                     sourceWord.setText("");
+                    wordFunctionHandler.setCurrentCreditState(CreditState.CHINESE_TRANSLATION_ENGLISH);
                     break;
                 case CREDIT:
                     // 不隐藏任何信息
                     visibleWordAllMessage(wordDTOLocal);
+                    playWordAudio(wordDTOLocal);
                     break;
-            }
-            // 播放音频
-            mediaPlayer.reset();
-            try {
-                mediaPlayer.setDataSource(new File(AnyLanguageWordProperties.getExternalFilesDir(),
-                        WordContextPath.WORD_AUDIO.getPath() + wordDTOLocal.getAudioPath()).getAbsolutePath());
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
             /*
             不管是什么状态,如果当前旗帜是打开的,那么都需要刷新旗帜(颜色标记)的状态.
@@ -655,6 +654,22 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
 
     }
 
+    /**
+     * 播放一个单词的音频信息
+     *
+     * @param tobePlayWord 待播放音频的单词
+     */
+    private void playWordAudio(WordDTOLocal tobePlayWord) {
+        mediaPlayer.reset();
+        try {
+            mediaPlayer.setDataSource(new File(AnyLanguageWordProperties.getExternalFilesDir(),
+                    WordContextPath.WORD_AUDIO.getPath() + tobePlayWord.getAudioPath()).getAbsolutePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * 读取所有单词信息,读取完毕之后更新UI
@@ -816,6 +831,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 该方法展示的是最全面的信息,所有隐藏信息都会被显示,但是单词没有的性质(比如没有某个中文意思)那么没有的内容不会展示.
      */
     private void visibleWordAllMessage(WordDTOLocal currentWord) {
+        // 如果当前是中译英则播放单词,并且移除短语
+        if (wordFunctionHandler.getCurrentCreditState() == CreditState.CHINESE_TRANSLATION_ENGLISH) {
+            playWordAudio(currentWord);
+        }
         // 设置单词原文
         Optional.ofNullable(currentWord.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> sourceWord

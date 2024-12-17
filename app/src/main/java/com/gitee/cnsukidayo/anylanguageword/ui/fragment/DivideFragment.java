@@ -111,11 +111,11 @@ public class DivideFragment extends Fragment {
                 try {
                     allWordList.add(JsonUtils.readJson(singleWordList.getAbsolutePath().replace(AnyLanguageWordProperties.getExternalFilesDir().getAbsolutePath(), ""),
                             DivideDTOLocal.class));
-                    allWordList.sort((o1, o2) -> Math.toIntExact(o1.getOrder() - o2.getOrder()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
+            allWordList.sort((o1, o2) -> Math.toIntExact(o1.getOrder() - o2.getOrder()));
             updateUIHandler.post(() -> childDivideListAdapter.replaceAll(allWordList));
         });
     }
