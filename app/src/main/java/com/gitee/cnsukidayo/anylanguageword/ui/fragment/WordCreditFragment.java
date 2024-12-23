@@ -225,24 +225,14 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
         } else if (clickViewId == R.id.fragment_word_credit_next_word) {
             emptyUI();
-            creditWord(wordFunctionHandler.jumpNextWord());
-            AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
-            addWordAnalysisParamLocal.setId(Math.toIntExact(wordFunctionHandler.getCurrentStructureWordMap().getId()));
-            addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
-            addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
-            wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
+            creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpNextWord());
         } else if (clickViewId == R.id.fragment_word_credit_previous_word) {
             emptyUI();
-            creditWord(wordFunctionHandler.jumpPreviousWord());
-            AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
-            addWordAnalysisParamLocal.setId(Math.toIntExact(wordFunctionHandler.getCurrentStructureWordMap().getId()));
-            addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
-            addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
-            wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
+            creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpPreviousWord());
         } else if (clickViewId == R.id.fragment_word_container_get_answer) {
             visibleWordAllMessage(wordFunctionHandler.getCurrentStructureWordMap());
         } else if (clickViewId == R.id.fragment_word_credit_play_word) {
-            creditWord(wordFunctionHandler.getCurrentStructureWordMap());
+            creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.getCurrentStructureWordMap());
         } else if (clickViewId == R.id.fragment_word_credit_jump_next) {
             final EditText inputEditText = new EditText(getContext());
             inputEditText.setInputType(InputType.TYPE_CLASS_DATETIME);
@@ -261,7 +251,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     exceptionToast.show();
                     return;
                 }
-                creditWord(wordFunctionHandler.jumpToWord(i - 1));
+                creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpToWord(i - 1));
             }).setNegativeButton("取消", (dialog, which) -> {
             }).show();
         } else if (clickViewId == R.id.fragment_word_credit_click_flag) {
@@ -304,18 +294,20 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 toast.show();
                 return;
             }
+            WordDTOLocal previous = wordFunctionHandler.getCurrentStructureWordMap();
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.NONE) {
+
                 this.chameleonImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.sectionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.shuffleImageView.getDrawable().setTint(getResources().getColor(wordFunctionHandler.getChameleon().getMapColorID(), null));
                 wordFunctionHandler.shuffle();
-                creditWord(wordFunctionHandler.jumpToWord(0));
+                creditWord(previous, wordFunctionHandler.jumpToWord(0));
             } else {
                 this.chameleonImageView.setForeground(null);
                 this.sectionImageView.setForeground(null);
                 this.shuffleImageView.getDrawable().setTintList(null);
                 wordFunctionHandler.restoreWordList();
-                creditWord(wordFunctionHandler.jumpToWord(0));
+                creditWord(previous, wordFunctionHandler.jumpToWord(0));
             }
         } else if (clickViewId == R.id.fragment_word_credit_click_section) {
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.SHUFFLE) {
@@ -324,6 +316,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 toast.show();
                 return;
             }
+            WordDTOLocal previous = wordFunctionHandler.getCurrentStructureWordMap();
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.NONE) {
                 View rangeRandomWordInputView = getLayoutInflater().inflate(R.layout.fragment_word_credit_dialog_section, null);
                 EditText minValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_min_value);
@@ -348,7 +341,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                             }
                             // 确定执行区间随机时执行的内容
                             wordFunctionHandler.shuffleRange(minRange, maxRange);
-                            creditWord(wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
+                            creditWord(previous, wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
                             this.shuffleImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                             this.sectionImageView.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
                         })
@@ -359,7 +352,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.shuffleImageView.setForeground(null);
                 this.sectionImageView.getDrawable().setTintList(null);
                 this.wordFunctionHandler.restoreWordList();
-                creditWord(wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
+                creditWord(previous, wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
             }
         } else if (clickViewId == R.id.toolbar_back_to_trace) {
             new AlertDialog.Builder(getContext())
@@ -631,10 +624,22 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 按模式展示某个单词.
      * 展示单词是一种状态,随着单词的变化,页面的UI也要跟随变化.
      *
+     * @param previousWord 上一个单词(当前正在背诵的单词)
      * @param wordDTOLocal 待被展示的单词
      */
     @SuppressLint("SetTextI18n")
-    private void creditWord(WordDTOLocal wordDTOLocal) {
+    private void creditWord(WordDTOLocal previousWord, WordDTOLocal wordDTOLocal) {
+        // 异步写入单词背诵记录
+        StaticFactory.getExecutorService().submit(() -> {
+            AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
+            addWordAnalysisParamLocal.setId(Math.toIntExact(previousWord.getId()));
+            addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
+            addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
+            wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
+            // 每次记录之后都要清除一下
+            recordFlagColor.clear();
+        });
+        // 更新UI相关
         updateUIHandler.post(() -> {
             switch (wordFunctionHandler.getCurrentCreditState()) {
                 case LISTENING:
@@ -790,7 +795,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.chineseAnswerDrawer.setAdapter(chineseAnswerAdapterDrawer);
                 this.starSingleCategory.setAdapter(startSingleCategoryAdapter);
                 touchHelper.attachToRecyclerView(starSingleCategory);
-                creditWord(wordFunctionHandler.getWordByIndex(0));
+                creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.getWordByIndex(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
                 flagChangeArea.setVisibility(View.GONE);
                 closeFlagChangeAreaFlush();
