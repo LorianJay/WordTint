@@ -36,6 +36,7 @@ import com.gitee.cnsukidayo.anylanguageword.context.AnyLanguageWordProperties;
 import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.WordContextPath;
 import com.gitee.cnsukidayo.anylanguageword.context.support.factory.StaticFactory;
 import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.AddWordAnalysisParamLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.DivideDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.HistoryDTOLocal;
@@ -47,7 +48,9 @@ import com.gitee.cnsukidayo.anylanguageword.enums.CreditState;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 import com.gitee.cnsukidayo.anylanguageword.enums.WordFunctionState;
 import com.gitee.cnsukidayo.anylanguageword.enums.structure.EnglishStructure;
+import com.gitee.cnsukidayo.anylanguageword.handler.WordAnalysisHandler;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordFunctionHandler;
+import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordAnalysisHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordFunctionHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.SimpleItemTouchHelperCallback;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StarChineseAnswerRecyclerViewAdapter;
@@ -69,6 +72,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -105,7 +109,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private TextView currentIndexTextView, wordCount, chameleonCount;
     private TextView sourceWordDrawer, sourceWordPhoneticsDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
     private CardView popWindowChangeModeLayout;
     private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView, getAnswer;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
@@ -114,7 +118,16 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 用户的背词风格
      */
     private UserCreditStyle userCreditStyle;
+    /**
+     * 单词分析的功能
+     */
+    private WordAnalysisHandler wordAnalysisHandler;
+    private final Set<FlagColor> recordFlagColor = new HashSet<>(10);
 
+    /**
+     * 常量
+     */
+    public static final String ANALYSIS_WORD = "ANALYSIS_WORD";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -213,9 +226,19 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         } else if (clickViewId == R.id.fragment_word_credit_next_word) {
             emptyUI();
             creditWord(wordFunctionHandler.jumpNextWord());
+            AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
+            addWordAnalysisParamLocal.setId(Math.toIntExact(wordFunctionHandler.getCurrentStructureWordMap().getId()));
+            addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
+            addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
+            wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
         } else if (clickViewId == R.id.fragment_word_credit_previous_word) {
             emptyUI();
             creditWord(wordFunctionHandler.jumpPreviousWord());
+            AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
+            addWordAnalysisParamLocal.setId(Math.toIntExact(wordFunctionHandler.getCurrentStructureWordMap().getId()));
+            addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
+            addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
+            wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
         } else if (clickViewId == R.id.fragment_word_container_get_answer) {
             visibleWordAllMessage(wordFunctionHandler.getCurrentStructureWordMap());
         } else if (clickViewId == R.id.fragment_word_credit_play_word) {
@@ -386,6 +409,13 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     R.id.action_navigation_word_credit_to_navigation_search_word,
                     null,
                     StaticFactory.getSimpleNavOptions());
+        } else if (clickViewId == R.id.fragment_word_credit_click_analysis_word) {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(WordCreditFragment.ANALYSIS_WORD, wordFunctionHandler.getCurrentStructureWordMap());
+            Navigation.findNavController(getView()).navigate(
+                    R.id.action_navigation_word_credit_to_navigation_analysis_word,
+                    bundle,
+                    StaticFactory.getSimpleNavOptions());
         } else if (clickViewId == R.id.fragment_word_credit_click_save_progress) {
             // 保存当前的进度
             StaticFactory.getExecutorService().submit(() -> {
@@ -445,8 +475,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.RED)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_red).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.RED);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.RED)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_red).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.RED);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_orange) {
             if (changingChameleon) {
@@ -460,8 +492,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.ORANGE)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_orange).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.ORANGE);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.ORANGE)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_orange).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.ORANGE);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_yellow) {
             if (changingChameleon) {
@@ -474,8 +508,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.YELLOW)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.YELLOW);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.YELLOW)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.YELLOW);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_blue) {
             if (changingChameleon) {
@@ -489,8 +525,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLUE)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_blue).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.BLUE);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLUE)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_blue).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.BLUE);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_cyan) {
             if (changingChameleon) {
@@ -504,8 +542,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.CYAN)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_cyan).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.CYAN);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.CYAN)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_cyan).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.CYAN);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_purple) {
             if (changingChameleon) {
@@ -519,8 +559,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PURPLE)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_purple).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.PURPLE);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.PURPLE)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_purple).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.PURPLE);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_pink) {
             if (changingChameleon) {
@@ -534,8 +576,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PINK)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_pink).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.PINK);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.PINK)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_pink).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.PINK);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_gray) {
             if (changingChameleon) {
@@ -549,8 +593,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GRAY)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_gray).setAlpha(0.0f);
+                recordFlagColor.remove(FlagColor.GRAY);
             } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.GRAY)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_gray).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.GRAY);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_black) {
             if (changingChameleon) {
@@ -562,10 +608,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLACK)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLACK)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_black).setAlpha(0.0f);
-            } else if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLACK)) {
+                recordFlagColor.remove(FlagColor.BLACK);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLACK)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_black).setAlpha(1.0f);
+                recordFlagColor.add(FlagColor.BLACK);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_brown) {
             if (changingChameleon) {
@@ -718,6 +766,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
 //                    wordList = wordList.stream().filter(word -> !TextUtils.isEmpty(word.getPhrase())).collect(Collectors.toList());
                 }
             }
+            // 单词分析功能
+            this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
+
             this.wordFunctionHandler = new WordFunctionHandlerImpl(allFunctionWordList, dict);
             if (userCreditStyle != null) {
                 this.wordFunctionHandler.setCurrentCreditState(userCreditStyle.getCreditState());
@@ -883,6 +934,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.searchWord = rootView.findViewById(R.id.fragment_word_credit_search_word);
         this.saveProgress = rootView.findViewById(R.id.fragment_word_credit_click_save_progress);
         this.chameleonCount = rootView.findViewById(R.id.fragment_word_credit_chameleon_word_count);
+        this.wordAnalysis = rootView.findViewById(R.id.fragment_word_credit_click_analysis_word);
 
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
         this.sourceWordPhoneticsDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_phonetics);
@@ -915,6 +967,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.addNewStartCategory.setOnClickListener(this);
         this.searchWord.setOnClickListener(this);
         this.saveProgress.setOnClickListener(this);
+        this.wordAnalysis.setOnClickListener(this);
 
         this.rootView.findViewById(R.id.fragment_word_credit_button_flag_green).setOnClickListener(this);
         this.rootView.findViewById(R.id.fragment_word_credit_button_flag_red).setOnClickListener(this);

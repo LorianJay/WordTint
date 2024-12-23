@@ -68,6 +68,9 @@
         <action
             android:id="@+id/action_navigation_word_credit_to_navigation_search_word"
             app:destination="@id/navigation_search_word" />
+        <action
+            android:id="@+id/action_navigation_word_credit_to_navigation_analysis_word"
+            app:destination="@id/navigation_analysis_word" />
     </fragment>
     <fragment
         android:id="@+id/navigation_settings"
@@ -88,6 +91,10 @@
         android:id="@+id/navigation_search_word"
         android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.SearchWordFragment"
         tools:layout="@layout/fragment_search_word" />
+    <fragment
+        android:id="@+id/navigation_analysis_word"
+        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.AnalysisWordFragment"
+        tools:layout="@layout/fragment_analysis_word" />
     <fragment
         android:id="@+id/navigation_word_credit_launch"
         android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.WordCreditLaunchFragment"
