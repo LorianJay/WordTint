@@ -2,6 +2,11 @@ package com.gitee.cnsukidayo.anylanguageword.handler;
 
 import com.gitee.cnsukidayo.anylanguageword.entity.local.AddWordAnalysisParamLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordAnalysisLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.WordFlagRankLocal;
+import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
+
+import io.github.cnsukidayo.wword.model.dto.support.DataPage;
+import io.github.cnsukidayo.wword.model.params.PageQueryParam;
 
 /**
  * @author cnsukidayo
@@ -24,4 +29,5 @@ public interface WordAnalysisHandler {
      */
     void insertWordAnalysis(AddWordAnalysisParamLocal addWordAnalysisParamLocal);
 
+    DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(FlagColor flagColor, PageQueryParam pageQueryParam);
 }

@@ -4,23 +4,22 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import com.flyco.tablayout.SlidingTabLayout;
 import com.gitee.cnsukidayo.anylanguageword.R;
+import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StartViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class IStartFragment extends Fragment {
+public class RankFragment extends Fragment {
 
     private View rootView;
-    private TextView title;
     private ViewPager viewPager;
     private SlidingTabLayout slidingTabLayout;
     private List<Fragment> listFragment;
@@ -36,24 +35,23 @@ public class IStartFragment extends Fragment {
         if (rootView != null) {
             return rootView;
         }
-        rootView = inflater.inflate(R.layout.fragment_i_start, container, false);
+        rootView = inflater.inflate(R.layout.fragment_rank, container, false);
         bindView();
         initView();
         return rootView;
     }
 
     private void initView() {
-        this.pageTitle = new String[4];
-        this.pageTitle[0] = getContext().getResources().getString(R.string.post);
-        this.pageTitle[1] = getContext().getResources().getString(R.string.word_divide);
-        this.pageTitle[2] = getContext().getResources().getString(R.string.word_star);
-        this.pageTitle[3] = getContext().getResources().getString(R.string.hearing);
-        this.title.setText(R.string.i_start);
+        List<String> list = new ArrayList<>();
         this.listFragment = new ArrayList<>();
-        listFragment.add(new HearingFragment());
-        listFragment.add(new HistoryFragment());
-        listFragment.add(new HistoryFragment());
-        listFragment.add(new HistoryFragment());
+        for (FlagColor flagColor : FlagColor.values()) {
+            if (flagColor == FlagColor.GREEN || flagColor == FlagColor.BROWN) {
+                continue;
+            }
+            list.add(flagColor.name());
+            listFragment.add(new FlagPageFragment(flagColor));
+        }
+        this.pageTitle = list.toArray(new String[]{});
         StartViewAdapter startViewAdapter = new StartViewAdapter(getChildFragmentManager(), listFragment);
         viewPager.setAdapter(startViewAdapter);
         slidingTabLayout.setViewPager(viewPager, pageTitle);
@@ -62,6 +60,5 @@ public class IStartFragment extends Fragment {
     private void bindView() {
         this.viewPager = rootView.findViewById(R.id.fragment_i_start_viewpage);
         this.slidingTabLayout = rootView.findViewById(R.id.slide);
-        this.title = rootView.findViewById(R.id.toolbar_title);
     }
 }

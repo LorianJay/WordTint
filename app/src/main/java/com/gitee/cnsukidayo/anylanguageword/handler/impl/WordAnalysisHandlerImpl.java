@@ -7,11 +7,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.gitee.cnsukidayo.anylanguageword.entity.local.AddWordAnalysisParamLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordAnalysisLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.WordFlagRankLocal;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordAnalysisHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.github.cnsukidayo.wword.model.dto.support.DataPage;
+import io.github.cnsukidayo.wword.model.params.PageQueryParam;
 
 /**
  * @author cnsukidayo
@@ -75,6 +81,7 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
             flagColorMapInfo.setTotal(totalCursor.getInt(0));
             map.put(flagColor, flagColorMapInfo);
         }
+        reader.close();
         result.setMapMessage(map);
         return result;
     }
@@ -90,6 +97,41 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
                     addWordAnalysisParamLocal.getCreateTimestamp()
             });
         }
+        writableDatabase.close();
+    }
+
+    @Override
+    public DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(FlagColor flagColor, PageQueryParam pageQueryParam) {
+        DataPage<WordFlagRankLocal> result = new DataPage<>();
+        List<WordFlagRankLocal> data = new ArrayList<>();
+        String searchSql = "select * from (SELECT COUNT(*) as count,word_id FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id) ORDER BY count DESC LIMIT ?,?";
+        String countSql = "SELECT COUNT(*) FROM(SELECT word_id FROM word_analysis WHERE word_flag = ? GROUP BY word_id);";
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        // 查询所有单词
+        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{
+                flagColor.name(),
+                String.valueOf((pageQueryParam.getCurrent() - 1) * pageQueryParam.getSize()),
+                String.valueOf((pageQueryParam.getCurrent() * pageQueryParam.getSize()))
+        });
+        int countIndex = searchSqlCursor.getColumnIndex("count");
+        int wordIdIndex = searchSqlCursor.getColumnIndex("word_id");
+        while (searchSqlCursor.moveToNext()) {
+            WordFlagRankLocal wordFlagRankLocal = new WordFlagRankLocal();
+            wordFlagRankLocal.setCount(searchSqlCursor.getInt(countIndex));
+            wordFlagRankLocal.setWordId(searchSqlCursor.getInt(wordIdIndex));
+            data.add(wordFlagRankLocal);
+        }
+        // 查询当前单词的数量
+        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{flagColor.name()});
+        countCursor.moveToNext();
+        int count = countCursor.getInt(0);
+        if (count - pageQueryParam.getCurrent() * 20 <= 0) {
+            result.setLast(true);
+        }
+        result.setFirst(pageQueryParam.getCurrent() == 1);
+        sqLiteDatabase.close();
+        result.setContent(data);
+        return result;
     }
 
     @Override

@@ -59,8 +59,8 @@
         tools:layout="@layout/fragment_user_agreement" />
     <fragment
         android:id="@+id/navigation_i_start"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.IStartFragment"
-        tools:layout="@layout/fragment_i_start" />
+        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.RankFragment"
+        tools:layout="@layout/fragment_rank" />
     <fragment
         android:id="@+id/navigation_word_credit"
         android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.WordCreditFragment"

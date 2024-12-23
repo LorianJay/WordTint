@@ -75,7 +75,7 @@ public class MainFragmentAdapter extends Fragment implements NavigationBarView.O
     private TextView userName, userLevel, userVipLevel, userMoney;
     private LinearLayout settings;
     private DrawerLayout drawerLayout;
-    private final Fragment creditFragment = new CreditFragment(), hearingFragment = new HearingFragment(), analysisFragment = new HistoryFragment();
+    private final Fragment creditFragment = new CreditFragment(), rankFragment = new RankFragment(), analysisFragment = new HistoryFragment();
     private BottomNavigationItemView bottomRecite, bottomHearing, bottomAnalysis;
     private RelativeLayout userInfoArea;
     private final Handler updateUIHandler = new Handler();
@@ -292,7 +292,7 @@ public class MainFragmentAdapter extends Fragment implements NavigationBarView.O
     private void initViewPage() {
         this.listFragment = new ArrayList<>(4);
         listFragment.add(creditFragment);
-        listFragment.add(hearingFragment);
+        listFragment.add(rankFragment);
         listFragment.add(analysisFragment);
         BottomViewAdapter adapter = new BottomViewAdapter(getChildFragmentManager(), getLifecycle(), listFragment);
         viewPager.setAdapter(adapter);

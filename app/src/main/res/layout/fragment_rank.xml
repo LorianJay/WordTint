@@ -4,12 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="15dp"
     android:background="@color/white"
-    tools:context=".ui.fragment.IStartFragment">
-
-    <include
-        android:id="@+id/include"
-        layout="@layout/global_back_toolbar" />
+    tools:context=".ui.fragment.RankFragment">
 
     <com.flyco.tablayout.SlidingTabLayout
         android:id="@+id/slide"
@@ -19,7 +16,7 @@
         android:layout_marginEnd="@dimen/app_layout_margin"
         android:background="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/include"
+        app:layout_constraintTop_toTopOf="parent"
         app:tl_indicator_color="@color/theme_color"
         app:tl_indicator_margin_left="15dp"
         app:tl_indicator_margin_right="15dp"
@@ -28,13 +25,19 @@
         app:tl_textUnselectColor="@color/black"
         app:tl_textsize="16sp" />
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/fragment_i_start_viewpage"
-        android:layout_width="match_parent"
+    <com.gitee.cnsukidayo.anylanguageword.ui.adapter.customview.SlidingScrollableHost
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="1"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/slide" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/slide">
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/fragment_i_start_viewpage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.gitee.cnsukidayo.anylanguageword.ui.adapter.customview.SlidingScrollableHost>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
