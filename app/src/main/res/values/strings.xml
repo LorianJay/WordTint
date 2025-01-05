@@ -31,6 +31,7 @@
     <string name="default_rate">1.0x</string>
     <string name="sign">标记</string>
     <string name="chameleon">变色龙</string>
+    <string name="swing_switch">滑动切换</string>
     <string name="shuffle">按色打乱</string>
     <string name="section">区间重背</string>
     <string name="change_mode">模式更改</string>

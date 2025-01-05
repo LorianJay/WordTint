@@ -1,13 +1,18 @@
 package com.gitee.cnsukidayo.anylanguageword.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -79,7 +84,7 @@ import java.util.stream.Collectors;
 import io.github.cnsukidayo.wword.model.dto.WordCategoryDTO;
 import io.github.cnsukidayo.wword.model.vo.WordCategoryDetailVO;
 
-public class WordCreditFragment extends Fragment implements View.OnClickListener, KeyEvent.Callback {
+public class WordCreditFragment extends Fragment implements View.OnClickListener, KeyEvent.Callback, View.OnTouchListener, View.OnLongClickListener {
     private View rootView;
 
     private ImageButton popMoreFunction;
@@ -109,11 +114,18 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private TextView currentIndexTextView, wordCount, chameleonCount;
     private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
     private CardView popWindowChangeModeLayout;
-    private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView, getAnswer, starRefresh;
+    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, shuffleImageView, sectionImageView, getAnswer, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
     private long exitLastTime = 0;
+    /**
+     * 旗帜
+     */
+    private ImageButton greenFlag, redFlag, orangeFlag, yellowFlag, blueFlag, cyanFlag, purpleFlag, pinkFlag, grayFlag, blackFlag, brownFlag;
+    private List<ImageButton> selectList;
+    private ImageButton currentSelectFlagButton;
+
     /**
      * 用户的背词风格
      */
@@ -125,9 +137,24 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private final Set<FlagColor> recordFlagColor = new HashSet<>(10);
 
     /**
+     * 滑动显示答案组件时的坐标<br>
+     * 以及是否长按点击了显示答案按钮
+     */
+    private float answerDY;
+    private boolean longClickAnswer = false, enableSelectFunction = false;
+    /**
+     * 切换的度
+     */
+    private final float answerDegree = 62.5f;
+    /**
      * 常量
      */
     public static final String ANALYSIS_WORD = "ANALYSIS_WORD";
+
+    /**
+     * 马达
+     */
+    private Vibrator vibrator;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -289,6 +316,13 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             toast.setGravity(Gravity.CENTER, 0, 500);
             toast.show();
             changingChameleon = true;
+        } else if (clickViewId == R.id.fragment_word_credit_click_swing_switch) {
+            enableSelectFunction = !enableSelectFunction;
+            if (enableSelectFunction) {
+                this.swingSwitchImageView.getDrawable().setTint(getResources().getColor(R.color.gold, null));
+            } else {
+                this.swingSwitchImageView.getDrawable().setTintList(null);
+            }
         } else if (clickViewId == R.id.fragment_word_credit_click_shuffle) {
             // 如果当前不是普通状态和按色打乱状态,代表当前在执行别的状态,需要先锁定按色打乱的功能
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.RANGE) {
@@ -640,6 +674,55 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
 
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        int itemId = v.getId();
+        if (itemId == R.id.fragment_word_container_get_answer && enableSelectFunction) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                answerDY = event.getY();
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE && longClickAnswer) {
+                float distinct = event.getY() - answerDY;
+                Log.d("结果", String.valueOf(distinct));
+                if (Math.abs(distinct) > 10) {
+                    // 展开右侧的旗帜列表
+                    if (!openFlagChange) {
+                        if (AnimationUtil.with().endMoveToViewLocation(flagChangeArea, 500)) {
+                            openFlagChangeAreaFlush();
+                            openFlagChange = !openFlagChange;
+                        }
+                    }
+                    int userMove = (int) (distinct / answerDegree) + 4;
+                    if (userMove < 0) {
+                        userMove = 0;
+                    } else if (userMove > 8) {
+                        userMove = 8;
+                    }
+                    // 修改样式
+                    selectList.forEach(imageButton -> imageButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding)));
+                    this.currentSelectFlagButton = selectList.get(userMove);
+                    this.currentSelectFlagButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding_selective));
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_UP && longClickAnswer) {
+                longClickAnswer = false;
+                this.currentSelectFlagButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding));
+                this.currentSelectFlagButton.performClick();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        int itemId = v.getId();
+        if (itemId == R.id.fragment_word_container_get_answer && enableSelectFunction) {
+            longClickAnswer = true;
+            // 马达震动提醒用户
+            VibrationEffect waveform = VibrationEffect.createWaveform(new long[]{100}, -1);
+            vibrator.vibrate(waveform);
+        }
+        return false;
+    }
+
     /**
      * 按模式展示某个单词.
      * 展示单词是一种状态,随着单词的变化,页面的UI也要跟随变化.
@@ -941,6 +1024,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.clickFlagImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_click_flag);
         this.viewFlagArea = rootView.findViewById(R.id.fragment_word_credit_view_flag_area);
         this.chameleonMode = rootView.findViewById(R.id.fragment_word_credit_click_chameleon_mode);
+        this.swingSwitch = rootView.findViewById(R.id.fragment_word_credit_click_swing_switch);
+        this.swingSwitchImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_swing_switch);
         this.shuffle = rootView.findViewById(R.id.fragment_word_credit_click_shuffle);
         this.chameleonImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_chameleon);
         this.sectionImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_section);
@@ -962,12 +1047,35 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.saveProgress = rootView.findViewById(R.id.fragment_word_credit_click_save_progress);
         this.chameleonCount = rootView.findViewById(R.id.fragment_word_credit_chameleon_word_count);
         this.wordAnalysis = rootView.findViewById(R.id.fragment_word_credit_click_analysis_word);
+        this.vibrator = (Vibrator) rootView.getContext().getSystemService(Context.VIBRATOR_SERVICE);
 
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
         this.starRefresh = rootView.findViewById(R.id.fragment_word_credit_drawer_refresh);
         this.chineseAnswerDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_chinese_answer);
         this.phraseHintDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_phrase_hint);
         this.phraseAnswerDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_phrase_answer);
+
+        this.greenFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_green);
+        this.redFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_red);
+        this.orangeFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_orange);
+        this.yellowFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_yellow);
+        this.blueFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_blue);
+        this.cyanFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_cyan);
+        this.purpleFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_purple);
+        this.pinkFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_pink);
+        this.grayFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_gray);
+        this.blackFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_black);
+        this.brownFlag = rootView.findViewById(R.id.fragment_word_credit_button_flag_brown);
+        this.selectList = new ArrayList<>(9);
+        this.selectList.add(redFlag);
+        this.selectList.add(orangeFlag);
+        this.selectList.add(yellowFlag);
+        this.selectList.add(blueFlag);
+        this.selectList.add(cyanFlag);
+        this.selectList.add(purpleFlag);
+        this.selectList.add(pinkFlag);
+        this.selectList.add(grayFlag);
+        this.selectList.add(blackFlag);
     }
 
     /**
@@ -996,18 +1104,21 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.saveProgress.setOnClickListener(this);
         this.wordAnalysis.setOnClickListener(this);
         this.starRefresh.setOnClickListener(this);
+        this.swingSwitch.setOnClickListener(this);
+        this.getAnswer.setOnTouchListener(this);
+        this.getAnswer.setOnLongClickListener(this);
 
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_green).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_red).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_orange).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_yellow).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_blue).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_cyan).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_purple).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_pink).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_gray).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_black).setOnClickListener(this);
-        this.rootView.findViewById(R.id.fragment_word_credit_button_flag_brown).setOnClickListener(this);
+        this.greenFlag.setOnClickListener(this);
+        this.redFlag.setOnClickListener(this);
+        this.orangeFlag.setOnClickListener(this);
+        this.yellowFlag.setOnClickListener(this);
+        this.blueFlag.setOnClickListener(this);
+        this.cyanFlag.setOnClickListener(this);
+        this.purpleFlag.setOnClickListener(this);
+        this.pinkFlag.setOnClickListener(this);
+        this.grayFlag.setOnClickListener(this);
+        this.blackFlag.setOnClickListener(this);
+        this.brownFlag.setOnClickListener(this);
     }
 
     // ----下面是一些用不到的方法----
