@@ -107,11 +107,11 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private ImageButton popBackStack, playWord;
     private TextView sourceWord, nextWord, previousWord;
     private TextView currentIndexTextView, wordCount, chameleonCount;
-    private TextView sourceWordDrawer, sourceWordPhoneticsDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
+    private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
     private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
     private CardView popWindowChangeModeLayout;
-    private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView, getAnswer;
+    private ImageView clickFlagImageView, chameleonImageView, shuffleImageView, sectionImageView, getAnswer, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
     private long exitLastTime = 0;
     /**
@@ -384,6 +384,22 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     .setNegativeButton("取消", (dialog, which) -> {
                     })
                     .show();
+        } else if (clickViewId == R.id.fragment_word_credit_drawer_refresh) {
+            // 刷新收藏夹信息
+            StaticFactory.getExecutorService().submit(() -> {
+                this.startSingleCategoryAdapter = new StartSingleCategoryAdapter(getContext());
+                ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(startSingleCategoryAdapter));
+                startSingleCategoryAdapter.setStartDragListener(touchHelper::startDrag);
+                startSingleCategoryAdapter.setStartFunctionHandler(wordFunctionHandler);
+                try {
+                    wordFunctionHandler.replaceAddCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
+                } catch (IOException ignored) {
+                }
+                updateUIHandler.post(() -> {
+                    starSingleCategory.setAdapter(startSingleCategoryAdapter);
+                    touchHelper.attachToRecyclerView(starSingleCategory);
+                });
+            });
         } else if (clickViewId == R.id.fragment_word_credit_click_change_mode) {
             PopupWindow changeModePopupWindow = new PopupWindow(popWindowChangeModeLayout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             changeModePopupWindow.setOutsideTouchable(true);
@@ -680,8 +696,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
                     .ifPresent(wordDTOS -> sourceWordDrawer
                             .setText(wordDTOS));
-            // 设置右侧展开列表单词的音标
-            sourceWordPhoneticsDrawer.setText("");
             // 设置短语
             String phraseTranslation = Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.PHRASE_TRANSLATION))
                     .orElse("");
@@ -713,10 +727,14 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * @param tobePlayWord 待播放音频的单词
      */
     private void playWordAudio(WordDTOLocal tobePlayWord) {
+        File file = new File(AnyLanguageWordProperties.getExternalFilesDir(),
+                WordContextPath.WORD_AUDIO.getPath() + tobePlayWord.getAudioPath());
+        if (!file.exists()) {
+            return;
+        }
         mediaPlayer.reset();
         try {
-            mediaPlayer.setDataSource(new File(AnyLanguageWordProperties.getExternalFilesDir(),
-                    WordContextPath.WORD_AUDIO.getPath() + tobePlayWord.getAudioPath()).getAbsolutePath());
+            mediaPlayer.setDataSource(file.getAbsolutePath());
             mediaPlayer.prepare();
             mediaPlayer.start();
         } catch (IOException e) {
@@ -942,7 +960,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.wordAnalysis = rootView.findViewById(R.id.fragment_word_credit_click_analysis_word);
 
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
-        this.sourceWordPhoneticsDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_phonetics);
+        this.starRefresh = rootView.findViewById(R.id.fragment_word_credit_drawer_refresh);
         this.chineseAnswerDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_chinese_answer);
         this.phraseHintDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_phrase_hint);
         this.phraseAnswerDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_phrase_answer);
@@ -973,6 +991,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.searchWord.setOnClickListener(this);
         this.saveProgress.setOnClickListener(this);
         this.wordAnalysis.setOnClickListener(this);
+        this.starRefresh.setOnClickListener(this);
 
         this.rootView.findViewById(R.id.fragment_word_credit_button_flag_green).setOnClickListener(this);
         this.rootView.findViewById(R.id.fragment_word_credit_button_flag_red).setOnClickListener(this);

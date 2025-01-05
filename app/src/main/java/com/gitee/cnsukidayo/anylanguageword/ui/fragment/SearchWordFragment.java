@@ -84,7 +84,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
     private StartSingleCategoryAdapter startSingleCategoryAdapter;
     private Handler updateUIHandler;
     private LinearLayout analysisWord, openStarDrawer;
-    private TextView sourceWord, sourceWordDrawer, sourceWordPhoneticsDrawer;
+    private TextView sourceWord, sourceWordDrawer;
     private TextView drawerPhraseHint, drawerPhraseAnswer, addNewCategory;
     // 收藏界抽屉布局
     private DrawerLayout startDrawer;
@@ -249,7 +249,6 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         chineseAnswerHandler = new ChineseAnswerHandler(rootView);
         sourceWord.setText("");
         sourceWordDrawer.setText("");
-        sourceWordPhoneticsDrawer.setText("");
         drawerPhraseHint.setVisibility(View.GONE);
         drawerPhraseAnswer.setVisibility(View.GONE);
         loadingDialog = new AlertDialog.Builder(getContext()).setView(LayoutInflater.from(getContext()).inflate(R.layout.dialog_loading, null)).setCancelable(false).show();
@@ -383,7 +382,6 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         this.chineseAnswerDrawer = rootView.findViewById(R.id.drawer_star_chinese_answer_recycler_view);
         this.starSingleCategory = rootView.findViewById(R.id.start_category_recycler);
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
-        this.sourceWordPhoneticsDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_phonetics);
         this.drawerPhraseHint = rootView.findViewById(R.id.drawer_star_phrase_hint);
         this.drawerPhraseAnswer = rootView.findViewById(R.id.drawer_star_phrase_answer);
         this.addNewCategory = rootView.findViewById(R.id.drawer_start_add_category);

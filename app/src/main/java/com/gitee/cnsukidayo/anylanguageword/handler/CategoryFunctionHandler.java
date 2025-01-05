@@ -36,6 +36,13 @@ public interface CategoryFunctionHandler extends CategoryWordFunctionHandler {
     void batchAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList);
 
     /**
+     * 批量替换单词收藏夹
+     *
+     * @param wordCategoryDetailVOList 单词分类列表
+     */
+    void replaceAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList);
+
+    /**
      * 得到当前停留的单词(得到当前正在背诵的单词)<br>
      * 该方法返回的单词是用户可能想要将其收藏到某个收藏夹内的单词.<br>
      * 并转换成以单词结构id为Key的集合

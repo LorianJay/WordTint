@@ -50,6 +50,12 @@ public abstract class AbstractCategoryFunctionHandler implements CategoryFunctio
     }
 
     @Override
+    public void replaceAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList) {
+        this.wordCategoryDetailVOList.clear();
+        this.wordCategoryDetailVOList.addAll(wordCategoryDetailVOList);
+    }
+
+    @Override
     public void addNewCategory(WordCategoryDTO wordCategoryDTO) {
         wordCategoryDTO.setId((long) wordCategoryDetailVOList.size());
         wordCategoryDTO.setCategoryOrder(wordCategoryDetailVOList.size());

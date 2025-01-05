@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="70dp"
     android:background="@color/white"
@@ -8,7 +9,7 @@
     android:paddingEnd="10dp">
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent">
 
         <TextView
@@ -30,18 +31,23 @@
             android:textColor="@color/black"
             android:textSize="22sp" />
 
-        <TextView
-            android:id="@+id/fragment_word_credit_drawer_word_phonetics"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_alignTop="@id/fragment_word_credit_drawer_word_origin"
-            android:layout_alignBottom="@+id/fragment_word_credit_drawer_word_origin"
-            android:layout_marginStart="10dp"
-            android:layout_toEndOf="@id/fragment_word_credit_drawer_word_origin"
-            android:gravity="center"
-            android:text="@string/word_phonetics"
-            android:textColor="@color/gray_black"
-            android:textSize="18sp" />
     </RelativeLayout>
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/fragment_word_credit_drawer_refresh"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/item_click_gray_round"
+        android:gravity="center"
+        android:paddingStart="5dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="5dp"
+        android:paddingBottom="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_refresh"
+        app:tint="@color/theme_color" />
+
+</RelativeLayout>
