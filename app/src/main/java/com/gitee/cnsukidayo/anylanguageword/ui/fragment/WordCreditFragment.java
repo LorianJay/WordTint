@@ -236,22 +236,25 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         } else if (clickViewId == R.id.fragment_word_credit_jump_next) {
             final EditText inputEditText = new EditText(getContext());
             inputEditText.setInputType(InputType.TYPE_CLASS_DATETIME);
-            new AlertDialog.Builder(getContext()).setTitle("跳转单词").setMessage("输入要跳转到第几个单词,你应当输入1到" + wordFunctionHandler.size() + "之间的值.").setView(inputEditText).setCancelable(false).setPositiveButton("确定", (dialog, which) -> {
+            new AlertDialog.Builder(getContext()).setTitle("跳转单词").setMessage("输入要跳转到第几个单词,你应当输入1到" + wordFunctionHandler.getChameleonSize() + "之间的值.").setView(inputEditText).setCancelable(false).setPositiveButton("确定", (dialog, which) -> {
                 String value = inputEditText.getText().toString();
                 int i;
                 try {
                     i = Integer.parseInt(value);
-                    if (i < 0 || i > wordFunctionHandler.size()) {
+                    if (i <= 0 || i > wordFunctionHandler.getChameleonSize()) {
                         throw new NumberFormatException();
                     }
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
-                    Toast exceptionToast = Toast.makeText(getContext(), "输入错误,请输入1~" + wordFunctionHandler.size() + "之间的值", Toast.LENGTH_LONG);
+                    Toast exceptionToast = Toast.makeText(getContext(), "输入错误,请输入1~" + wordFunctionHandler.getChameleonSize() + "之间的值", Toast.LENGTH_LONG);
                     exceptionToast.setGravity(Gravity.CENTER, 0, 500);
                     exceptionToast.show();
                     return;
                 }
-                creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpToWord(i - 1));
+                // 异步跳转单词,可能查找时间较长
+                StaticFactory.getExecutorService().submit(() ->
+                        creditWord(wordFunctionHandler.getCurrentStructureWordMap(),
+                                wordFunctionHandler.jumpToWord(i - 1)));
             }).setNegativeButton("取消", (dialog, which) -> {
             }).show();
         } else if (clickViewId == R.id.fragment_word_credit_click_flag) {
@@ -307,7 +310,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.sectionImageView.setForeground(null);
                 this.shuffleImageView.getDrawable().setTintList(null);
                 wordFunctionHandler.restoreWordList();
-                creditWord(previous, wordFunctionHandler.jumpToWord(0));
+                creditWord(previous, wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
             }
         } else if (clickViewId == R.id.fragment_word_credit_click_section) {
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.SHUFFLE) {
@@ -322,7 +325,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 EditText minValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_min_value);
                 EditText maxValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_max_value);
                 new AlertDialog.Builder(getContext()).setTitle("区间随机:")
-                        .setMessage("选择要单独随机的区间:[1," + wordFunctionHandler.size() + "].注意这里是闭区间")
+                        .setMessage("选择要单独随机的区间:[1," + wordFunctionHandler.getChameleonSize() + "].注意这里是闭区间")
                         .setView(rangeRandomWordInputView)
                         .setCancelable(false)
                         .setPositiveButton("确定", (dialog, which) -> {
@@ -330,11 +333,11 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                             try {
                                 minRange = Integer.parseInt(minValue.getText().toString()) - 1;
                                 maxRange = Integer.parseInt(maxValue.getText().toString()) - 1;
-                                if (minRange < 0 || maxRange > wordFunctionHandler.size() || minRange > maxRange) {
+                                if (minRange < 0 || maxRange > wordFunctionHandler.getChameleonSize() || minRange > maxRange) {
                                     throw new IllegalArgumentException("输入参数不合法!");
                                 }
                             } catch (IllegalArgumentException e) {
-                                Toast errorToast = Toast.makeText(getContext(), "输入错误,请输入1~" + wordFunctionHandler.size() + "之间的值", Toast.LENGTH_LONG);
+                                Toast errorToast = Toast.makeText(getContext(), "输入错误,请输入1~" + wordFunctionHandler.getChameleonSize() + "之间的值", Toast.LENGTH_LONG);
                                 errorToast.setGravity(Gravity.CENTER, 0, 500);
                                 errorToast.show();
                                 return;
@@ -514,6 +517,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
+                return;
             }
             if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.YELLOW)) {
                 rootView.findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(0.0f);

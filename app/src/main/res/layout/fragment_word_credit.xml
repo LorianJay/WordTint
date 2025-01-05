@@ -772,9 +772,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-12dp"
+                android:elevation="1dp"
                 android:text="12"
                 android:textColor="@android:color/holo_red_dark"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toEndOf="@id/fragment_word_credit_play_word"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -809,10 +810,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-12dp"
                 android:layout_marginTop="-5dp"
+                android:elevation="1dp"
                 android:text="13"
                 android:textColor="@android:color/holo_red_dark"
-                android:textSize="16sp"
-                app:layout_constraintStart_toEndOf="@id/fragment_word_credit_next_word"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
 

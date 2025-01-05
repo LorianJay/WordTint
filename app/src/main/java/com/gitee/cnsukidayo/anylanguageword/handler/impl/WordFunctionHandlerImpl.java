@@ -35,6 +35,10 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
      * 当前单词背诵的指针,从0开始计数
      */
     private int currentIndex = 0;
+    /**
+     * 先前的背诵指针,用于恢复背诵进度
+     */
+    private int preIndex = 0;
 
     /**
      * 现在正在背诵的区间 start:19 end:29 -> [20,30]
@@ -125,7 +129,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
 
     @Override
     public WordDTOLocal jumpToWord(int currentIndex) {
-        return getWordByIndex(this.currentIndex = currentIndex);
+        return getWordByIndex(this.currentIndex = findColorCursor(currentIndex));
     }
 
     @Override
@@ -172,8 +176,10 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         this.allFunctionWordList = this.dummyWordList;
         this.dummyWordList = temp;
         Collections.shuffle(this.allFunctionWordList);
+        Collections.shuffle(this.allFunctionWordList);
         this.start = 0;
         this.end = allFunctionWordList.size() - 1;
+        this.preIndex = currentIndex;
         this.currentIndex = 0;
     }
 
@@ -181,15 +187,25 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     public void shuffleRange(int start, int end) {
         this.wordFunctionState = WordFunctionState.RANGE;
         this.dummyWordList = new ArrayList<>(end - start + 1);
-        for (int i = start; i <= end; i++) {
-            dummyWordList.add(allFunctionWordList.get(i));
+        // 要找到对应颜色的区间
+        int realIndex = findColorCursor(start);
+        int count = end - start + 1;
+        FlagColor currentFlagColor = getChameleon();
+        for (int i = realIndex; count > 0; i++) {
+            FunctionWordDTOLocal tempWord = allFunctionWordList.get(i);
+            if (tempWord.getWordsFlagList().contains(currentFlagColor)) {
+                dummyWordList.add(tempWord);
+                count--;
+            }
         }
         List<FunctionWordDTOLocal> temp = allFunctionWordList;
         this.allFunctionWordList = this.dummyWordList;
         this.dummyWordList = temp;
         Collections.shuffle(this.allFunctionWordList);
+        Collections.shuffle(this.allFunctionWordList);
         this.start = 0;
         this.end = allFunctionWordList.size() - 1;
+        this.preIndex = currentIndex;
         this.currentIndex = 0;
     }
 
@@ -199,7 +215,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         this.wordFunctionState = WordFunctionState.NONE;
         this.start = 0;
         this.end = allFunctionWordList.size() - 1;
-        this.currentIndex = 0;
+        this.currentIndex = preIndex;
     }
 
     @Override
@@ -243,6 +259,23 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
             }
         }
         return result + 1;
+    }
+
+    /**
+     * 找出用户输入的颜色索引对应的目标单词index
+     *
+     * @param currentIndex 用户期待的颜色索引
+     * @return 返回用户输入的颜色索引所对应的数组元素索引
+     */
+    private int findColorCursor(int currentIndex) {
+        FlagColor currentFlagColor = getChameleon();
+        int result = 0;
+        for (; result < this.size() && currentIndex > 0; result++) {
+            if (allFunctionWordList.get(result).getWordsFlagList().contains(currentFlagColor)) {
+                currentIndex--;
+            }
+        }
+        return result;
     }
 
 }
