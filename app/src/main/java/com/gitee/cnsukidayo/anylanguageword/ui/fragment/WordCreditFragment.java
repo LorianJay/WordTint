@@ -344,7 +344,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.sectionImageView.setForeground(null);
                 this.shuffleImageView.getDrawable().setTintList(null);
                 wordFunctionHandler.restoreWordList();
-                creditWord(previous, wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
+                creditWord(previous, wordFunctionHandler.getCurrentStructureWordMap());
             }
         } else if (clickViewId == R.id.fragment_word_credit_click_section) {
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.SHUFFLE) {
@@ -389,7 +389,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.shuffleImageView.setForeground(null);
                 this.sectionImageView.getDrawable().setTintList(null);
                 this.wordFunctionHandler.restoreWordList();
-                creditWord(previous, wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
+                creditWord(previous, wordFunctionHandler.getCurrentStructureWordMap());
             }
         } else if (clickViewId == R.id.toolbar_back_to_trace) {
             new AlertDialog.Builder(getContext())

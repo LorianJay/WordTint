@@ -270,12 +270,12 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     private int findColorCursor(int currentIndex) {
         FlagColor currentFlagColor = getChameleon();
         int result = 0;
-        for (; result < this.size() && currentIndex > 0; result++) {
+        for (; result < this.size() && currentIndex > -1; result++) {
             if (allFunctionWordList.get(result).getWordsFlagList().contains(currentFlagColor)) {
                 currentIndex--;
             }
         }
-        return result;
+        return result - 1;
     }
 
 }
