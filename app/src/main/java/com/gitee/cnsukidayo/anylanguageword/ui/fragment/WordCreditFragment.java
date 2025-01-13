@@ -2,6 +2,7 @@ package com.gitee.cnsukidayo.anylanguageword.ui.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -155,6 +157,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 马达
      */
     private Vibrator vibrator;
+    /**
+     * activity
+     */
+    private FragmentActivity requireActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -168,6 +174,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             return rootView;
         }
         rootView = inflater.inflate(R.layout.fragment_word_credit, container, false);
+        this.requireActivity = requireActivity();
+        this.requireActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         this.updateUIHandler = new Handler();
         /*
         调用流程明细:
@@ -1047,7 +1055,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.saveProgress = rootView.findViewById(R.id.fragment_word_credit_click_save_progress);
         this.chameleonCount = rootView.findViewById(R.id.fragment_word_credit_chameleon_word_count);
         this.wordAnalysis = rootView.findViewById(R.id.fragment_word_credit_click_analysis_word);
-        this.vibrator = (Vibrator) rootView.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        this.vibrator = (Vibrator) requireActivity.getSystemService(Context.VIBRATOR_SERVICE);
 
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
         this.starRefresh = rootView.findViewById(R.id.fragment_word_credit_drawer_refresh);

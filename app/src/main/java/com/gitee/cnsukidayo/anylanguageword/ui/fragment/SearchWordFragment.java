@@ -298,6 +298,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
                 if (!recyclerView.canScrollVertically(1) && !lastList) {
                     // 优先执行搜索事件或者已有的分页查询事件
                     if (!isRunning) {
+                        isRunning = true;
                         searchWordEvent.setCurrent(searchWordEvent.getCurrent() + 1);
                         queryTimer = new Timer();
                         queryTimer.schedule(getQueryTask(), 1000);

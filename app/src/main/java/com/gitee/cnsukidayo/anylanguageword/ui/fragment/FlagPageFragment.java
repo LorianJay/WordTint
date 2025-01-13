@@ -102,6 +102,7 @@ public class FlagPageFragment extends Fragment {
                 if (!recyclerView.canScrollVertically(1) && !lastList) {
                     // 优先执行搜索事件或者已有的分页查询事件
                     if (!isRunning) {
+                        isRunning = true;
                         pageQueryParam.setCurrent(pageQueryParam.getCurrent() + 1);
                         queryTimer = new Timer();
                         queryTimer.schedule(getQueryTask(), 1000);
