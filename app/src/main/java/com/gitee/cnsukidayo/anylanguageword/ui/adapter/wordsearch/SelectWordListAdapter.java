@@ -18,12 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.gitee.cnsukidayo.anylanguageword.R;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
-import com.gitee.cnsukidayo.anylanguageword.enums.structure.EnglishStructure;
 import com.gitee.cnsukidayo.anylanguageword.handler.RecyclerViewAdapterItemChange;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.gitee.cnsukidayo.anylanguageword.utils.DPUtils;
-
-import java.util.Map;
 
 import io.github.cnsukidayo.wword.model.dto.support.DataPage;
 
@@ -66,23 +63,6 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             SelectWordViewHolder selectWordViewHolder = (SelectWordViewHolder) holder;
             WordDTOLocal wordESDTO = selectWordPage.getContent().get(position);
             selectWordViewHolder.wordOrigin.setText(wordESDTO.getOrigin());
-            // 遍历获取单词的额外信息并展示
-            Map<EnglishStructure, String> details = wordESDTO.getValue();
-            StringBuilder wordTranslationBuilder = new StringBuilder();
-            //for (EnglishStructure englishStructure : details.keySet()) {
-            //    Long key = englishStructure.getWordStructureId();
-            //    String fieldKey = Optional.ofNullable(currentWordStructure.get(key))
-            //            .orElse(new WordStructureDTO())
-            //            .getField();
-            //    wordTranslationBuilder.append("[")
-            //            .append(fieldKey)
-            //            .append("]")
-            //            .append(" ")
-            //            .append(wordDetail.getValue())
-            //            .append(" | ");
-            //}
-            selectWordViewHolder.wordTranslation.setText(wordTranslationBuilder.toString());
-            // 通过获取当前用户的收藏列表来判断当前单词是否被用户收藏了
         }
     }
 
@@ -147,14 +127,13 @@ public class SelectWordListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
      */
     public class SelectWordViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private View itemView;
-        private TextView wordOrigin, wordTranslation;
+        private TextView wordOrigin;
         private LinearLayout choiceElementWord;
 
         public SelectWordViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
             this.wordOrigin = itemView.findViewById(R.id.fragment_search_word_choice_element_word_origin);
-            this.wordTranslation = itemView.findViewById(R.id.fragment_search_word_choice_element_word_translation);
             this.choiceElementWord = itemView.findViewById(R.id.fragment_search_word_choice_element_word);
             this.choiceElementWord.setOnClickListener(this);
         }

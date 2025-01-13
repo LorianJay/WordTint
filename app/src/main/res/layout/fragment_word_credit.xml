@@ -433,6 +433,36 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/fragment_word_credit_click_lock_answer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
+                    android:clickable="true"
+                    android:foreground="@drawable/item_gray_select"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/fragment_word_credit_imageview_lock_answer"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/style_image_padding"
+                        android:gravity="center"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_lock_answer"
+                        app:tint="@android:color/holo_red_dark" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/lock_answer"
+                        android:textColor="@color/gray_black"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
 
                 <LinearLayout
                     android:id="@+id/fragment_word_credit_jump_next"
@@ -684,18 +714,21 @@
 
         </HorizontalScrollView>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
+            android:id="@+id/fragment_word_linear_layout_get_answer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/fragment_word_credit_bottom_constraint_layout"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="130dp"
+            android:elevation="10dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/fragment_word_card_view_get_answer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginBottom="100dp"
                 android:clickable="true"
                 app:cardBackgroundColor="@color/semi_transparent"
                 app:cardCornerRadius="30dp"
@@ -704,7 +737,6 @@
                 app:layout_constraintStart_toStartOf="parent">
 
                 <ImageView
-                    android:id="@+id/fragment_word_container_get_answer"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center_vertical"
@@ -723,14 +755,12 @@
                 android:id="@+id/fragment_word_credit_chameleon_word_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:text="13"
                 android:textColor="@android:color/holo_red_dark"
-                android:textSize="15sp"
-                app:layout_constraintEnd_toEndOf="@id/fragment_word_card_view_get_answer"
-                app:layout_constraintStart_toStartOf="@+id/fragment_word_card_view_get_answer"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_word_card_view_get_answer" />
+                android:textSize="15sp" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_word_credit_bottom_constraint_layout"

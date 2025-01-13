@@ -7,7 +7,7 @@
     <LinearLayout
         android:id="@+id/fragment_search_word_choice_element_word"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
         android:layout_toStartOf="@id/fragment_search_word_start_word_element"
         android:clickable="true"
         android:foreground="@drawable/item_gray_select"
@@ -16,21 +16,13 @@
         <TextView
             android:id="@+id/fragment_search_word_choice_element_word_origin"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:ellipsize="end"
+            android:gravity="center_vertical"
             android:maxLines="1"
             android:text="@string/source_word"
             android:textColor="@color/black"
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/fragment_search_word_choice_element_word_translation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/word_translation"
-            android:textSize="14sp" />
+            android:textSize="20sp" />
     </LinearLayout>
 
     <ImageView

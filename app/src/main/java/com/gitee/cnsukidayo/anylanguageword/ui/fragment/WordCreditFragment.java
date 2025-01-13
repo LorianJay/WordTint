@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -116,9 +115,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private TextView currentIndexTextView, wordCount, chameleonCount;
     private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
-    private CardView popWindowChangeModeLayout;
-    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, shuffleImageView, sectionImageView, getAnswer, starRefresh;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
+    private LinearLayout getAnswerParentLayout;
+    private CardView popWindowChangeModeLayout, getAnswer;
+    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, shuffleImageView, sectionImageView, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
     private long exitLastTime = 0;
     /**
@@ -143,7 +143,11 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 以及是否长按点击了显示答案按钮
      */
     private float answerDY;
-    private boolean longClickAnswer = false, enableSelectFunction = false;
+    /**
+     * 滑动改变答案按钮位置
+     */
+    private float answerChangeDY, answerChangeDX, answerParentLayoutY = 0, answerParentLayoutX = 0;
+    private boolean longClickAnswer = false, enableSelectFunction = false, lockAnswerLocation = true;
     /**
      * 切换的度
      */
@@ -241,6 +245,14 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         return true;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUIHandler.post(() -> {
+            this.answerParentLayoutY = getAnswerParentLayout.getY();
+            this.answerParentLayoutX = getAnswerParentLayout.getX();
+        });
+    }
 
     @Override
     public void onClick(View v) {
@@ -264,7 +276,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         } else if (clickViewId == R.id.fragment_word_credit_previous_word) {
             emptyUI();
             creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpPreviousWord());
-        } else if (clickViewId == R.id.fragment_word_container_get_answer) {
+        } else if (clickViewId == R.id.fragment_word_card_view_get_answer) {
             visibleWordAllMessage(wordFunctionHandler.getCurrentStructureWordMap());
         } else if (clickViewId == R.id.fragment_word_credit_play_word) {
             creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.getCurrentStructureWordMap());
@@ -330,6 +342,15 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.swingSwitchImageView.getDrawable().setTint(getResources().getColor(R.color.gold, null));
             } else {
                 this.swingSwitchImageView.getDrawable().setTintList(null);
+            }
+        } else if (clickViewId == R.id.fragment_word_credit_click_lock_answer) {
+            lockAnswerLocation = !lockAnswerLocation;
+            if (lockAnswerLocation) {
+                this.lockAnswerImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
+            } else {
+                getAnswerParentLayout.setX(answerParentLayoutX);
+                getAnswerParentLayout.setY(answerParentLayoutY);
+                this.lockAnswerImageView.getDrawable().setTintList(null);
             }
         } else if (clickViewId == R.id.fragment_word_credit_click_shuffle) {
             // 如果当前不是普通状态和按色打乱状态,代表当前在执行别的状态,需要先锁定按色打乱的功能
@@ -685,12 +706,23 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int itemId = v.getId();
-        if (itemId == R.id.fragment_word_container_get_answer && enableSelectFunction) {
+        if (itemId == R.id.fragment_word_card_view_get_answer && !lockAnswerLocation) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // 获得按下时的相对位置
+                answerChangeDY = getAnswerParentLayout.getY() - event.getRawY();
+                answerChangeDX = getAnswerParentLayout.getX() - event.getRawX();
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                float newY = event.getRawY() + answerChangeDY;
+                float newX = event.getRawX() + answerChangeDX;
+                getAnswerParentLayout.setX(newX);
+                getAnswerParentLayout.setY(newY);
+            }
+        }
+        if (itemId == R.id.fragment_word_card_view_get_answer && enableSelectFunction) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 answerDY = event.getY();
             } else if (event.getAction() == MotionEvent.ACTION_MOVE && longClickAnswer) {
                 float distinct = event.getY() - answerDY;
-                Log.d("结果", String.valueOf(distinct));
                 if (Math.abs(distinct) > 10) {
                     // 展开右侧的旗帜列表
                     if (!openFlagChange) {
@@ -722,7 +754,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     @Override
     public boolean onLongClick(View v) {
         int itemId = v.getId();
-        if (itemId == R.id.fragment_word_container_get_answer && enableSelectFunction) {
+        if (itemId == R.id.fragment_word_card_view_get_answer && enableSelectFunction) {
             longClickAnswer = true;
             // 马达震动提醒用户
             VibrationEffect waveform = VibrationEffect.createWaveform(new long[]{100}, -1);
@@ -1023,7 +1055,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.nextWord = rootView.findViewById(R.id.fragment_word_credit_next_word);
         this.sourceWord = rootView.findViewById(R.id.text_view_source_word);
         this.previousWord = rootView.findViewById(R.id.fragment_word_credit_previous_word);
-        this.getAnswer = rootView.findViewById(R.id.fragment_word_container_get_answer);
+        this.getAnswer = rootView.findViewById(R.id.fragment_word_card_view_get_answer);
+        this.getAnswerParentLayout = rootView.findViewById(R.id.fragment_word_linear_layout_get_answer);
         this.currentIndexTextView = rootView.findViewById(R.id.fragment_word_credit_current_index);
         this.wordCount = rootView.findViewById(R.id.fragment_word_credit_word_count);
         this.jumpNextWord = rootView.findViewById(R.id.fragment_word_credit_jump_next);
@@ -1034,6 +1067,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.chameleonMode = rootView.findViewById(R.id.fragment_word_credit_click_chameleon_mode);
         this.swingSwitch = rootView.findViewById(R.id.fragment_word_credit_click_swing_switch);
         this.swingSwitchImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_swing_switch);
+        this.lockAnswer = rootView.findViewById(R.id.fragment_word_credit_click_lock_answer);
+        this.lockAnswerImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_lock_answer);
         this.shuffle = rootView.findViewById(R.id.fragment_word_credit_click_shuffle);
         this.chameleonImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_chameleon);
         this.sectionImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_section);
@@ -1113,6 +1148,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.wordAnalysis.setOnClickListener(this);
         this.starRefresh.setOnClickListener(this);
         this.swingSwitch.setOnClickListener(this);
+        this.lockAnswer.setOnClickListener(this);
         this.getAnswer.setOnTouchListener(this);
         this.getAnswer.setOnLongClickListener(this);
 
