@@ -17,7 +17,6 @@ import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordFlagRankLocal;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordAnalysisHandler;
-import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordAnalysisHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.WordFlagRankRecyclerViewAdapter;
 
 import java.util.Map;
@@ -48,8 +47,9 @@ public class FlagPageFragment extends Fragment {
     // 单词字典
     private Map<Long, WordDTOLocal> allWordDict;
 
-    public FlagPageFragment(FlagColor flagColor) {
+    public FlagPageFragment(FlagColor flagColor, WordAnalysisHandler wordAnalysisHandler) {
         this.flagColor = flagColor;
+        this.wordAnalysisHandler = wordAnalysisHandler;
     }
 
     @Override
@@ -82,7 +82,6 @@ public class FlagPageFragment extends Fragment {
                 .getExecutorService()
                 .submit(() -> {
                     // 异步查询单词信息(可能比较费时)
-                    wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
                     wordFlagRankRecyclerViewAdapter = new WordFlagRankRecyclerViewAdapter(getContext());
                     showView();
                     allWordDict = StaticFactory.getAllWordDict();

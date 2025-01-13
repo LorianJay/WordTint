@@ -40,4 +40,41 @@
     </com.gitee.cnsukidayo.anylanguageword.ui.adapter.customview.SlidingScrollableHost>
 
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="150dp"
+        app:cardBackgroundColor="@color/learn_back_ground_99"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/fragment_rank_complete"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/style_image_padding"
+            android:foreground="@drawable/item_gray_select"
+            android:gravity="center"
+            android:scaleType="fitCenter"
+            android:src="@drawable/flag_close" />
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/fragment_rank_complete_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="185dp"
+        android:text="4411"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

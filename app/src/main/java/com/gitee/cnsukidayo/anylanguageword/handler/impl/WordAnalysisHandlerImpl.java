@@ -105,7 +105,6 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
         DataPage<WordFlagRankLocal> result = new DataPage<>();
         List<WordFlagRankLocal> data = new ArrayList<>();
         String searchSql = "select * from (SELECT COUNT(*) as count,word_id FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id) ORDER BY count DESC LIMIT ?,?";
-        String countSql = "SELECT COUNT(*) FROM(SELECT word_id FROM word_analysis WHERE word_flag = ? GROUP BY word_id);";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询所有单词
         Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{
@@ -121,10 +120,7 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
             wordFlagRankLocal.setWordId(searchSqlCursor.getInt(wordIdIndex));
             data.add(wordFlagRankLocal);
         }
-        // 查询当前单词的数量
-        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{flagColor.name()});
-        countCursor.moveToNext();
-        int count = countCursor.getInt(0);
+        int count = this.countFlagRankByFlagColor(flagColor);
         if (count - pageQueryParam.getCurrent() * 20 <= 0) {
             result.setLast(true);
         }
@@ -132,6 +128,33 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
         sqLiteDatabase.close();
         result.setContent(data);
         return result;
+    }
+
+    @Override
+    public ArrayList<Long> queryFlagRankByFlagColor(FlagColor flagColor) {
+        ArrayList<Long> result = new ArrayList<>();
+        String searchSql = "SELECT * FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id ORDER BY create_timestamp ASC";
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        // 查询所有单词
+        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{flagColor.name()});
+        int wordIdIndex = searchSqlCursor.getColumnIndex("word_id");
+        while (searchSqlCursor.moveToNext()) {
+            result.add(searchSqlCursor.getLong(wordIdIndex));
+        }
+        sqLiteDatabase.close();
+        return result;
+    }
+
+    @Override
+    public int countFlagRankByFlagColor(FlagColor flagColor) {
+        String countSql = "SELECT COUNT(*) FROM(SELECT word_id FROM word_analysis WHERE word_flag = ? GROUP BY word_id);";
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        // 查询当前单词的数量
+        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{flagColor.name()});
+        countCursor.moveToNext();
+        int count = countCursor.getInt(0);
+        sqLiteDatabase.close();
+        return count;
     }
 
     @Override

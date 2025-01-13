@@ -5,6 +5,8 @@ import com.gitee.cnsukidayo.anylanguageword.entity.local.WordAnalysisLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordFlagRankLocal;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 
+import java.util.ArrayList;
+
 import io.github.cnsukidayo.wword.model.dto.support.DataPage;
 import io.github.cnsukidayo.wword.model.params.PageQueryParam;
 
@@ -29,5 +31,29 @@ public interface WordAnalysisHandler {
      */
     void insertWordAnalysis(AddWordAnalysisParamLocal addWordAnalysisParamLocal);
 
+    /**
+     * 分页查询单词排行榜
+     *
+     * @param flagColor      目标单词标记
+     * @param pageQueryParam 分页查询参数
+     * @return 返回分页查询结果
+     */
     DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(FlagColor flagColor, PageQueryParam pageQueryParam);
+
+    /**
+     * 查询某个标记下的所有单词
+     *
+     * @param flagColor 目标单词标记
+     * @return 返回分页查询结果
+     */
+    ArrayList<Long> queryFlagRankByFlagColor(FlagColor flagColor);
+
+    /**
+     * 统计某个标记单词有多少种颜色
+     *
+     * @param flagColor 目标单词的标记
+     * @return 返回目标单词标记的总数
+     */
+    int countFlagRankByFlagColor(FlagColor flagColor);
+
 }

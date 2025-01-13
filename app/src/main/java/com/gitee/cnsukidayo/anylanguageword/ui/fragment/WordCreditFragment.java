@@ -885,6 +885,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 // 初始化单词操作
                 HashSet<DivideDTOLocal> divideList = bundle.getSerializable(CreditFragment.CHILD_DIVIDE_SET, HashSet.class);
                 HashSet<HistoryDTOLocal> historyDTOSet = bundle.getSerializable(CreditFragment.HISTORY_WORD_SET, HashSet.class);
+                ArrayList<Long> reViewList = bundle.getSerializable(CreditFragment.REVIEW_WORD_List, ArrayList.class);
                 // 新的背词
                 if (divideList != null) {
                     // 初始化
@@ -903,6 +904,15 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 if (historyDTOSet != null) {
                     for (HistoryDTOLocal historyDTOLocal : historyDTOSet) {
                         allFunctionWordList.addAll(historyDTOLocal.getSerializeWordList());
+                    }
+                }
+                // 单词回顾
+                if (reViewList != null) {
+                    for (int i = 0; i < reViewList.size(); i++) {
+                        FunctionWordDTOLocal functionWordDTOLocal = new FunctionWordDTOLocal();
+                        functionWordDTOLocal.setId(reViewList.get(i));
+                        functionWordDTOLocal.setWordsFlagList(new HashSet<>(List.of(FlagColor.GREEN, FlagColor.BROWN)));
+                        allFunctionWordList.add(functionWordDTOLocal);
                     }
                 }
                 // 读取字典
