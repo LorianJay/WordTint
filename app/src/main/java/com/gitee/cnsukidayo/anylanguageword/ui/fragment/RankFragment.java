@@ -21,7 +21,9 @@ import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
 import com.gitee.cnsukidayo.anylanguageword.entity.waper.UserCreditStyleWrapper;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordAnalysisHandler;
+import com.gitee.cnsukidayo.anylanguageword.handler.WordSupplementReviewHandler;
 import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordAnalysisHandlerImpl;
+import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordSupplementReviewHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StartViewAdapter;
 import com.gitee.cnsukidayo.anylanguageword.utils.JsonUtils;
 
@@ -39,8 +41,9 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     private List<Fragment> listFragment;
     private ArrayList<FlagColor> flagColorList;
     private ImageButton creditComplete;
-    private TextView completeCount;
+    private TextView completeCount, supplementCount;
     private WordAnalysisHandler wordAnalysisHandler;
+    private WordSupplementReviewHandler wordSupplementReviewHandler;
     private Handler updateUIHandler;
     // 当前选中的标记
     private FlagColor currentFlagColor;
@@ -66,6 +69,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
 
     private void initView() {
         this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
+        this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(getContext());
         this.flagColorList = new ArrayList<>();
         this.listFragment = new ArrayList<>();
         this.updateUIHandler = new Handler();
@@ -85,6 +89,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
         StartViewAdapter startViewAdapter = new StartViewAdapter(getChildFragmentManager(), listFragment);
         viewPager.setAdapter(startViewAdapter);
         slidingTabLayout.setViewPager(viewPager, pageTitle);
+        onPageSelected(0);
     }
 
     private void bindView() {
@@ -92,6 +97,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
         this.slidingTabLayout = rootView.findViewById(R.id.slide);
         this.creditComplete = rootView.findViewById(R.id.fragment_rank_complete);
         this.completeCount = rootView.findViewById(R.id.fragment_rank_complete_count);
+        this.supplementCount = rootView.findViewById(R.id.fragment_rank_supplement_count);
 
         this.viewPager.addOnPageChangeListener(this);
         this.creditComplete.setOnClickListener(this);
@@ -139,7 +145,11 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
         // 更改总数
         StaticFactory.getExecutorService().submit(() -> {
             int count = wordAnalysisHandler.countFlagRankByFlagColor(currentFlagColor);
-            updateUIHandler.post(() -> this.completeCount.setText(String.valueOf(count)));
+            int supplementCount = wordSupplementReviewHandler.countSupplementFlagColor(currentFlagColor);
+            updateUIHandler.post(() -> {
+                this.completeCount.setText(String.valueOf(count));
+                this.supplementCount.setText(String.valueOf(supplementCount));
+            });
         });
     }
 
