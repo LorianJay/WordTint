@@ -211,6 +211,7 @@
     <string name="word_analysis_last_flag">上次标记时间:%s</string>
     <string name="word_analysis_previous">距上次过去:%s小时</string>
     <string name="lock_answer">锁定提示</string>
+    <string name="blue_open">蓝牙开启</string>
 
 
 </resources>

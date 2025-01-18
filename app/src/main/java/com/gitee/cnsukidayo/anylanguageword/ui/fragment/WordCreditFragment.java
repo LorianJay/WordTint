@@ -9,12 +9,20 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.InputType;
+import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -25,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.res.ResourcesCompat;
@@ -85,7 +94,11 @@ import java.util.stream.Collectors;
 import io.github.cnsukidayo.wword.model.dto.WordCategoryDTO;
 import io.github.cnsukidayo.wword.model.vo.WordCategoryDetailVO;
 
-public class WordCreditFragment extends Fragment implements View.OnClickListener, KeyEvent.Callback, View.OnTouchListener, View.OnLongClickListener {
+public class WordCreditFragment extends Fragment implements View.OnClickListener,
+        KeyEvent.Callback,
+        View.OnTouchListener,
+        View.OnLongClickListener,
+        Window.Callback {
     private View rootView;
 
     private ImageButton popMoreFunction;
@@ -115,10 +128,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private TextView currentIndexTextView, wordCount, chameleonCount;
     private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
     private LinearLayout getAnswerParentLayout;
     private CardView popWindowChangeModeLayout, getAnswer;
-    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, shuffleImageView, sectionImageView, starRefresh;
+    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
     private long exitLastTime = 0;
     /**
@@ -147,7 +160,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 滑动改变答案按钮位置
      */
     private float answerChangeDY, answerChangeDX, answerParentLayoutY = 0, answerParentLayoutX = 0;
-    private boolean longClickAnswer = false, enableSelectFunction = false, lockAnswerLocation = true;
+    private boolean longClickAnswer = false, enableSelectFunction = false, lockAnswerLocation = true, enableBlueTooth = true;
     /**
      * 切换的度
      */
@@ -165,6 +178,13 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * activity
      */
     private FragmentActivity requireActivity;
+
+    /**
+     * 蓝牙相关
+     */
+    private float blueToothDownX, blueToothDownY;
+    private int blueToothMoveIndex = -1;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -243,6 +263,79 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // 屏蔽蓝牙未开启的点击
+        if (event.getSource() == 769 && !enableBlueTooth) {
+            return true;
+        }
+        if (enableBlueTooth && event.getSource() == 769
+                && event.getAction() == KeyEvent.ACTION_DOWN
+                && (keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
+            getAnswer.performClick();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // 屏蔽蓝牙未开启的点击
+        if (event.getSource() == InputDevice.SOURCE_MOUSE && !enableBlueTooth) {
+            return true;
+        }
+        if (event.getSource() == InputDevice.SOURCE_MOUSE && enableBlueTooth) {
+            int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    blueToothDownX = event.getRawX();
+                    blueToothDownY = event.getRawY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    // 修改样式
+                    float distinctX = event.getRawX() - blueToothDownX;
+                    float distinctY = event.getRawY() - blueToothDownY;
+                    if (distinctX == 0 && distinctY == 0) {
+                        if (Math.abs(blueToothDownX - 91) < 5 && Math.abs(blueToothDownY - 2322) < 5) {
+                            popMoreFunction.performClick();
+                        } else if (openFlagChange && blueToothMoveIndex >= 0 && blueToothMoveIndex <= 8) {
+                            // 如果当前正展开了旗帜
+                            this.currentSelectFlagButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding));
+                            this.currentSelectFlagButton.performClick();
+                            clickFlag.performClick();
+                        } else {
+                            playWord.performClick();
+                        }
+                    } else if (distinctX == 0 && distinctY > 0) {
+                        blueToothMoveIndex--;
+                        if (!openFlagChange) clickFlag.performClick();
+                    } else if (distinctX == 0 && distinctY < 0) {
+                        blueToothMoveIndex++;
+                        if (!openFlagChange) clickFlag.performClick();
+                    } else if (distinctY == 0 && distinctX > 0) {
+                        previousWord.performClick();
+                    } else if (distinctY == 0 && distinctX < 0) {
+                        nextWord.performClick();
+                    }
+                    // 如果当前展开了旗帜
+                    if (openFlagChange) {
+                        if (blueToothMoveIndex < 0) {
+                            blueToothMoveIndex = 0;
+                        } else if (blueToothMoveIndex > 8) {
+                            blueToothMoveIndex = 8;
+                        }
+                        selectList.forEach(imageButton -> imageButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding)));
+                        this.currentSelectFlagButton = selectList.get(blueToothMoveIndex);
+                        this.currentSelectFlagButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding_selective));
+                    }
+                    break;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -351,6 +444,13 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 getAnswerParentLayout.setX(answerParentLayoutX);
                 getAnswerParentLayout.setY(answerParentLayoutY);
                 this.lockAnswerImageView.getDrawable().setTintList(null);
+            }
+        } else if (clickViewId == R.id.fragment_word_credit_click_blue_tooth) {
+            enableBlueTooth = !enableBlueTooth;
+            if (enableBlueTooth) {
+                this.blueToothImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
+            } else {
+                this.blueToothImageView.getDrawable().setTint(getResources().getColor(R.color.dark_gray, null));
             }
         } else if (clickViewId == R.id.fragment_word_credit_click_shuffle) {
             // 如果当前不是普通状态和按色打乱状态,代表当前在执行别的状态,需要先锁定按色打乱的功能
@@ -872,6 +972,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     /**
      * 读取所有单词信息,读取完毕之后更新UI
      */
+    @SuppressLint("MissingPermission")
     private void readAllWord() {
         StaticFactory.getExecutorService().submit(() -> {
             // 根据自定义风格背诵,获取当前要加载的所有单词
@@ -960,7 +1061,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         });
     }
 
-
     /**
      * 隐藏所有暂时不必要出现的UI
      */
@@ -984,6 +1084,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             viewFlagArea.getChildAt(flagColor.ordinal()).setVisibility(View.VISIBLE);
             viewFlagArea.getChildAt(flagColor.ordinal()).setAlpha(1.0f);
         }
+        // 将所有选择框复原
+        selectList.forEach(imageButton -> imageButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding)));
+        blueToothMoveIndex = -1;
     }
 
     /**
@@ -1079,6 +1182,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.swingSwitchImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_swing_switch);
         this.lockAnswer = rootView.findViewById(R.id.fragment_word_credit_click_lock_answer);
         this.lockAnswerImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_lock_answer);
+        this.blueTooth = rootView.findViewById(R.id.fragment_word_credit_click_blue_tooth);
+        this.blueToothImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_blue_tooth);
         this.shuffle = rootView.findViewById(R.id.fragment_word_credit_click_shuffle);
         this.chameleonImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_chameleon);
         this.sectionImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_section);
@@ -1160,6 +1265,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.swingSwitch.setOnClickListener(this);
         this.lockAnswer.setOnClickListener(this);
         this.getAnswer.setOnTouchListener(this);
+        this.blueTooth.setOnClickListener(this);
         this.getAnswer.setOnLongClickListener(this);
 
         this.greenFlag.setOnClickListener(this);
@@ -1176,10 +1282,6 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     }
 
     // ----下面是一些用不到的方法----
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return false;
-    }
 
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
@@ -1189,5 +1291,118 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     @Override
     public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
         return false;
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchTrackballEvent(MotionEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public View onCreatePanelView(int featureId) {
+        return null;
+    }
+
+    @Override
+    public boolean onCreatePanelMenu(int featureId, @NonNull Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onPreparePanel(int featureId, @Nullable View view, @NonNull Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuOpened(int featureId, @NonNull Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, @NonNull MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public void onWindowAttributesChanged(WindowManager.LayoutParams attrs) {
+
+    }
+
+    @Override
+    public void onContentChanged() {
+
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+
+    }
+
+    @Override
+    public void onPanelClosed(int featureId, @NonNull Menu menu) {
+
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        return false;
+    }
+
+    @Override
+    public boolean onSearchRequested(SearchEvent searchEvent) {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+        return null;
+    }
+
+    @Override
+    public void onActionModeStarted(ActionMode mode) {
+
+    }
+
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+
     }
 }

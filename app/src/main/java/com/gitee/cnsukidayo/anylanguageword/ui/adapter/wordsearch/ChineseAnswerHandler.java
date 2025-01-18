@@ -38,8 +38,7 @@ public class ChineseAnswerHandler {
         // 设置可以支持缩放
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
-        try {
-            InputStream welcomeInputStream = context.getAssets().open("template/english.html");
+        try (InputStream welcomeInputStream = context.getAssets().open("template/english.html");) {
             template = FileUtils.readAll(welcomeInputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);

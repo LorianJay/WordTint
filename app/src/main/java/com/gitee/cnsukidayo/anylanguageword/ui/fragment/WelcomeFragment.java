@@ -67,9 +67,8 @@ public class WelcomeFragment extends Fragment implements View.OnClickListener, K
     String message = null;
 
     private void initView() {
-        try {
-            // 读取欢迎markdown文件
-            InputStream welcomeInputStream = assetManager.open("systemFile/welcomeMessage.md");
+        // 读取欢迎markdown文件
+        try (InputStream welcomeInputStream = assetManager.open("systemFile/welcomeMessage.md");) {
             message = FileUtils.readAll(welcomeInputStream);
         } catch (IOException e) {
             e.printStackTrace();
