@@ -22,12 +22,12 @@ public class JsonUtils {
         if (result == null) {
             try {
                 result = classOfT.newInstance();
+                writeJson(externalPath, result);
             } catch (IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
                 return null;
             }
         }
-        writeJson(externalPath, result);
         return result;
     }
 

@@ -22,7 +22,6 @@ import com.gitee.cnsukidayo.anylanguageword.utils.JsonUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import io.github.cnsukidayo.wword.model.dto.LanguageClassDTO;
 import io.github.cnsukidayo.wword.model.dto.UserProfileDTO;
@@ -55,6 +54,7 @@ public class DivideFragment extends Fragment {
      * RecycleView回调的事件
      */
     private RecycleViewItemClickCallBack<DivideDTOLocal> recycleViewItemOnClickListener;
+    private ArrayList<DivideDTOLocal> allWordList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -104,9 +104,13 @@ public class DivideFragment extends Fragment {
     private void requestData() {
         // 查询当前用户的所有划分
         StaticFactory.getExecutorService().execute(() -> {
+            if (allWordList != null) {
+                updateUIHandler.post(() -> childDivideListAdapter.replaceAll(allWordList));
+                return;
+            }
             // 读取文件列表
             File file = new File(AnyLanguageWordProperties.getExternalFilesDir(), WordContextPath.WORD_LIST.getPath());
-            List<DivideDTOLocal> allWordList = new ArrayList<>();
+            allWordList = new ArrayList<>();
             for (File singleWordList : file.listFiles()) {
                 try {
                     allWordList.add(JsonUtils.readJson(singleWordList.getAbsolutePath().replace(AnyLanguageWordProperties.getExternalFilesDir().getAbsolutePath(), ""),
