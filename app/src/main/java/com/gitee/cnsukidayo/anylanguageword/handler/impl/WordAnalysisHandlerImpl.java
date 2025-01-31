@@ -133,7 +133,7 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
     @Override
     public ArrayList<Long> queryFlagRankByFlagColor(FlagColor flagColor) {
         ArrayList<Long> result = new ArrayList<>();
-        String searchSql = "SELECT * FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id ORDER BY create_timestamp ASC";
+        String searchSql = "SELECT *,MAX(create_timestamp) FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id ORDER BY create_timestamp ASC";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询所有单词
         Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{flagColor.name()});

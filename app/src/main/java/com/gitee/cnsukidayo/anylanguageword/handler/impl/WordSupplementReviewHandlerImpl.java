@@ -62,8 +62,8 @@ public class WordSupplementReviewHandlerImpl extends SQLiteOpenHelper implements
     @Override
     public void deleteWordReView(int wordId) {
         SQLiteDatabase writableDatabase = this.getWritableDatabase();
-        String deleteWord = "SELECT * FROM word_review WHERE word_id = ?";
-        writableDatabase.rawQuery(deleteWord, new String[]{String.valueOf(wordId)});
+        String deleteWord = "DELETE FROM word_review WHERE word_id = ?";
+        writableDatabase.execSQL(deleteWord, new String[]{String.valueOf(wordId)});
         writableDatabase.close();
     }
 

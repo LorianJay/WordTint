@@ -22,17 +22,20 @@ public class UserCreditStyle {
     private CreditFormat creditFormat = CreditFormat.CLASSIC;
     // 是否跳过
     private boolean ignore = false;
+    // 是否是回顾复习
+    private boolean review = false;
 
 
     public UserCreditStyle() {
     }
 
-    public UserCreditStyle(CreditState creditState, CreditOrder creditOrder, CreditFilter creditFilter, CreditFormat creditFormat, boolean ignore) {
+    public UserCreditStyle(CreditState creditState, CreditOrder creditOrder, CreditFilter creditFilter, CreditFormat creditFormat, boolean ignore, boolean review) {
         this.creditState = creditState;
         this.creditOrder = creditOrder;
         this.creditFilter = creditFilter;
         this.creditFormat = creditFormat;
         this.ignore = ignore;
+        this.review = review;
     }
 
     public CreditState getCreditState() {
@@ -73,5 +76,13 @@ public class UserCreditStyle {
 
     public void setIgnore(boolean ignore) {
         this.ignore = ignore;
+    }
+
+    public boolean isReview() {
+        return review;
+    }
+
+    public void setReview(boolean review) {
+        this.review = review;
     }
 }

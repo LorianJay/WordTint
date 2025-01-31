@@ -185,6 +185,10 @@ public class WordCreditLaunchFragment extends Fragment implements View.OnClickLi
         // 设置选词量
         int selectWordCount = getArguments().getInt(CreditFragment.SELECT_WORD_COUNT);
         this.selectWordCount.setText(String.valueOf(selectWordCount));
+        if (this.userCreditStyle.isReview()) {
+            this.start.setForegroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.purple75, null)));
+            this.start.setTextColor(ColorStateList.valueOf(getResources().getColor(R.color.purple75, null)));
+        }
         updateCreditStyle(userCreditStyle);
         loadingDialog.dismiss();
     }

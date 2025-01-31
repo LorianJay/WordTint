@@ -40,7 +40,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     private SlidingTabLayout slidingTabLayout;
     private List<Fragment> listFragment;
     private ArrayList<FlagColor> flagColorList;
-    private ImageButton creditComplete;
+    private ImageButton creditComplete, creditSupplement;
     private TextView completeCount, supplementCount;
     private WordAnalysisHandler wordAnalysisHandler;
     private WordSupplementReviewHandler wordSupplementReviewHandler;
@@ -96,45 +96,54 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
         this.viewPager = rootView.findViewById(R.id.fragment_i_start_viewpage);
         this.slidingTabLayout = rootView.findViewById(R.id.slide);
         this.creditComplete = rootView.findViewById(R.id.fragment_rank_complete);
+        this.creditSupplement = rootView.findViewById(R.id.fragment_rank_supplement);
         this.completeCount = rootView.findViewById(R.id.fragment_rank_complete_count);
         this.supplementCount = rootView.findViewById(R.id.fragment_rank_supplement_count);
 
         this.viewPager.addOnPageChangeListener(this);
         this.creditComplete.setOnClickListener(this);
+        this.creditSupplement.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         int itemId = v.getId();
-        if (itemId == R.id.fragment_rank_complete) {
-            loadingDialog.show();
-            StaticFactory.getExecutorService().submit(() -> {
-                ArrayList<Long> currentFlagWord = wordAnalysisHandler.queryFlagRankByFlagColor(currentFlagColor);
-                try {
-                    userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        loadingDialog.show();
+        StaticFactory.getExecutorService().submit(() -> {
+            // 读取用户背诵风格
+            try {
+                userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // 拷贝Bean
+            UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
+
+            ArrayList<Long> currentFlagWord = null;
+            if (itemId == R.id.fragment_rank_complete) {
+                currentFlagWord = wordAnalysisHandler.queryFlagRankByFlagColor(currentFlagColor);
+            } else if (itemId == R.id.fragment_rank_supplement) {
+                currentFlagWord = wordSupplementReviewHandler.querySupplementByFlagColor(currentFlagColor);
+                userCreditStyle.setReview(true);
+            }
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+            // 设置背诵列表
+            bundle.putSerializable(CreditFragment.REVIEW_WORD_List, currentFlagWord);
+            // 统计当前的选词量
+            bundle.putInt(CreditFragment.SELECT_WORD_COUNT, currentFlagWord.size());
+            updateUIHandler.post(() -> {
+                if (userCreditStyle.isIgnore()) {
+                    Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
+                            StaticFactory.getSimpleNavOptions());
+                } else {
+                    Navigation.findNavController(getView()).navigate(R.id.action_main_navigation_to_navigation_word_credit_launch, bundle,
+                            StaticFactory.getSimpleNavOptions());
                 }
-                // 拷贝Bean
-                UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
-                // 设置背诵列表
-                bundle.putSerializable(CreditFragment.REVIEW_WORD_List, currentFlagWord);
-                // 统计当前的选词量
-                bundle.putInt(CreditFragment.SELECT_WORD_COUNT, currentFlagWord.size());
-                updateUIHandler.post(() -> {
-                    if (userCreditStyle.isIgnore()) {
-                        Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
-                                StaticFactory.getSimpleNavOptions());
-                    } else {
-                        Navigation.findNavController(getView()).navigate(R.id.action_main_navigation_to_navigation_word_credit_launch, bundle,
-                                StaticFactory.getSimpleNavOptions());
-                    }
-                    loadingDialog.dismiss();
-                });
+                loadingDialog.dismiss();
             });
-        }
+        });
     }
 
     @Override

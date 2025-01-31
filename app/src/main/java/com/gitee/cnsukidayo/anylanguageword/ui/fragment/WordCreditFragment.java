@@ -52,6 +52,7 @@ import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.WordCont
 import com.gitee.cnsukidayo.anylanguageword.context.support.factory.StaticFactory;
 import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.AddWordAnalysisParamLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.AddWordReViewParamLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.DivideDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.HistoryDTOLocal;
@@ -65,8 +66,10 @@ import com.gitee.cnsukidayo.anylanguageword.enums.WordFunctionState;
 import com.gitee.cnsukidayo.anylanguageword.enums.structure.EnglishStructure;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordAnalysisHandler;
 import com.gitee.cnsukidayo.anylanguageword.handler.WordFunctionHandler;
+import com.gitee.cnsukidayo.anylanguageword.handler.WordSupplementReviewHandler;
 import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordAnalysisHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordFunctionHandlerImpl;
+import com.gitee.cnsukidayo.anylanguageword.handler.impl.WordSupplementReviewHandlerImpl;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.SimpleItemTouchHelperCallback;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StarChineseAnswerRecyclerViewAdapter;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.StartSingleCategoryAdapter;
@@ -149,6 +152,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 单词分析的功能
      */
     private WordAnalysisHandler wordAnalysisHandler;
+    private WordSupplementReviewHandler wordSupplementReviewHandler;
     private final Set<FlagColor> recordFlagColor = new HashSet<>(10);
 
     /**
@@ -881,11 +885,21 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private void creditWord(WordDTOLocal previousWord, WordDTOLocal wordDTOLocal) {
         // 异步写入单词背诵记录
         StaticFactory.getExecutorService().submit(() -> {
+            // 先清除增量,只要当前看过该单词就算清除
+            AddWordReViewParamLocal addWordReViewParamLocal = new AddWordReViewParamLocal();
+            addWordReViewParamLocal.setId(Math.toIntExact(previousWord.getId()));
+            if (userCreditStyle.isReview()) {
+                wordSupplementReviewHandler.deleteWordReView(addWordReViewParamLocal.getId());
+            }
+            // 正常全量增加
             AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
             addWordAnalysisParamLocal.setId(Math.toIntExact(previousWord.getId()));
             addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
             addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
             wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
+            // 当然也可以再把当前单词增加到末尾
+            addWordReViewParamLocal.setWordFlag(recordFlagColor);
+            wordSupplementReviewHandler.insertWordReView(addWordReViewParamLocal);
             // 每次记录之后都要清除一下
             recordFlagColor.clear();
         });
@@ -1041,6 +1055,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             // 单词分析功能
             this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
+            this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(getContext());
 
             this.wordFunctionHandler = new WordFunctionHandlerImpl(allFunctionWordList, dict);
             if (userCreditStyle != null) {

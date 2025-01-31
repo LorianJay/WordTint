@@ -31,6 +31,7 @@ public class UserCreditStyleWrapper implements Parcelable {
         in.writeInt(userCreditStyle.getCreditFilter().ordinal());
         in.writeInt(userCreditStyle.getCreditFormat().ordinal());
         in.writeBoolean(userCreditStyle.isIgnore());
+        in.writeBoolean(userCreditStyle.isReview());
     }
 
     @Override
@@ -41,6 +42,7 @@ public class UserCreditStyleWrapper implements Parcelable {
         userCreditStyle.setCreditFilter(CreditFilter.values()[dest.readInt()]);
         userCreditStyle.setCreditFormat(CreditFormat.values()[dest.readInt()]);
         userCreditStyle.setIgnore(dest.readBoolean());
+        userCreditStyle.setReview(dest.readBoolean());
     }
 
     public static final Creator<UserCreditStyleWrapper> CREATOR = new Creator<UserCreditStyleWrapper>() {
