@@ -215,6 +215,11 @@
     <string name="blue_open">蓝牙开启</string>
     <string name="basis_choose">基础词正反选</string>
     <string name="core_choose">核心词正反选</string>
+    <string name="random_hint">随机提示</string>
+    <string name="extract_correct">提取对词库</string>
+    <string name="add_error">+错词库</string>
+    <string name="add_correct">+对词库</string>
+    <string name="extract_error">提取错词库</string>
 
 
 </resources>

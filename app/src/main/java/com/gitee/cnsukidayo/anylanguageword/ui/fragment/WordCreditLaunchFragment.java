@@ -79,7 +79,7 @@ public class WordCreditLaunchFragment extends Fragment implements View.OnClickLi
                 if (userCreditStyle.getCreditFormat() == CreditFormat.CLASSIC) {
                     Navigation.findNavController(getView()).navigate(R.id.action_navigation_word_credit_launch_to_navigation_word_credit, bundle, StaticFactory.getSimpleNavOptions());
                 } else {
-                    Navigation.findNavController(getView()).navigate(R.id.action_navigation_word_credit_launch_to_navigation_search_word, bundle, StaticFactory.getSimpleNavOptions());
+                    Navigation.findNavController(getView()).navigate(R.id.action_navigation_word_credit_launch_to_navigation_association, bundle, StaticFactory.getSimpleNavOptions());
                 }
                 break;
             case R.id.fragment_word_credit_launch_save_settings:

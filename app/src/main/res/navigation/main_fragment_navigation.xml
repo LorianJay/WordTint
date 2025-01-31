@@ -92,6 +92,10 @@
         android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.SearchWordFragment"
         tools:layout="@layout/fragment_search_word" />
     <fragment
+        android:id="@+id/navigation_association_credit"
+        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.AssociationCreditFragment"
+        tools:layout="@layout/fragment_association_credit" />
+    <fragment
         android:id="@+id/navigation_analysis_word"
         android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.AnalysisWordFragment"
         tools:layout="@layout/fragment_analysis_word" />
@@ -103,8 +107,8 @@
             android:id="@+id/action_navigation_word_credit_launch_to_navigation_word_credit"
             app:destination="@id/navigation_word_credit" />
         <action
-            android:id="@+id/action_navigation_word_credit_launch_to_navigation_search_word"
-            app:destination="@id/navigation_search_word" />
+            android:id="@+id/action_navigation_word_credit_launch_to_navigation_association"
+            app:destination="@id/navigation_association_credit" />
     </fragment>
     <fragment
         android:id="@+id/navigation_login"
