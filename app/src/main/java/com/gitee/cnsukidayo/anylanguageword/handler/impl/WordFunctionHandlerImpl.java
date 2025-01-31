@@ -56,7 +56,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     private WordFunctionState wordFunctionState = WordFunctionState.NONE;
 
     // todo 当前的背诵风格功能
-    private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE;
+    private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING;
 
     /**
      * @param allFunctionWordList 所有功能性单词

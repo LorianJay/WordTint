@@ -132,7 +132,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private LinearLayout getAnswerParentLayout;
     private CardView popWindowChangeModeLayout, getAnswer;
     private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, starRefresh;
-    private TextView listeningWriteMode, englishTranslationChineseMode, chineseTranslationEnglish, onlyCreditMode;
+    private TextView listeningWriteMode, englishTranslationChineseModeHearing, englishTranslationChineseModeNoHearing, chineseTranslationEnglish, onlyCreditMode;
     private long exitLastTime = 0;
     /**
      * 旗帜
@@ -373,6 +373,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             visibleWordAllMessage(wordFunctionHandler.getCurrentStructureWordMap());
         } else if (clickViewId == R.id.fragment_word_credit_play_word) {
             creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.getCurrentStructureWordMap());
+            // 如果当前是听音频模式,需要手动播放音频
+            if (wordFunctionHandler.getCurrentCreditState() == CreditState.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
+                playWordAudio(wordFunctionHandler.getCurrentStructureWordMap());
+            }
         } else if (clickViewId == R.id.fragment_word_credit_jump_next) {
             final EditText inputEditText = new EditText(getContext());
             inputEditText.setInputType(InputType.TYPE_CLASS_DATETIME);
@@ -614,8 +618,11 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         } else if (clickViewId == R.id.fragment_word_credit_pop_listening_write_mode) {
             wordFunctionHandler.setCurrentCreditState(CreditState.LISTENING);
             updateChangeModePopWindowState();
-        } else if (clickViewId == R.id.fragment_word_credit_pop_english_translation_chinese) {
-            wordFunctionHandler.setCurrentCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE);
+        } else if (clickViewId == R.id.fragment_word_credit_pop_english_translation_chinese_hearing) {
+            wordFunctionHandler.setCurrentCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING);
+            updateChangeModePopWindowState();
+        } else if (clickViewId == R.id.fragment_word_credit_pop_english_translation_chinese_no_hearing) {
+            wordFunctionHandler.setCurrentCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE_NO_HEARING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_pop_chinese_translation_english) {
             wordFunctionHandler.setCurrentCreditState(CreditState.CHINESE_TRANSLATION_ENGLISH);
@@ -890,11 +897,16 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     chineseAnswerHandler.gone();
                     playWordAudio(wordDTOLocal);
                     break;
-                case ENGLISH_TRANSLATION_CHINESE:
+                case ENGLISH_TRANSLATION_CHINESE_HEARING:
                     // 先展示单词的所有信息,然后将单词的中文意思进行隐藏,再将单词额外信息进行隐藏(必须在UI线程中隐藏)
                     visibleWordAllMessage(wordDTOLocal);
                     chineseAnswerHandler.gone();
                     playWordAudio(wordDTOLocal);
+                    break;
+                case ENGLISH_TRANSLATION_CHINESE_NO_HEARING:
+                    // 先展示单词的所有信息,然后将单词的中文意思进行隐藏,再将单词额外信息进行隐藏(必须在UI线程中隐藏)
+                    visibleWordAllMessage(wordDTOLocal);
+                    chineseAnswerHandler.gone();
                     break;
                 case CHINESE_TRANSLATION_ENGLISH:
                     // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
@@ -1113,12 +1125,18 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      */
     private void updateChangeModePopWindowState() {
         this.listeningWriteMode.setBackground(null);
-        this.englishTranslationChineseMode.setBackground(null);
+        this.englishTranslationChineseModeHearing.setBackground(null);
+        this.englishTranslationChineseModeNoHearing.setBackground(null);
         this.chineseTranslationEnglish.setBackground(null);
         this.onlyCreditMode.setBackground(null);
         CreditState currentCreditState = wordFunctionHandler.getCurrentCreditState();
-        if (currentCreditState == CreditState.ENGLISH_TRANSLATION_CHINESE) {
-            this.englishTranslationChineseMode.setBackground(ResourcesCompat.getDrawable(
+        if (currentCreditState == CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING) {
+            this.englishTranslationChineseModeHearing.setBackground(ResourcesCompat.getDrawable(
+                    getResources(),
+                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    null));
+        } else if (currentCreditState == CreditState.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
+            this.englishTranslationChineseModeNoHearing.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
@@ -1193,7 +1211,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.changeMode = rootView.findViewById(R.id.fragment_word_credit_click_change_mode);
         this.popWindowChangeModeLayout = (CardView) getLayoutInflater().inflate(R.layout.fragment_word_credit_popwindow_change_mode, null);
         this.listeningWriteMode = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_listening_write_mode);
-        this.englishTranslationChineseMode = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese);
+        this.englishTranslationChineseModeHearing = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_hearing);
+        this.englishTranslationChineseModeNoHearing = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_no_hearing);
         this.chineseTranslationEnglish = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_chinese_translation_english);
         this.onlyCreditMode = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_only_credit);
         this.playWord = rootView.findViewById(R.id.fragment_word_credit_play_word);
@@ -1252,7 +1271,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.popBackStack.setOnClickListener(this);
         this.changeMode.setOnClickListener(this);
         this.listeningWriteMode.setOnClickListener(this);
-        this.englishTranslationChineseMode.setOnClickListener(this);
+        this.englishTranslationChineseModeHearing.setOnClickListener(this);
+        this.englishTranslationChineseModeNoHearing.setOnClickListener(this);
         this.chineseTranslationEnglish.setOnClickListener(this);
         this.onlyCreditMode.setOnClickListener(this);
         this.playWord.setOnClickListener(this);

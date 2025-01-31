@@ -8,7 +8,8 @@ import com.gitee.cnsukidayo.anylanguageword.R;
  */
 public enum CreditState {
 
-    ENGLISH_TRANSLATION_CHINESE(R.string.english_translation_chinese),
+    ENGLISH_TRANSLATION_CHINESE_HEARING(R.string.english_translation_chinese_hearing),
+    ENGLISH_TRANSLATION_CHINESE_NO_HEARING(R.string.english_translation_chinese_no_hearing),
     CHINESE_TRANSLATION_ENGLISH(R.string.chinese_translation_english),
     LISTENING(R.string.listening_write_mode),
     CREDIT(R.string.only_credit);

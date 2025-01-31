@@ -13,7 +13,7 @@ import com.gitee.cnsukidayo.anylanguageword.enums.CreditState;
  */
 public class UserCreditStyle {
     // 背诵状态
-    private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE;
+    private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING;
     // 背诵顺序
     private CreditOrder creditOrder = CreditOrder.ORDERLY;
     // 背诵过滤

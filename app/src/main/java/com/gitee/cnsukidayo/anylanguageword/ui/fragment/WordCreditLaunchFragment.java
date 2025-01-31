@@ -90,7 +90,7 @@ public class WordCreditLaunchFragment extends Fragment implements View.OnClickLi
                 }
                 break;
             case R.id.fragment_word_credit_launch_restore_default:
-                userCreditStyle.setCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE);
+                userCreditStyle.setCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING);
                 userCreditStyle.setCreditOrder(CreditOrder.ORDERLY);
                 userCreditStyle.setCreditFilter(CreditFilter.WORD);
                 userCreditStyle.setCreditFormat(CreditFormat.CLASSIC);

@@ -95,7 +95,7 @@
                             android:paddingTop="3dp"
                             android:paddingEnd="3dp"
                             android:paddingBottom="3dp"
-                            android:text="@string/english_translation_chinese"
+                            android:text="@string/english_translation_chinese_hearing"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
