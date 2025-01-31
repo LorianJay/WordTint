@@ -37,6 +37,8 @@ public class ChildDivideListAdapter extends RecyclerView.Adapter<ChildDivideList
      */
     private RecycleViewItemClickCallBack<DivideDTOLocal> recycleViewItemOnClickListener;
 
+    private boolean coreChoose = false, basisChoose = false;
+
     public ChildDivideListAdapter(Context context) {
         this.context = context;
     }
@@ -86,6 +88,40 @@ public class ChildDivideListAdapter extends RecyclerView.Adapter<ChildDivideList
         allDivideDTOList.clear();
         allDivideDTOList.addAll(divideDTOS);
         notifyItemRangeChanged(0, divideDTOS.size());
+    }
+
+    public void coreChoose() {
+        // 默认为选择
+        coreChoose = !coreChoose;
+        for (int position = 0; position < 26; position++) {
+            DivideDTOLocal divideDTO = allDivideDTOList.get(position);
+            // 没有才需要添加
+            if (!divideIdSet.contains(divideDTO) && coreChoose) {
+                divideIdSet.add(divideDTO);
+                recycleViewItemOnClickListener.viewClickCallBack(divideDTO);
+            } else if (divideIdSet.contains(divideDTO) && !coreChoose) {
+                divideIdSet.remove(divideDTO);
+                recycleViewItemOnClickListener.viewClickCallBack(divideDTO);
+            }
+        }
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
+    public void basisChoose() {
+        // 默认为选择
+        basisChoose = !basisChoose;
+        for (int position = 26; position < 57; position++) {
+            DivideDTOLocal divideDTO = allDivideDTOList.get(position);
+            // 没有才需要添加
+            if (!divideIdSet.contains(divideDTO) && basisChoose) {
+                divideIdSet.add(divideDTO);
+                recycleViewItemOnClickListener.viewClickCallBack(divideDTO);
+            } else if (divideIdSet.contains(divideDTO) && !basisChoose) {
+                divideIdSet.remove(divideDTO);
+                recycleViewItemOnClickListener.viewClickCallBack(divideDTO);
+            }
+        }
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

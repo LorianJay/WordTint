@@ -213,6 +213,8 @@
     <string name="word_analysis_previous">距上次过去:%s小时</string>
     <string name="lock_answer">锁定提示</string>
     <string name="blue_open">蓝牙开启</string>
+    <string name="basis_choose">基础词正反选</string>
+    <string name="core_choose">核心词正反选</string>
 
 
 </resources>

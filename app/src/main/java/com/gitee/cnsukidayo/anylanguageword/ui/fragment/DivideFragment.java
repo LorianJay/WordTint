@@ -87,6 +87,9 @@ public class DivideFragment extends Fragment {
         this.recycleViewItemOnClickListener = recycleViewItemOnClickListener;
     }
 
+    public RecyclerView getDivideRecyclerView() {
+        return divideRecyclerView;
+    }
 
     private void bindView() {
         this.divideRecyclerView = rootView.findViewById(R.id.single_recycler_view);

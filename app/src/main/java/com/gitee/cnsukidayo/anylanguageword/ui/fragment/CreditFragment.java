@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -15,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.gitee.cnsukidayo.anylanguageword.R;
 import com.gitee.cnsukidayo.anylanguageword.context.pathsystem.document.UserInfoPath;
@@ -23,6 +26,7 @@ import com.gitee.cnsukidayo.anylanguageword.entity.UserCreditStyle;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.DivideDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.waper.UserCreditStyleWrapper;
 import com.gitee.cnsukidayo.anylanguageword.ui.MainActivity;
+import com.gitee.cnsukidayo.anylanguageword.ui.adapter.divide.ChildDivideListAdapter;
 import com.gitee.cnsukidayo.anylanguageword.ui.adapter.listener.NavigationItemSelectListener;
 import com.gitee.cnsukidayo.anylanguageword.utils.JsonUtils;
 import com.google.android.material.badge.BadgeDrawable;
@@ -49,6 +53,14 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
      * backup按钮,作用是从选词界面切换到选语种界面
      */
     private ImageButton switchLanguageClass;
+
+    /**
+     * 快速选择
+     */
+    private ImageButton quickChoose;
+    private LinearLayout quickChoosePopWindowLayout;
+    private View coreChoose, basisChoose;
+    private RecyclerView divideRecyclerView;
 
     /**
      * 标题栏,主要用于显示当前是选词还是选语种的标题提示
@@ -110,45 +122,64 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fragment_credit_start_credit:
-                if (!isLoading) {
-                    loadingBar.setVisibility(View.VISIBLE);
-                    StaticFactory.getExecutorService().submit(() -> {
-                        try {
-                            userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+        int itemId = v.getId();
+        if (itemId == R.id.fragment_credit_start_credit) {
+            if (!isLoading) {
+                loadingBar.setVisibility(View.VISIBLE);
+                StaticFactory.getExecutorService().submit(() -> {
+                    try {
+                        userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    // 拷贝Bean
+                    UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+                    // 首先将id转为String类型的List
+                    bundle.putSerializable(CreditFragment.CHILD_DIVIDE_SET, divideSet);
+                    // 统计当前的选词量
+                    int selectWordCount = 0;
+                    for (DivideDTOLocal divideDTO : divideSet) {
+                        selectWordCount += divideDTO.getWordIdList().size();
+                    }
+                    bundle.putInt(CreditFragment.SELECT_WORD_COUNT, selectWordCount);
+                    // 设置当前的语种
+                    updateUIHandler.post(() -> {
+                        if (userCreditStyle.isIgnore()) {
+                            Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
+                                    StaticFactory.getSimpleNavOptions());
+                        } else {
+                            Navigation.findNavController(getView()).navigate(R.id.action_main_navigation_to_navigation_word_credit_launch, bundle,
+                                    StaticFactory.getSimpleNavOptions());
                         }
-                        // 拷贝Bean
-                        UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
-                        // 首先将id转为String类型的List
-                        bundle.putSerializable(CreditFragment.CHILD_DIVIDE_SET, divideSet);
-                        // 统计当前的选词量
-                        int selectWordCount = 0;
-                        for (DivideDTOLocal divideDTO : divideSet) {
-                            selectWordCount += divideDTO.getWordIdList().size();
-                        }
-                        bundle.putInt(CreditFragment.SELECT_WORD_COUNT, selectWordCount);
-                        // 设置当前的语种
-                        updateUIHandler.post(() -> {
-                            if (userCreditStyle.isIgnore()) {
-                                Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
-                                        StaticFactory.getSimpleNavOptions());
-                            } else {
-                                Navigation.findNavController(getView()).navigate(R.id.action_main_navigation_to_navigation_word_credit_launch, bundle,
-                                        StaticFactory.getSimpleNavOptions());
-                            }
-                            loadingBar.setVisibility(View.INVISIBLE);
-                        });
+                        loadingBar.setVisibility(View.INVISIBLE);
                     });
-                }
-                break;
-            case R.id.fragment_credit_divide_backup:
-                languageClassRecyclerView();
-                break;
+                });
+            }
+        } else if (itemId == R.id.fragment_credit_divide_backup) {
+            languageClassRecyclerView();
+        } else if (itemId == R.id.fragment_credit_quick_choose) {
+            PopupWindow changeModePopupWindow = new PopupWindow(
+                    quickChoosePopWindowLayout,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            changeModePopupWindow.setOutsideTouchable(true);
+            changeModePopupWindow.setFocusable(true);
+            changeModePopupWindow.setAnimationStyle(R.style.pop_window_anim_style);
+            changeModePopupWindow.showAsDropDown(quickChoose, -100, 0);
+        } else if (itemId == R.id.fragment_word_credit_pop_listening_write_mode) {
+            if (divideRecyclerView == null) {
+                this.divideRecyclerView = divideFragment.getDivideRecyclerView();
+            }
+            ChildDivideListAdapter childDivideListAdapter = (ChildDivideListAdapter) divideRecyclerView.getAdapter();
+            childDivideListAdapter.coreChoose();
+        } else if (itemId == R.id.fragment_word_credit_pop_english_translation_chinese_hearing) {
+            if (divideRecyclerView == null) {
+                this.divideRecyclerView = divideFragment.getDivideRecyclerView();
+            }
+            ChildDivideListAdapter childDivideListAdapter = (ChildDivideListAdapter) divideRecyclerView.getAdapter();
+            childDivideListAdapter.basisChoose();
         }
     }
 
@@ -221,7 +252,13 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
         this.startLearning = rootView.findViewById(R.id.fragment_credit_start_credit);
         this.loadingBar = rootView.findViewById(R.id.credit_fragment_loading_bar);
         this.switchLanguageClass = rootView.findViewById(R.id.fragment_credit_divide_backup);
+        this.quickChoose = rootView.findViewById(R.id.fragment_credit_quick_choose);
         this.title = rootView.findViewById(R.id.fragment_credit_title);
+
+        this.quickChoosePopWindowLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.fragment_word_credit_quick_choose, null);
+        this.coreChoose = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_listening_write_mode);
+        this.basisChoose = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_hearing);
+
     }
 
     private void initView() {
@@ -230,6 +267,9 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
         // 设置fragment切换逻辑 语种与划分之间的切换显示
         divideRecyclerView();
         this.switchLanguageClass.setOnClickListener(this);
+        this.quickChoose.setOnClickListener(this);
+        this.coreChoose.setOnClickListener(this);
+        this.basisChoose.setOnClickListener(this);
     }
 
 }
