@@ -10,8 +10,10 @@
     tools:openDrawer="">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_word_credit_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
         <include
             android:id="@+id/include"
@@ -617,6 +619,54 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/fragment_word_credit_click_projector"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
+                    android:clickable="true"
+                    android:foreground="@drawable/item_gray_select"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center">
+
+                        <ImageView
+                            android:id="@+id/fragment_word_credit_imageview_projector"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/style_image_padding"
+                            android:gravity="center"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_projector" />
+
+                        <TextView
+                            android:id="@+id/fragment_word_credit_projector_hint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_marginStart="20dp"
+                            android:elevation="1dp"
+                            android:text=""
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="15sp" />
+                    </RelativeLayout>
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:minWidth="55dp"
+                        android:text="@string/projector"
+                        android:textColor="@color/gray_black"
+                        android:textSize="14sp" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/fragment_word_credit_click_save_progress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -925,6 +975,86 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_word_credit_projector_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/fragment_word_credit_projector_countdown_top"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="7dp"
+            android:foreground="@drawable/text_border_radius_foreground"
+            android:foregroundTint="@color/gray"
+            android:gravity="center"
+            android:paddingBottom="3dp"
+            android:text="11:40"
+            android:textColor="@color/gray"
+            android:textSize="35sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/fragment_word_credit_projector_countdown_bottom"
+
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="50dp"
+            android:foreground="@drawable/text_border_radius_foreground"
+            android:foregroundTint="@color/gray"
+            android:gravity="center"
+            android:paddingBottom="3dp"
+            android:text="11:40"
+            android:textColor="@color/gray"
+            android:textSize="35sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/fragment_word_credit_projector_countdown_interrupt"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
+            android:foreground="@drawable/text_border_radius_foreground"
+            android:foregroundTint="@color/gray"
+            android:gravity="center"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:text="@string/interrupt"
+            android:textColor="@color/gray"
+            android:textSize="35sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/fragment_word_credit_projector_countdown_exit"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
+            android:foreground="@drawable/text_border_radius_foreground"
+            android:foregroundTint="@color/gray"
+            android:gravity="center"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:text="@string/exit"
+            android:textColor="@color/gray"
+            android:textSize="35sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -1056,6 +1186,7 @@
                 android:layout_marginBottom="2dp"
                 android:background="@drawable/text_border_radius_background"
                 android:foreground="@drawable/text_border_radius_foreground"
+                android:foregroundTint="@color/theme_color"
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="@string/add_new_category"

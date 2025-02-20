@@ -1,6 +1,7 @@
 package com.gitee.cnsukidayo.anylanguageword.handler.impl;
 
 import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.ProjectorDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.enums.CreditState;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
@@ -55,8 +56,16 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
      */
     private WordFunctionState wordFunctionState = WordFunctionState.NONE;
 
-    // todo 当前的背诵风格功能
+    /**
+     * 当前的背诵风格
+     */
     private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING;
+
+    /**
+     * 当前的放映规则
+     */
+    private ProjectorDTOLocal projectorDTOLocal;
+    private long startTimeMillis;
 
     /**
      * @param allFunctionWordList 所有功能性单词
@@ -260,6 +269,40 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         }
         return result + 1;
     }
+
+    @Override
+    public synchronized void startProjector(ProjectorDTOLocal projectorDTOLocal) {
+        if (projectorDTOLocal == null) {
+            this.projectorDTOLocal = null;
+            return;
+        }
+        this.projectorDTOLocal = projectorDTOLocal;
+        this.projectorDTOLocal.setMilliseconds((long) this.projectorDTOLocal.getMinute() * 60 * 1000);
+        this.startTimeMillis = 0;
+    }
+
+    @Override
+    public ProjectorDTOLocal calculateCountdown() {
+        if (this.projectorDTOLocal == null) {
+            return null;
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+
+        if (this.projectorDTOLocal.isRunning()) {
+            this.startTimeMillis = startTimeMillis == 0 ? currentTimeMillis : startTimeMillis;
+            long result = this.projectorDTOLocal.getMilliseconds() - (currentTimeMillis - this.startTimeMillis);
+            this.projectorDTOLocal.setRemainingTime(result < 0 ? 0 : result);
+        }
+
+        if (!this.projectorDTOLocal.isRunning() && this.startTimeMillis != 0) {
+            long result = this.projectorDTOLocal.getMilliseconds() - (currentTimeMillis - this.startTimeMillis);
+            this.projectorDTOLocal.setRemainingTime(result < 0 ? 0 : result);
+            this.projectorDTOLocal.setMilliseconds(this.projectorDTOLocal.getRemainingTime());
+            this.startTimeMillis = 0;
+        }
+        return this.projectorDTOLocal;
+    }
+
 
     /**
      * 找出用户输入的颜色索引对应的目标单词index

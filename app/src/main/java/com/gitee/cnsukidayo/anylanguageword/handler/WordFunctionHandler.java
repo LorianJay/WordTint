@@ -1,6 +1,7 @@
 package com.gitee.cnsukidayo.anylanguageword.handler;
 
 import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.ProjectorDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.enums.CreditState;
 import com.gitee.cnsukidayo.anylanguageword.enums.FlagColor;
@@ -173,5 +174,16 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      */
     int getChameleonOrder();
 
+    /**
+     * 开始放映机
+     *
+     * @param projectorDTOLocal 放映参数
+     */
+    void startProjector(ProjectorDTOLocal projectorDTOLocal);
 
+    /**
+     * 计算剩余毫秒数
+     * @return 返回计时剩余毫秒数
+     */
+    ProjectorDTOLocal calculateCountdown();
 }

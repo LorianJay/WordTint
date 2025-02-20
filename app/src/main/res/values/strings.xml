@@ -220,6 +220,14 @@
     <string name="add_error">+错词库</string>
     <string name="add_correct">+对词库</string>
     <string name="extract_error">提取错词库</string>
+    <string name="projector">放映机</string>
+    <string name="interval_duration">间隔时长:</string>
+    <string name="minute">分钟</string>
+    <string name="credit_count">背诵数量:</string>
+    <string name="set_ture_argument">设置正确的参数</string>
+    <string name="interrupt">暂停</string>
+    <string name="exit">退出</string>
+    <string name="continuee">继续</string>
 
 
 </resources>

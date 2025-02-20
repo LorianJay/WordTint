@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     tools:context=".ui.fragment.AssociationCreditFragment"
-    tools:openDrawer="">
+    tools:openDrawer="end">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -351,7 +351,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/quick_query_word"
-                        android:textColor="@color/gray_black"
+                        android:textColor="@color/dark_gray"
                         android:textSize="14sp" />
 
 

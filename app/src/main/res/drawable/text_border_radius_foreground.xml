@@ -5,8 +5,7 @@
         <shape>
             <solid android:color="@android:color/transparent" />
             <stroke
-                android:width="5px"
-                android:color="@color/theme_color" />
+                android:width="5px" />
             <corners android:radius="6dp" />
         </shape>
     </item>

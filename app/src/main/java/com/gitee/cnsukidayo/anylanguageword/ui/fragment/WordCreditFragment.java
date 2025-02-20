@@ -3,7 +3,11 @@ package com.gitee.cnsukidayo.anylanguageword.ui.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
@@ -56,6 +60,7 @@ import com.gitee.cnsukidayo.anylanguageword.entity.local.AddWordReViewParamLocal
 import com.gitee.cnsukidayo.anylanguageword.entity.local.DivideDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.FunctionWordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.HistoryDTOLocal;
+import com.gitee.cnsukidayo.anylanguageword.entity.local.ProjectorDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.local.WordDTOLocal;
 import com.gitee.cnsukidayo.anylanguageword.entity.waper.UserCreditStyleWrapper;
 import com.gitee.cnsukidayo.anylanguageword.enums.CreditFilter;
@@ -92,6 +97,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.github.cnsukidayo.wword.model.dto.WordCategoryDTO;
@@ -102,7 +108,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         View.OnTouchListener,
         View.OnLongClickListener,
         Window.Callback {
-    private View rootView;
+    private View rootView, parentView, projectorParent;
 
     private ImageButton popMoreFunction;
     private HorizontalScrollView moreFunctionHorizontalScrollView;
@@ -128,14 +134,15 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      */
     private ImageButton popBackStack, playWord;
     private TextView sourceWord, nextWord, previousWord;
-    private TextView currentIndexTextView, wordCount, chameleonCount;
+    private TextView currentIndexTextView, wordCount, chameleonCount, projectorHint;
     private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, changeMode, start, searchWord, saveProgress, wordAnalysis;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, projector, changeMode, start, searchWord, saveProgress, wordAnalysis;
     private LinearLayout getAnswerParentLayout;
     private CardView popWindowChangeModeLayout, getAnswer;
     private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseModeHearing, englishTranslationChineseModeNoHearing, chineseTranslationEnglish, onlyCreditMode;
+    private TextView countDownTop, countDownBottom, countDownInterrupt, countDownExit;
     private long exitLastTime = 0;
     /**
      * 旗帜
@@ -189,6 +196,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private float blueToothDownX, blueToothDownY;
     private int blueToothMoveIndex = -1;
 
+    /**
+     * 定时任务
+     */
+    private volatile boolean timeTaskRunning = true;
+    private volatile boolean projectorFinish;
+    private int projectorFade = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -349,6 +362,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             this.answerParentLayoutY = getAnswerParentLayout.getY();
             this.answerParentLayoutX = getAnswerParentLayout.getX();
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.timeTaskRunning = false;
     }
 
     @Override
@@ -527,6 +546,82 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 this.sectionImageView.getDrawable().setTintList(null);
                 this.wordFunctionHandler.restoreWordList();
                 creditWord(previous, wordFunctionHandler.getCurrentStructureWordMap());
+            }
+        } else if (clickViewId == R.id.fragment_word_credit_projector_parent) {
+            countDownInterrupt.setVisibility(View.VISIBLE);
+            countDownExit.setVisibility(View.VISIBLE);
+        } else if (clickViewId == R.id.fragment_word_credit_click_projector) {
+            ProjectorDTOLocal existProjector = wordFunctionHandler.calculateCountdown();
+            if (existProjector != null) {
+                parentView.setVisibility(View.GONE);
+                projectorParent.setVisibility(View.VISIBLE);
+                requireActivity.getWindow().setStatusBarColor(Color.BLACK);
+                requireActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                projectorFade = 0;
+                existProjector.setRunning(true);
+                wordFunctionHandler.startProjector(existProjector);
+                return;
+            }
+            View projectorInputView = getLayoutInflater().inflate(R.layout.fragment_word_credit_dialog_projector, null);
+            EditText minuteValue = projectorInputView.findViewById(R.id.fragment_word_credit_dialog_projector_minute);
+            EditText wordCountValue = projectorInputView.findViewById(R.id.fragment_word_credit_dialog_projector_word_count);
+            new AlertDialog.Builder(getContext()).setTitle(getContext().getResources().getString(R.string.projector))
+                    .setView(projectorInputView)
+                    .setCancelable(false)
+                    .setPositiveButton("确定", (dialog, which) -> {
+                        int minute, wordCount;
+                        try {
+                            minute = Integer.parseInt(minuteValue.getText().toString());
+                            wordCount = Integer.parseInt(wordCountValue.getText().toString());
+                            if (minute < 0 || wordCount > wordFunctionHandler.getChameleonSize()) {
+                                throw new IllegalArgumentException("输入参数不合法!");
+                            }
+                        } catch (IllegalArgumentException e) {
+                            Toast errorToast = Toast.makeText(getContext(), "输入参数不合法", Toast.LENGTH_LONG);
+                            errorToast.setGravity(Gravity.CENTER, 0, 500);
+                            errorToast.show();
+                            return;
+                        }
+                        ProjectorDTOLocal projectorDTOLocal = new ProjectorDTOLocal();
+                        projectorDTOLocal.setMinute(minute);
+                        projectorDTOLocal.setWordCount(wordCount);
+                        projectorDTOLocal.setRunning(true);
+                        projectorDTOLocal.setRound(1);
+                        wordFunctionHandler.startProjector(projectorDTOLocal);
+                        parentView.setVisibility(View.GONE);
+                        projectorParent.setVisibility(View.VISIBLE);
+                        requireActivity.getWindow().setStatusBarColor(Color.BLACK);
+                        requireActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        projectorFade = 0;
+                    })
+                    .setNegativeButton("取消", (dialog, which) -> {
+                    })
+                    .show();
+        } else if (clickViewId == R.id.fragment_word_credit_projector_countdown_exit) {
+            ProjectorDTOLocal calculateCountdown = wordFunctionHandler.calculateCountdown();
+            parentView.setVisibility(View.VISIBLE);
+            projectorParent.setVisibility(View.GONE);
+            requireActivity.getWindow().setStatusBarColor(Color.WHITE);
+            requireActivity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            calculateCountdown.setRunning(false);
+            projectorFinish = false;
+            // 跳转单词
+            int jumpIndex = (calculateCountdown.getRound() - 1) * calculateCountdown.getWordCount();
+            if (jumpIndex < wordFunctionHandler.getChameleonSize()) {
+                creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpToWord(jumpIndex));
+                projectorHint.setText(String.valueOf(calculateCountdown.getRound() * calculateCountdown.getWordCount() + 1));
+            }
+            calculateCountdown.setRound(calculateCountdown.getRound() + 1);
+            requireActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else if (clickViewId == R.id.fragment_word_credit_projector_countdown_interrupt) {
+            ProjectorDTOLocal projectorDTOLocal = wordFunctionHandler.calculateCountdown();
+            projectorDTOLocal.setRunning(!projectorDTOLocal.isRunning());
+            countDownTop.setVisibility(View.GONE);
+            countDownBottom.setVisibility(View.GONE);
+            if (projectorDTOLocal.isRunning()) {
+                countDownInterrupt.setText(getResources().getText(R.string.interrupt));
+            } else {
+                countDownInterrupt.setText(getResources().getText(R.string.continuee));
             }
         } else if (clickViewId == R.id.toolbar_back_to_trace) {
             new AlertDialog.Builder(getContext())
@@ -870,6 +965,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             // 马达震动提醒用户
             VibrationEffect waveform = VibrationEffect.createWaveform(new long[]{100}, -1);
             vibrator.vibrate(waveform);
+        } else if (itemId == R.id.fragment_word_credit_click_projector) {
+            wordFunctionHandler.startProjector(null);
+            projectorHint.setText("");
         }
         return false;
     }
@@ -974,6 +1072,61 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
 
     }
 
+    private Runnable timedTasks() {
+        return () -> {
+            while (timeTaskRunning) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(200);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                ProjectorDTOLocal calculateCountdown = wordFunctionHandler.calculateCountdown();
+                if (calculateCountdown == null) {
+                    continue;
+                }
+                projectorFade = ++projectorFade % 41;
+                updateUIHandler.post(() -> {
+                    // 如果已经倒计时结束,播放通知音效
+                    if (projectorFinish && projectorFade == 0) {
+                        Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                        Ringtone ringtone = RingtoneManager.getRingtone(getContext(), notificationUri);
+                        if (!ringtone.isPlaying()) {
+                            ringtone.play();
+                        }
+                        countDownTop.setVisibility(View.GONE);
+                        countDownBottom.setVisibility(View.GONE);
+                    }
+                    // 任务已经完成,不执行后续代码
+                    if (projectorFinish) {
+                        return;
+                    }
+                    if (projectorFade == 25) {
+                        countDownInterrupt.setVisibility(View.GONE);
+                        countDownExit.setVisibility(View.GONE);
+                    }
+                    if (!calculateCountdown.isRunning()) {
+                        return;
+                    }
+                    long minute = (calculateCountdown.getRemainingTime() / 1000) / 60;
+                    long second = (calculateCountdown.getRemainingTime() / 1000) % 60;
+                    if ((minute % 2 == 0 && second <= 30) ||
+                            (minute % 2 == 1 && second >= 30)) {
+                        countDownTop.setVisibility(View.VISIBLE);
+                        countDownBottom.setVisibility(View.GONE);
+                    } else {
+                        countDownTop.setVisibility(View.GONE);
+                        countDownBottom.setVisibility(View.VISIBLE);
+                    }
+                    countDownTop.setText(String.format("%02d:%02d", minute, second));
+                    countDownBottom.setText(String.format("%02d:%02d", minute, second));
+                    // 倒计时结束,播放通知
+                    projectorFinish = calculateCountdown.getRemainingTime() == 0;
+                });
+
+            }
+        };
+    }
+
     /**
      * 播放一个单词的音频信息
      *
@@ -1074,6 +1227,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            // 启动定时任务
+            StaticFactory.getExecutorService().execute(timedTasks());
+            // 更新UI
             updateUIHandler.post(() -> {
                 this.chineseAnswerDrawer.setAdapter(chineseAnswerAdapterDrawer);
                 this.starSingleCategory.setAdapter(startSingleCategoryAdapter);
@@ -1196,6 +1352,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      * 绑定所有组件
      */
     private void bindView() {
+        this.parentView = rootView.findViewById(R.id.fragment_word_credit_parent);
         this.popMoreFunction = rootView.findViewById(R.id.fragment_word_credit_pop_more_function);
         this.moreFunctionHorizontalScrollView = rootView.findViewById(R.id.fragment_word_credit_more_function_horizontal_scroll_view);
         this.nextWord = rootView.findViewById(R.id.fragment_word_credit_next_word);
@@ -1222,6 +1379,8 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.sectionImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_section);
         this.shuffleImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_shuffle);
         this.section = rootView.findViewById(R.id.fragment_word_credit_click_section);
+        this.projector = rootView.findViewById(R.id.fragment_word_credit_click_projector);
+        this.projectorHint = rootView.findViewById(R.id.fragment_word_credit_projector_hint);
         this.popBackStack = rootView.findViewById(R.id.toolbar_back_to_trace);
         this.changeMode = rootView.findViewById(R.id.fragment_word_credit_click_change_mode);
         this.popWindowChangeModeLayout = (CardView) getLayoutInflater().inflate(R.layout.fragment_word_credit_popwindow_change_mode, null);
@@ -1240,6 +1399,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.chameleonCount = rootView.findViewById(R.id.fragment_word_credit_chameleon_word_count);
         this.wordAnalysis = rootView.findViewById(R.id.fragment_word_credit_click_analysis_word);
         this.vibrator = (Vibrator) requireActivity.getSystemService(Context.VIBRATOR_SERVICE);
+
+        this.projectorParent = rootView.findViewById(R.id.fragment_word_credit_projector_parent);
+        this.countDownTop = rootView.findViewById(R.id.fragment_word_credit_projector_countdown_top);
+        this.countDownBottom = rootView.findViewById(R.id.fragment_word_credit_projector_countdown_bottom);
+        this.countDownInterrupt = rootView.findViewById(R.id.fragment_word_credit_projector_countdown_interrupt);
+        this.countDownExit = rootView.findViewById(R.id.fragment_word_credit_projector_countdown_exit);
 
         this.sourceWordDrawer = rootView.findViewById(R.id.fragment_word_credit_drawer_word_origin);
         this.starRefresh = rootView.findViewById(R.id.fragment_word_credit_drawer_refresh);
@@ -1302,6 +1467,11 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.getAnswer.setOnTouchListener(this);
         this.blueTooth.setOnClickListener(this);
         this.getAnswer.setOnLongClickListener(this);
+        this.projector.setOnClickListener(this);
+        this.projector.setOnLongClickListener(this);
+        this.countDownInterrupt.setOnClickListener(this);
+        this.countDownExit.setOnClickListener(this);
+        this.projectorParent.setOnClickListener(this);
 
         this.greenFlag.setOnClickListener(this);
         this.redFlag.setOnClickListener(this);
