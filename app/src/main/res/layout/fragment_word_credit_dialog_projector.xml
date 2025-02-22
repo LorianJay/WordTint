@@ -66,5 +66,37 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:text="@string/start_index"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/fragment_word_credit_dialog_projector_start_index"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.45"
+            android:background="@drawable/fragment_word_credit_edit_text"
+            android:digits="1234567890"
+            android:gravity="center"
+            android:hint="1"
+            android:inputType="number"
+            android:paddingStart="5dp"
+            android:paddingEnd="15dp"
+            android:singleLine="true"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

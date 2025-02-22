@@ -36,6 +36,11 @@ public class ProjectorDTOLocal {
      */
     private int round;
 
+    /**
+     * 起始位置
+     */
+    private int startIndex;
+
     public ProjectorDTOLocal() {
     }
 
@@ -85,5 +90,13 @@ public class ProjectorDTOLocal {
 
     public void setRound(int round) {
         this.round = round;
+    }
+
+    public int getStartIndex() {
+        return startIndex;
+    }
+
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
     }
 }

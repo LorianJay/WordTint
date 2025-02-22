@@ -565,15 +565,18 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             View projectorInputView = getLayoutInflater().inflate(R.layout.fragment_word_credit_dialog_projector, null);
             EditText minuteValue = projectorInputView.findViewById(R.id.fragment_word_credit_dialog_projector_minute);
             EditText wordCountValue = projectorInputView.findViewById(R.id.fragment_word_credit_dialog_projector_word_count);
+            EditText startIndexValue = projectorInputView.findViewById(R.id.fragment_word_credit_dialog_projector_start_index);
             new AlertDialog.Builder(getContext()).setTitle(getContext().getResources().getString(R.string.projector))
                     .setView(projectorInputView)
                     .setCancelable(false)
                     .setPositiveButton("确定", (dialog, which) -> {
-                        int minute, wordCount;
+                        int minute, wordCount, startIndex;
                         try {
                             minute = Integer.parseInt(minuteValue.getText().toString());
                             wordCount = Integer.parseInt(wordCountValue.getText().toString());
-                            if (minute < 0 || wordCount > wordFunctionHandler.getChameleonSize()) {
+                            startIndex = Integer.parseInt(startIndexValue.getText().toString());
+                            if (minute < 0 || wordCount > wordFunctionHandler.getChameleonSize() ||
+                                    startIndex < 1 || startIndex > wordFunctionHandler.getChameleonSize()) {
                                 throw new IllegalArgumentException("输入参数不合法!");
                             }
                         } catch (IllegalArgumentException e) {
@@ -587,6 +590,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                         projectorDTOLocal.setWordCount(wordCount);
                         projectorDTOLocal.setRunning(true);
                         projectorDTOLocal.setRound(1);
+                        projectorDTOLocal.setStartIndex(startIndex);
                         wordFunctionHandler.startProjector(projectorDTOLocal);
                         parentView.setVisibility(View.GONE);
                         projectorParent.setVisibility(View.VISIBLE);
@@ -606,10 +610,11 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             calculateCountdown.setRunning(false);
             projectorFinish = false;
             // 跳转单词
-            int jumpIndex = (calculateCountdown.getRound() - 1) * calculateCountdown.getWordCount();
+            int jumpIndex = (calculateCountdown.getRound() - 1) * calculateCountdown.getWordCount() + calculateCountdown.getStartIndex() - 1;
             if (jumpIndex < wordFunctionHandler.getChameleonSize()) {
                 creditWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.jumpToWord(jumpIndex));
-                projectorHint.setText(String.valueOf(calculateCountdown.getRound() * calculateCountdown.getWordCount() + 1));
+                projectorHint.setText(String.valueOf(calculateCountdown.getRound() * calculateCountdown.getWordCount() +
+                        calculateCountdown.getStartIndex()));
             }
             calculateCountdown.setRound(calculateCountdown.getRound() + 1);
             requireActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
