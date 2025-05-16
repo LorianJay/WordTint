@@ -153,6 +153,17 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      */
     void setCurrentCreditState(CreditState creditState);
 
+    /**
+     * 隐藏介词
+     */
+    void setHidePronoun(boolean hide);
+
+    /**
+     * 是否隐藏介词
+     * @return 是否隐藏介词
+     */
+    boolean isHidePronoun();
+
     CreditState getCurrentCreditState();
 
     /**

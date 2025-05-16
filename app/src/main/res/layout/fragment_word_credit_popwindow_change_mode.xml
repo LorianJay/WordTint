@@ -44,7 +44,6 @@
             android:id="@+id/fragment_word_credit_pop_english_translation_chinese_no_hearing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/fragment_word_credit_pop_window_change_mode"
             android:foreground="@drawable/item_gray_select"
             android:gravity="center_vertical"
             android:paddingStart="@dimen/fragment_word_credit_pop_window_change_mode"
@@ -80,6 +79,20 @@
             android:paddingEnd="150dp"
             android:paddingBottom="@dimen/fragment_word_credit_pop_window_change_mode"
             android:text="@string/only_credit"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/fragment_word_credit_pop_hide_pronoun"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:foreground="@drawable/item_gray_select"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/fragment_word_credit_pop_window_change_mode"
+            android:paddingTop="@dimen/fragment_word_credit_pop_window_change_mode"
+            android:paddingEnd="150dp"
+            android:paddingBottom="@dimen/fragment_word_credit_pop_window_change_mode"
+            android:text="@string/hide_pronoun"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 

@@ -68,6 +68,12 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     private long startTimeMillis;
 
     /**
+     * 是否隐藏介词
+     */
+
+    private boolean hideProNoun = false;
+
+    /**
      * @param allFunctionWordList 所有功能性单词
      * @param dict                字典
      */
@@ -236,6 +242,16 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     @Override
     public void setCurrentCreditState(CreditState creditState) {
         this.creditState = creditState;
+    }
+
+    @Override
+    public void setHidePronoun(boolean hide) {
+        this.hideProNoun = hide;
+    }
+
+    @Override
+    public boolean isHidePronoun() {
+        return this.hideProNoun;
     }
 
     @Override

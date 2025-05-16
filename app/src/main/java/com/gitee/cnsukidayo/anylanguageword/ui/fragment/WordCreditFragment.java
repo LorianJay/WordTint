@@ -141,7 +141,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private LinearLayout getAnswerParentLayout;
     private CardView popWindowChangeModeLayout, getAnswer;
     private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, starRefresh;
-    private TextView listeningWriteMode, englishTranslationChineseModeHearing, englishTranslationChineseModeNoHearing, chineseTranslationEnglish, onlyCreditMode;
+    private TextView listeningWriteMode, englishTranslationChineseModeHearing, englishTranslationChineseModeNoHearing, chineseTranslationEnglish, onlyCreditMode, hideProNoun;
     private TextView countDownTop, countDownBottom, countDownInterrupt, countDownExit;
     private long exitLastTime = 0;
     /**
@@ -734,6 +734,9 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         } else if (clickViewId == R.id.fragment_word_credit_pop_only_credit) {
             wordFunctionHandler.setCurrentCreditState(CreditState.CREDIT);
             updateChangeModePopWindowState();
+        } else if (clickViewId == R.id.fragment_word_credit_pop_hide_pronoun) {
+            wordFunctionHandler.setHidePronoun(!wordFunctionHandler.isHidePronoun());
+            updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_green) {
             if (changingChameleon) {
                 changingChameleon = false;
@@ -1171,6 +1174,10 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 HashSet<DivideDTOLocal> divideList = bundle.getSerializable(CreditFragment.CHILD_DIVIDE_SET, HashSet.class);
                 HashSet<HistoryDTOLocal> historyDTOSet = bundle.getSerializable(CreditFragment.HISTORY_WORD_SET, HashSet.class);
                 ArrayList<Long> reViewList = bundle.getSerializable(CreditFragment.REVIEW_WORD_List, ArrayList.class);
+                // 删除bundle内容
+                bundle.remove(CreditFragment.CHILD_DIVIDE_SET);
+                bundle.remove(CreditFragment.HISTORY_WORD_SET);
+                bundle.remove(CreditFragment.REVIEW_WORD_List);
                 // 新的背词
                 if (divideList != null) {
                     // 初始化
@@ -1305,6 +1312,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.englishTranslationChineseModeNoHearing.setBackground(null);
         this.chineseTranslationEnglish.setBackground(null);
         this.onlyCreditMode.setBackground(null);
+        this.hideProNoun.setBackground(null);
         CreditState currentCreditState = wordFunctionHandler.getCurrentCreditState();
         if (currentCreditState == CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING) {
             this.englishTranslationChineseModeHearing.setBackground(ResourcesCompat.getDrawable(
@@ -1332,6 +1340,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
         }
+        if (wordFunctionHandler.isHidePronoun()) {
+            this.hideProNoun.setBackground(ResourcesCompat.getDrawable(
+                    getResources(),
+                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    null));
+        }
     }
 
     /**
@@ -1343,13 +1357,18 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         if (wordFunctionHandler.getCurrentCreditState() == CreditState.CHINESE_TRANSLATION_ENGLISH) {
             playWordAudio(currentWord);
         }
+        // 如果是省略短语则直接移除短语
+        String phaseValue = currentWord.getValue().get(EnglishStructure.PHRASE);
+        if (wordFunctionHandler.isHidePronoun()) {
+            currentWord.getValue().remove(EnglishStructure.PHRASE);
+        }
         // 设置单词原文
         Optional.ofNullable(currentWord.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> sourceWord
                         .setText(wordDTOS));
         chineseAnswerHandler.showWordChineseMessage(currentWord);
         // todo 在这里设置recycleView的宽度
-
+        currentWord.getValue().put(EnglishStructure.PHRASE, phaseValue);
     }
 
 
@@ -1394,6 +1413,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.englishTranslationChineseModeNoHearing = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_no_hearing);
         this.chineseTranslationEnglish = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_chinese_translation_english);
         this.onlyCreditMode = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_only_credit);
+        this.hideProNoun = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_hide_pronoun);
         this.playWord = rootView.findViewById(R.id.fragment_word_credit_play_word);
         this.startDrawer = rootView.findViewById(R.id.fragment_word_credit_start_drawer);
         this.start = rootView.findViewById(R.id.fragment_word_credit_click_start);
@@ -1460,6 +1480,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.englishTranslationChineseModeNoHearing.setOnClickListener(this);
         this.chineseTranslationEnglish.setOnClickListener(this);
         this.onlyCreditMode.setOnClickListener(this);
+        this.hideProNoun.setOnClickListener(this);
         this.playWord.setOnClickListener(this);
         this.start.setOnClickListener(this);
         this.addNewStartCategory.setOnClickListener(this);
