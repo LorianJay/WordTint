@@ -11,6 +11,7 @@ import com.gitee.cnsukidayo.anylanguageword.handler.WordFunctionHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,12 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
      * 单词的摘要信息
      */
     private List<FunctionWordDTOLocal> allFunctionWordList;
+
+    /**
+     * 反查单词的Index
+     */
+    private Map<String, Integer> reverseQueryIndex;
+
     /**
      * 这是一个临时的集合,它指向allWordList,用于保存由按色打乱、区间重背功能被重置的allWordList引用
      */
@@ -70,7 +77,6 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     /**
      * 是否隐藏介词
      */
-
     private boolean hideProNoun = false;
 
     /**
@@ -81,6 +87,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
                                    Map<Long, WordDTOLocal> dict) {
         this.allFunctionWordList = allFunctionWordList;
         super.addWordQueryCache(dict);
+        initReverseQueryMap();
         this.start = 0;
         this.end = allFunctionWordList.size() - 1;
     }
@@ -319,6 +326,11 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         return this.projectorDTOLocal;
     }
 
+    @Override
+    public int getIndexByWordOrigin(String origin) {
+        Integer result = reverseQueryIndex.get(origin);
+        return result == null ? -1 : result;
+    }
 
     /**
      * 找出用户输入的颜色索引对应的目标单词index
@@ -335,6 +347,16 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
             }
         }
         return result - 1;
+    }
+
+    private void initReverseQueryMap() {
+        reverseQueryIndex = new HashMap<>(allFunctionWordList.size());
+        for (int i = 0; i < allFunctionWordList.size(); i++) {
+            WordDTOLocal tempWord = queryCache.getOrDefault(allFunctionWordList.get(i).getId(), new WordDTOLocal());
+            if (tempWord != null) {
+                reverseQueryIndex.put(tempWord.getOrigin(), i);
+            }
+        }
     }
 
 }

@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.InputDevice;
@@ -137,7 +138,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private TextView currentIndexTextView, wordCount, chameleonCount, projectorHint;
     private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, projector, changeMode, start, searchWord, saveProgress, wordAnalysis;
+    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, projector, changeMode, quickPosition, start, searchWord, saveProgress, wordAnalysis;
     private LinearLayout getAnswerParentLayout;
     private CardView popWindowChangeModeLayout, getAnswer;
     private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, starRefresh;
@@ -195,6 +196,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
      */
     private float blueToothDownX, blueToothDownY;
     private int blueToothMoveIndex = -1;
+    private int preBlueToothMoveIndex = 0;
 
     /**
      * 定时任务
@@ -340,12 +342,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                     // 如果当前展开了旗帜
                     if (openFlagChange) {
                         if (blueToothMoveIndex < 0) {
-                            blueToothMoveIndex = 0;
+                            blueToothMoveIndex = preBlueToothMoveIndex;
                         } else if (blueToothMoveIndex > 8) {
                             blueToothMoveIndex = 8;
                         }
                         selectList.forEach(imageButton -> imageButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding)));
-                        this.currentSelectFlagButton = selectList.get(blueToothMoveIndex);
+                        this.currentSelectFlagButton = selectList.get(preBlueToothMoveIndex = blueToothMoveIndex);
                         this.currentSelectFlagButton.setBackground(getContext().getDrawable(R.drawable.style_image_padding_selective));
                     }
                     break;
@@ -456,6 +458,26 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             toast.setGravity(Gravity.CENTER, 0, 500);
             toast.show();
             changingChameleon = true;
+        } else if (clickViewId == R.id.fragment_word_credit_click_quick_position) {
+            final EditText inputEditText = new EditText(getContext());
+            inputEditText.setKeyListener(DigitsKeyListener.getInstance("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "));
+            inputEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+            new AlertDialog.Builder(getContext()).setTitle("定位单词").setView(inputEditText).setCancelable(false).setPositiveButton("确定", (dialog, which) -> {
+                String origin = inputEditText.getText().toString().trim();
+                int index = wordFunctionHandler.getIndexByWordOrigin(origin);
+                // 未查询到单词
+                if (index == -1) {
+                    Toast exceptionToast = Toast.makeText(getContext(), "单词未找到", Toast.LENGTH_SHORT);
+                    exceptionToast.setGravity(Gravity.CENTER, 0, 500);
+                    exceptionToast.show();
+                    return;
+                }
+                // 异步跳转单词,可能查找时间较长
+                StaticFactory.getExecutorService().submit(() ->
+                        creditWord(wordFunctionHandler.getCurrentStructureWordMap(),
+                                wordFunctionHandler.jumpToWord(index)));
+            }).setNegativeButton("取消", (dialog, which) -> {
+            }).show();
         } else if (clickViewId == R.id.fragment_word_credit_click_swing_switch) {
             enableSelectFunction = !enableSelectFunction;
             if (enableSelectFunction) {
@@ -1407,6 +1429,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.projectorHint = rootView.findViewById(R.id.fragment_word_credit_projector_hint);
         this.popBackStack = rootView.findViewById(R.id.toolbar_back_to_trace);
         this.changeMode = rootView.findViewById(R.id.fragment_word_credit_click_change_mode);
+        this.quickPosition = rootView.findViewById(R.id.fragment_word_credit_click_quick_position);
         this.popWindowChangeModeLayout = (CardView) getLayoutInflater().inflate(R.layout.fragment_word_credit_popwindow_change_mode, null);
         this.listeningWriteMode = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_listening_write_mode);
         this.englishTranslationChineseModeHearing = popWindowChangeModeLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_hearing);
@@ -1475,6 +1498,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.section.setOnClickListener(this);
         this.popBackStack.setOnClickListener(this);
         this.changeMode.setOnClickListener(this);
+        this.quickPosition.setOnClickListener(this);
         this.listeningWriteMode.setOnClickListener(this);
         this.englishTranslationChineseModeHearing.setOnClickListener(this);
         this.englishTranslationChineseModeNoHearing.setOnClickListener(this);

@@ -160,6 +160,7 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
 
     /**
      * 是否隐藏介词
+     *
      * @return 是否隐藏介词
      */
     boolean isHidePronoun();
@@ -194,7 +195,17 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
 
     /**
      * 计算剩余毫秒数
+     *
      * @return 返回计时剩余毫秒数
      */
     ProjectorDTOLocal calculateCountdown();
+
+    /**
+     * 根据单词查找该单词在列表中的索引位置
+     *
+     * @param origin 源单词内容
+     * @return 单词索引,若没找到返回-1
+     */
+    int getIndexByWordOrigin(String origin);
+
 }

@@ -20,6 +20,7 @@
         android:theme="@style/Theme.AnyLanguageWord">
         <activity
             android:name=".ui.MainActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation|screenLayout|screenSize|orientation"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

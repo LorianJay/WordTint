@@ -2,7 +2,6 @@
     <!-- Base application theme. -->
     <style name="Theme.AnyLanguageWord" parent="Theme.Design.Light.NoActionBar">
 
-        <!-- Status bar color. -->
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/white</item>
