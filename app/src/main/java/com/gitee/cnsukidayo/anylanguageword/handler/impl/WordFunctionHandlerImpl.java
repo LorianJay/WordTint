@@ -155,6 +155,11 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     }
 
     @Override
+    public WordDTOLocal jumpToWordWithOutFlag(int index) {
+        return getWordByIndex(this.currentIndex = index);
+    }
+
+    @Override
     public int getCurrentIndex() {
         return this.currentIndex;
     }

@@ -141,7 +141,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
     private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, projector, changeMode, quickPosition, start, searchWord, saveProgress, wordAnalysis;
     private LinearLayout getAnswerParentLayout;
     private CardView popWindowChangeModeLayout, getAnswer;
-    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, starRefresh;
+    private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, quickPositionImageView, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseModeHearing, englishTranslationChineseModeNoHearing, chineseTranslationEnglish, onlyCreditMode, hideProNoun;
     private TextView countDownTop, countDownBottom, countDownInterrupt, countDownExit;
     private long exitLastTime = 0;
@@ -459,6 +459,13 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             toast.show();
             changingChameleon = true;
         } else if (clickViewId == R.id.fragment_word_credit_click_quick_position) {
+            // 如果不是普通模式,则禁止使用快速定位功能
+            if (wordFunctionHandler.getWordFunctionState() != WordFunctionState.NONE) {
+                toast = Toast.makeText(getContext(), wordFunctionHandler.getWordFunctionState().getInfo(), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 500);
+                toast.show();
+                return;
+            }
             final EditText inputEditText = new EditText(getContext());
             inputEditText.setKeyListener(DigitsKeyListener.getInstance("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "));
             inputEditText.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -466,6 +473,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 String origin = inputEditText.getText().toString().trim();
                 int index = wordFunctionHandler.getIndexByWordOrigin(origin);
                 // 未查询到单词
+                // 如果查询到的单词不在当前变色龙列表内,则不跳转
                 if (index == -1) {
                     Toast exceptionToast = Toast.makeText(getContext(), "单词未找到", Toast.LENGTH_SHORT);
                     exceptionToast.setGravity(Gravity.CENTER, 0, 500);
@@ -475,7 +483,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                 // 异步跳转单词,可能查找时间较长
                 StaticFactory.getExecutorService().submit(() ->
                         creditWord(wordFunctionHandler.getCurrentStructureWordMap(),
-                                wordFunctionHandler.jumpToWord(index)));
+                                wordFunctionHandler.jumpToWordWithOutFlag(index)));
             }).setNegativeButton("取消", (dialog, which) -> {
             }).show();
         } else if (clickViewId == R.id.fragment_word_credit_click_swing_switch) {
@@ -511,15 +519,16 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
             }
             WordDTOLocal previous = wordFunctionHandler.getCurrentStructureWordMap();
             if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.NONE) {
-
                 this.chameleonImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.sectionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
+                this.quickPositionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.shuffleImageView.getDrawable().setTint(getResources().getColor(wordFunctionHandler.getChameleon().getMapColorID(), null));
                 wordFunctionHandler.shuffle();
                 creditWord(previous, wordFunctionHandler.jumpToWord(0));
             } else {
                 this.chameleonImageView.setForeground(null);
                 this.sectionImageView.setForeground(null);
+                this.quickPositionImageView.setForeground(null);
                 this.shuffleImageView.getDrawable().setTintList(null);
                 wordFunctionHandler.restoreWordList();
                 creditWord(previous, wordFunctionHandler.getCurrentStructureWordMap());
@@ -558,6 +567,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                             wordFunctionHandler.shuffleRange(minRange, maxRange);
                             creditWord(previous, wordFunctionHandler.jumpToWord(wordFunctionHandler.getCurrentIndex()));
                             this.shuffleImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
+                            this.quickPositionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                             this.sectionImageView.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
                         })
                         .setNegativeButton("取消", (dialog, which) -> {
@@ -565,6 +575,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
                         .show();
             } else {
                 this.shuffleImageView.setForeground(null);
+                this.quickPositionImageView.setForeground(null);
                 this.sectionImageView.getDrawable().setTintList(null);
                 this.wordFunctionHandler.restoreWordList();
                 creditWord(previous, wordFunctionHandler.getCurrentStructureWordMap());
@@ -1423,6 +1434,7 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         this.shuffle = rootView.findViewById(R.id.fragment_word_credit_click_shuffle);
         this.chameleonImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_chameleon);
         this.sectionImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_section);
+        this.quickPositionImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_quick_position);
         this.shuffleImageView = rootView.findViewById(R.id.fragment_word_credit_imageview_shuffle);
         this.section = rootView.findViewById(R.id.fragment_word_credit_click_section);
         this.projector = rootView.findViewById(R.id.fragment_word_credit_click_projector);

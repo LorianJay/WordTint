@@ -53,12 +53,22 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     WordDTOLocal jumpNextWord();
 
     /**
-     * 跳转到某个单词,调用该方法会将指针指向传入的索引位置
+     * 跳转到某个单词,调用该方法会将指针指向传入的索引位置<br>
+     * 该方法会考虑单词标记
      *
      * @param index 跳转的目标位序
      * @return 返回单词引用
      */
     WordDTOLocal jumpToWord(int index);
+
+    /**
+     * 强制跳转到索引指向的单词,不会考虑单词标记
+     *
+     * @param index 单词索引
+     * @return 返回单词引用
+     * @see WordFunctionHandler#jumpToWord(int)
+     */
+    WordDTOLocal jumpToWordWithOutFlag(int index);
 
     /**
      * 得到当前指针指向的索引
@@ -204,7 +214,7 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * 根据单词查找该单词在列表中的索引位置
      *
      * @param origin 源单词内容
-     * @return 单词索引,若没找到返回-1
+     * @return 单词索引, 若没找到返回-1
      */
     int getIndexByWordOrigin(String origin);
 
