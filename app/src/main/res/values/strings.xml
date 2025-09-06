@@ -231,6 +231,15 @@
     <string name="start_index">起始单词:</string>
     <string name="hide_pronoun">隐藏介词</string>
     <string name="quick_position">快速定位</string>
+    <string name="mock_examine">模拟考试</string>
+    <string name="mock_politician">模拟政治</string>
+    <string name="mock_english">模拟英语</string>
+    <string name="mock_math">模拟数学</string>
+    <string name="mock_major">模拟专业课</string>
+    <string name="add5s">加5s</string>
+    <string name="remove5s">减5s</string>
+    <string name="add30s">加30s</string>
+    <string name="remove30s">减30s</string>
 
 
 </resources>

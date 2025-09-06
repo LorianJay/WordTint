@@ -59,7 +59,7 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
      */
     private ImageButton quickChoose;
     private LinearLayout quickChoosePopWindowLayout;
-    private View coreChoose, basisChoose;
+    private View coreChoose, basisChoose, mockExamine;
     private RecyclerView divideRecyclerView;
 
     /**
@@ -102,6 +102,10 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
      * 选中的单词数量
      */
     public static final String SELECT_WORD_COUNT = "SELECT_WORD_COUNT";
+    /**
+     * 快速选择弹窗
+     */
+    private PopupWindow changeModePopupWindow;
 
 
     @Override
@@ -160,7 +164,7 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
         } else if (itemId == R.id.fragment_credit_divide_backup) {
             languageClassRecyclerView();
         } else if (itemId == R.id.fragment_credit_quick_choose) {
-            PopupWindow changeModePopupWindow = new PopupWindow(
+            this.changeModePopupWindow = new PopupWindow(
                     quickChoosePopWindowLayout,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -180,6 +184,10 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
             }
             ChildDivideListAdapter childDivideListAdapter = (ChildDivideListAdapter) divideRecyclerView.getAdapter();
             childDivideListAdapter.basisChoose();
+        } else if (itemId == R.id.fragment_word_credit_pop_english_mock_examine) {
+            changeModePopupWindow.dismiss();
+            Navigation.findNavController(getView()).navigate(R.id.action_navigation_welcome_to_navigation_mock_examine, null,
+                    StaticFactory.getSimpleNavOptions());
         }
     }
 
@@ -215,8 +223,6 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
 
     /**
      * 单词划分的recycleView
-     *
-     * @param languageClassDTO 展示哪个语种
      */
     private void divideRecyclerView() {
         // 显示返回按钮
@@ -258,7 +264,7 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
         this.quickChoosePopWindowLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.fragment_word_credit_quick_choose, null);
         this.coreChoose = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_listening_write_mode);
         this.basisChoose = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_hearing);
-
+        this.mockExamine = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_english_mock_examine);
     }
 
     private void initView() {
@@ -270,6 +276,7 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
         this.quickChoose.setOnClickListener(this);
         this.coreChoose.setOnClickListener(this);
         this.basisChoose.setOnClickListener(this);
+        this.mockExamine.setOnClickListener(this);
     }
 
 }

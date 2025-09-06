@@ -19,6 +19,9 @@
             android:id="@+id/action_navigation_main_to_word_credit"
             app:destination="@id/navigation_word_credit" />
         <action
+            android:id="@+id/action_navigation_welcome_to_navigation_mock_examine"
+            app:destination="@id/navigation_mock_examine" />
+        <action
             android:id="@+id/action_main_navigation_to_settings"
             app:destination="@id/navigation_settings" />
         <action
@@ -137,5 +140,9 @@
         android:id="@+id/navigation_push_post"
         android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.PushPostFragment"
         tools:layout="@layout/fragment_push_post" />
+    <fragment
+        android:id="@+id/navigation_mock_examine"
+        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.MockExamineFragment"
+        tools:layout="@layout/fragment_mock_examine" />
 
 </navigation>
