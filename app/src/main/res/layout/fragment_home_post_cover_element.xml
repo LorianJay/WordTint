@@ -10,7 +10,7 @@
     android:backgroundTint="@color/white"
     android:paddingBottom="3dp">
 
-    <com.gitee.cnsukidayo.anylanguageword.ui.adapter.customview.RoundImageView
+    <com.github.lorenj.wordtint.ui.adapter.customview.RoundImageView
         android:id="@+id/fragment_home_post_cover_element_cover"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

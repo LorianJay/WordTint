@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.gitee.cnsukidayo.anylanguageword'
+    namespace 'com.github.lorenj.wordtint'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.gitee.cnsukidayo.anylanguageword"
+        applicationId "com.github.lorenj.wordtint"
         minSdk 33
         targetSdk 33
         versionCode 134
@@ -42,8 +42,13 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     final def markwon_version = '4.6.2'
+//    显示markdown相关
+    implementation group: 'io.noties.markwon', name: 'core', version: "$markwon_version"
+    implementation group: 'io.noties.markwon', name: 'html', version: "$markwon_version"
+    implementation group: 'io.noties.markwon', name: 'image', version: "$markwon_version"
+
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
@@ -53,19 +58,12 @@ dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
-    implementation group: 'io.noties.markwon', name: 'core', version: "$markwon_version"
-    implementation group: 'io.noties.markwon', name: 'html', version: "$markwon_version"
-    implementation group: 'io.noties.markwon', name: 'image', version: "$markwon_version"
     implementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
     implementation group: 'androidx.swiperefreshlayout', name: 'swiperefreshlayout', version: '1.1.0'
     implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.14.9'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-
-    // 导入本地jar
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">万语词</string>
+    <string name="app_name">WordTint</string>
     <string name="accept">同意并进入</string>
     <string name="disagree">不同意</string>
     <string name="fragment_welcome_welcome">欢迎使用</string>

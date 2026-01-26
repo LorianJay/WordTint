@@ -74,4 +74,3 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 app/libs
-syncFile.bat

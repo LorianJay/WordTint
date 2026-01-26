@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/main_navigation"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.MainFragmentAdapter"
+        android:name="com.github.lorenj.wordtint.ui.fragment.MainFragmentAdapter"
         tools:layout="@layout/fragment_main_adapter">
         <action
             android:id="@+id/action_navigation_main_to_navigation_welcome"
@@ -42,7 +42,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_welcome"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.WelcomeFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.WelcomeFragment"
         tools:layout="@layout/fragment_welcome">
         <action
             android:id="@+id/action_navigation_welcome_to_navigation_user_agreement"
@@ -54,19 +54,19 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_user_agreement"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.UserAgreementFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.UserAgreementFragment"
         tools:layout="@layout/fragment_user_agreement" />
     <fragment
         android:id="@+id/navigation_user_privacy_policy"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.PrivacyPolicyFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.PrivacyPolicyFragment"
         tools:layout="@layout/fragment_user_agreement" />
     <fragment
         android:id="@+id/navigation_i_start"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.RankFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.RankFragment"
         tools:layout="@layout/fragment_rank" />
     <fragment
         android:id="@+id/navigation_word_credit"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.WordCreditFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.WordCreditFragment"
         tools:layout="@layout/fragment_word_credit">
         <action
             android:id="@+id/action_navigation_word_credit_to_navigation_search_word"
@@ -77,7 +77,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.settings.SettingsFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.settings.SettingsFragment"
         tools:layout="@layout/fragment_settings">
         <action
             android:id="@+id/action_navigation_settings_to_navigation_user_agreement"
@@ -88,23 +88,23 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_account_profile"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.settings.AccountProfileFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.settings.AccountProfileFragment"
         tools:layout="@layout/fragment_account_profile" />
     <fragment
         android:id="@+id/navigation_search_word"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.SearchWordFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.SearchWordFragment"
         tools:layout="@layout/fragment_search_word" />
     <fragment
         android:id="@+id/navigation_association_credit"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.AssociationCreditFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.AssociationCreditFragment"
         tools:layout="@layout/fragment_association_credit" />
     <fragment
         android:id="@+id/navigation_analysis_word"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.AnalysisWordFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.AnalysisWordFragment"
         tools:layout="@layout/fragment_analysis_word" />
     <fragment
         android:id="@+id/navigation_word_credit_launch"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.WordCreditLaunchFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.WordCreditLaunchFragment"
         tools:layout="@layout/fragment_word_credit_launch">
         <action
             android:id="@+id/action_navigation_word_credit_launch_to_navigation_word_credit"
@@ -115,7 +115,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_login"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.LoginFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.LoginFragment"
         tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_navigation_login_to_navigation_create_account"
@@ -126,7 +126,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_create_account"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.CreateAccountFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.CreateAccountFragment"
         tools:layout="@layout/fragment_create_account">
         <action
             android:id="@+id/action_navigation_create_account_to_navigation_user_privacy_policy"
@@ -134,15 +134,15 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_post"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.PostFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.PostFragment"
         tools:layout="@layout/fragment_post" />
     <fragment
         android:id="@+id/navigation_push_post"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.PushPostFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.PushPostFragment"
         tools:layout="@layout/fragment_push_post" />
     <fragment
         android:id="@+id/navigation_mock_examine"
-        android:name="com.gitee.cnsukidayo.anylanguageword.ui.fragment.MockExamineFragment"
+        android:name="com.github.lorenj.wordtint.ui.fragment.MockExamineFragment"
         tools:layout="@layout/fragment_mock_examine" />
 
 </navigation>

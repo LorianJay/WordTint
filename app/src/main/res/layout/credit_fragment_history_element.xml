@@ -5,7 +5,7 @@
     android:layout_marginBottom="5dp"
     android:background="@color/gray">
 
-    <com.gitee.cnsukidayo.anylanguageword.ui.adapter.customview.ScrollerLinearLayout
+    <com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout
         android:id="@+id/fragment_word_credit_start_single_category_word_scroller"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
                 android:textColor="@color/white"
                 android:textSize="18sp" />
         </LinearLayout>
-    </com.gitee.cnsukidayo.anylanguageword.ui.adapter.customview.ScrollerLinearLayout>
+    </com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout>
 
 
 </LinearLayout>
