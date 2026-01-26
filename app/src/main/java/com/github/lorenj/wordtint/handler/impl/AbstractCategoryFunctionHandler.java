@@ -156,7 +156,7 @@ public abstract class AbstractCategoryFunctionHandler implements CategoryFunctio
         WordCategoryDetailVO wordCategoryDetailVO = getWordCategoryByPosition(categoryPosition);
         // 重排序收藏夹内的单词顺序
         wordCategoryDetailVO.getWordCategoryWordList().sort((o1, o2) -> o1.getWordOrder() - o2.getWordOrder());
-        wordCategoryDetailVO.getWordCategoryWordList().forEach(new Consumer<>() {
+        wordCategoryDetailVO.getWordCategoryWordList().forEach(new Consumer<WordCategoryWordDTO>() {
 
             int order = 0;
 

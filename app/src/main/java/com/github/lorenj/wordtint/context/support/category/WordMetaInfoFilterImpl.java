@@ -21,23 +21,24 @@ public class WordMetaInfoFilterImpl implements WordMetaInfoFilter {
     private final Map<Long, Map<Integer, BaseStructure>> cacheMap;
 
     public WordMetaInfoFilterImpl() {
-        Map<Long, Map<Integer, BaseStructure>> temp = new HashMap<>() {{
-            put(2L, new HashMap<>() {{
-                put(0, EnglishStructure.ADJ);
-                put(1, EnglishStructure.ADV);
-                put(2, EnglishStructure.V);
-                put(3, EnglishStructure.VI);
-                put(4, EnglishStructure.VT);
-                put(5, EnglishStructure.N);
-                put(6, EnglishStructure.CONJ);
-                put(7, EnglishStructure.PRON);
-                put(8, EnglishStructure.NUM);
-                put(9, EnglishStructure.ART);
-                put(10, EnglishStructure.PREP);
-                put(11, EnglishStructure.INT);
-                put(12, EnglishStructure.AUX);
-            }});
-        }};
+        Map<Long, Map<Integer, BaseStructure>> temp = new HashMap<>();
+
+        Map<Integer, BaseStructure> english = new HashMap<>();
+        english.put(0, EnglishStructure.ADJ);
+        english.put(1, EnglishStructure.ADV);
+        english.put(2, EnglishStructure.V);
+        english.put(3, EnglishStructure.VI);
+        english.put(4, EnglishStructure.VT);
+        english.put(5, EnglishStructure.N);
+        english.put(6, EnglishStructure.CONJ);
+        english.put(7, EnglishStructure.PRON);
+        english.put(8, EnglishStructure.NUM);
+        english.put(9, EnglishStructure.ART);
+        english.put(10, EnglishStructure.PREP);
+        english.put(11, EnglishStructure.INT);
+        english.put(12, EnglishStructure.AUX);
+        temp.put(2L, english);
+
         cacheMap = Collections.unmodifiableMap(temp);
     }
 
