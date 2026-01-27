@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".ui.fragment.WordCreditLaunchFragment">
+    android:background="@color/white">
 
 
     <com.google.android.material.appbar.AppBarLayout
@@ -27,8 +26,12 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/item_click_gray_round"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center"
+                android:paddingStart="5dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
                 android:scaleType="fitCenter"
                 android:src="?attr/actionModeCloseDrawable" />
 
@@ -48,7 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_word_credit_launch_start"
+        app:layout_constraintBottom_toTopOf="@+id/tv_word_recite_start"
         app:layout_constraintTop_toBottomOf="@id/toolbar_word_recite_launch">
 
         <LinearLayout
@@ -80,7 +83,7 @@
                     android:layout_marginStart="10dp"
                     android:layout_toEndOf="@id/fragment_word_credit_launch_word_count_hint"
                     android:gravity="center"
-                    android:text="2333"
+                    android:text="@string/default_txt"
                     android:textColor="@color/theme_color"
                     android:textSize="16sp" />
             </RelativeLayout>
@@ -499,7 +502,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <TextView
-        android:id="@+id/fragment_word_credit_launch_start"
+        android:id="@+id/tv_word_recite_start"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginStart="15dp"

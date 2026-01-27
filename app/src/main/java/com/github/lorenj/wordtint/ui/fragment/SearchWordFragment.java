@@ -236,7 +236,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         updateUIHandler = new Handler();
         startDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         // 隐藏单词的附加显示内容、隐藏收藏界面的答案信息
-        chineseAnswerHandler = new ChineseAnswerHandler(rootView);
+        chineseAnswerHandler = new ChineseAnswerHandler(null,null);
         sourceWord.setText("");
         sourceWordDrawer.setText("");
         drawerPhraseHint.setVisibility(View.GONE);

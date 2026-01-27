@@ -1,5 +1,6 @@
 package com.github.lorenj.wordtint.ui.activity;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -51,10 +52,13 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         int itemId = v.getId();
         if (itemId == R.id.ib_toolbar_back) {
             finish();
-        } else if (itemId == R.id.fragment_word_credit_launch_start) {
-            Bundle bundle = new Bundle();
+        } else if (itemId == R.id.tv_word_recite_start) {
             if (userCreditStyle.getCreditFormat() == CreditFormat.CLASSIC) {
+                Intent intent = new Intent(this, MainReciteActivity.class);
+                intent.putExtras(getIntent());
+                startActivity(intent);
             } else {
+
             }
         } else if (itemId == R.id.fragment_word_credit_launch_save_settings) {
             try {
@@ -87,7 +91,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
 
     private void bindView() {
         this.toolBarBack = findViewById(R.id.ib_toolbar_back);
-        this.start = findViewById(R.id.fragment_word_credit_launch_start);
+        this.start = findViewById(R.id.tv_word_recite_start);
         this.saveSettings = findViewById(R.id.fragment_word_credit_launch_save_settings);
         this.selectWordCount = findViewById(R.id.fragment_word_credit_launch_word_count);
         this.restoreDefault = findViewById(R.id.fragment_word_credit_launch_restore_default);

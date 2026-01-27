@@ -244,6 +244,8 @@
     <string name="bnv_analysis_word">单词分析</string>
     <string name="bnv_recite_list">背诵列表</string>
     <string name="recite_preference">偏好设置</string>
+    <string name="default_txt">default</string>
+    <string name="phrase_with_translation">%1$s %2$s</string>
 
 
 </resources>

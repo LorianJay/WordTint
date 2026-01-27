@@ -19,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AnyLanguageWord">
         <activity
+            android:name=".ui.activity.MainReciteActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.WordReciteLaunchActivity"
             android:exported="false" />
         <activity

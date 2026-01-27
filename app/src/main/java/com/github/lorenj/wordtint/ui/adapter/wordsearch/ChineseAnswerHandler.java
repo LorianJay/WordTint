@@ -9,7 +9,6 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.utils.FileUtils;
 import com.github.lorenj.wordtint.utils.RegularUtils;
-import com.github.lorenj.wordtint.R;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
@@ -23,15 +22,13 @@ import java.util.List;
  * @date 2024/7/20 14:02
  */
 public class ChineseAnswerHandler {
-    private final View rootView;
     private final Context context;
     private final WebView chineseAnswer;
     private final String template;
 
-    public ChineseAnswerHandler(View rootView) {
-        this.rootView = rootView;
-        this.context = rootView.getContext();
-        this.chineseAnswer = rootView.findViewById(R.id.fragment_word_credit_chinese_answer);
+    public ChineseAnswerHandler(Context context, WebView chineseAnswer) {
+        this.context = context;
+        this.chineseAnswer = chineseAnswer;
         WebSettings webSettings = this.chineseAnswer.getSettings();
         // 支持javascript
         webSettings.setJavaScriptEnabled(true);
