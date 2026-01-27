@@ -1,6 +1,7 @@
 package com.github.lorenj.wordtint.ui;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -11,13 +12,13 @@ import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.UserSettings;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
+import com.github.lorenj.wordtint.ui.activity.WelcomeActivity;
 import com.github.lorenj.wordtint.utils.JsonUtils;
-import com.github.lorenj.wordtint.R;
 
 import java.io.IOException;
 
@@ -93,7 +94,8 @@ public class MainActivity extends AppCompatActivity {
     private void changeFragment() {
         if (!userSettings.isAcceptUserAgreement()) {
             // 还没有同意用户协议跳转到用户协议界面
-            Navigation.findNavController(this.findViewById(R.id.fragment_main_adapter_viewpager)).navigate(R.id.action_navigation_main_to_navigation_welcome);
+            Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+            startActivity(intent);
         }
     }
 }
