@@ -806,7 +806,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/analysis" />
+                        android:src="@drawable/ic_word_analysis" />
 
                     <TextView
                         android:layout_width="wrap_content"

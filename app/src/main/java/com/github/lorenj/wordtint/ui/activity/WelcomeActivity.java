@@ -38,29 +38,27 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void bindView() {
-        disAgree = findViewById(R.id.fragment_welcome_disagree);
-        accept = findViewById(R.id.fragment_welcome_accept);
-        this.welcomeMessage = findViewById(R.id.welcome_message);
+        disAgree = findViewById(R.id.btn_welcome_disagree_agreement);
+        accept = findViewById(R.id.btn_welcome_accept_agreement);
+        this.welcomeMessage = findViewById(R.id.txt_welcome_message);
         disAgree.setOnClickListener(this);
         accept.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fragment_welcome_disagree:
-                exitAPP();
-                break;
-            case R.id.fragment_welcome_accept:
-                try {
-                    UserSettings userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
-                    userSettings.setAcceptUserAgreement(true);
-                    JsonUtils.writeJson(UserInfoPath.USER_SETTINGS.getPath(), userSettings);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                finish();
-                break;
+        int vId = v.getId();
+        if (vId == R.id.btn_welcome_disagree_agreement) {
+            exitAPP();
+        } else if (vId == R.id.btn_welcome_accept_agreement) {
+            try {
+                UserSettings userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
+                userSettings.setAcceptUserAgreement(true);
+                JsonUtils.writeJson(UserInfoPath.USER_SETTINGS.getPath(), userSettings);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            finish();
         }
     }
 

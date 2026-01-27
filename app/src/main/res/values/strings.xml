@@ -240,6 +240,9 @@
     <string name="remove5s">减5s</string>
     <string name="add30s">加30s</string>
     <string name="remove30s">减30s</string>
+    <string name="bnv_history_record">历史记录</string>
+    <string name="bnv_analysis_word">单词分析</string>
+    <string name="bnv_recite_list">背诵列表</string>
 
 
 </resources>

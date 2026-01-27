@@ -240,7 +240,7 @@ public class MainFragmentAdapter extends Fragment implements NavigationBarView.O
         listFragment.add(creditFragment);
         listFragment.add(rankFragment);
         listFragment.add(analysisFragment);
-        BottomViewAdapter adapter = new BottomViewAdapter(getChildFragmentManager(), getLifecycle(), listFragment);
+        BottomViewAdapter adapter = null;
         viewPager.setAdapter(adapter);
         viewPager.setSaveEnabled(false);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -288,6 +288,5 @@ public class MainFragmentAdapter extends Fragment implements NavigationBarView.O
         this.drawerUserFace.setOnClickListener(this);
         // 禁止左滑出现
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
     }
 }

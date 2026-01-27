@@ -8,15 +8,15 @@
         android:checkableBehavior="none">
         <item
             android:id="@+id/fragment_main_bottom_recite"
-            android:icon="@drawable/credit"
-            android:title="@string/recite" />
+            android:icon="@drawable/ic_bnv_recite"
+            android:title="@string/bnv_recite_list" />
         <item
             android:id="@+id/fragment_main_bottom_hearing"
-            android:icon="@drawable/hearing"
-            android:title="@string/analysis_word" />
+            android:icon="@drawable/ic_word_analysis"
+            android:title="@string/bnv_analysis_word" />
         <item
             android:id="@+id/fragment_main_bottom_analysis"
-            android:icon="@drawable/analysis"
-            android:title="@string/history" />
+            android:icon="@drawable/ic_bnv_history"
+            android:title="@string/bnv_history_record" />
     </group>
 </menu>
