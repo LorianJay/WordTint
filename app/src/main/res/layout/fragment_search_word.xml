@@ -15,7 +15,7 @@
 
         <include
             android:id="@+id/include"
-            layout="@layout/global_back_toolbar" />
+            layout="@layout/global_toolbar" />
 
         <TextView
             android:id="@+id/fragment_search_word_source_word"

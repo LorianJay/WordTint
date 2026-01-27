@@ -9,7 +9,7 @@
 
     <include
         android:id="@+id/include"
-        layout="@layout/global_back_toolbar" />
+        layout="@layout/global_toolbar" />
 
     <ProgressBar
         android:id="@+id/progress_bar_loading"

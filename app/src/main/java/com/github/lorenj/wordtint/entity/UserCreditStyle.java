@@ -5,13 +5,15 @@ import com.github.lorenj.wordtint.enums.CreditFormat;
 import com.github.lorenj.wordtint.enums.CreditOrder;
 import com.github.lorenj.wordtint.enums.CreditState;
 
+import java.io.Serializable;
+
 /**
  * 背诵风格
  *
  * @author cnsukidayo
  * @date 2023/2/9 19:59
  */
-public class UserCreditStyle {
+public class UserCreditStyle implements Serializable {
     // 背诵状态
     private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING;
     // 背诵顺序
@@ -25,11 +27,15 @@ public class UserCreditStyle {
     // 是否是回顾复习
     private boolean review = false;
 
-
     public UserCreditStyle() {
     }
 
-    public UserCreditStyle(CreditState creditState, CreditOrder creditOrder, CreditFilter creditFilter, CreditFormat creditFormat, boolean ignore, boolean review) {
+    public UserCreditStyle(CreditState creditState,
+                           CreditOrder creditOrder,
+                           CreditFilter creditFilter,
+                           CreditFormat creditFormat,
+                           boolean ignore,
+                           boolean review) {
         this.creditState = creditState;
         this.creditOrder = creditOrder;
         this.creditFilter = creditFilter;

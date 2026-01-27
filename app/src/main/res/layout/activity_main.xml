@@ -26,6 +26,6 @@
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/fragment_main_bottom" />
+        app:menu="@menu/menu_main_bottom_navigation" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -77,11 +77,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         int position = -1;
-        if (itemId == R.id.fragment_main_bottom_recite) {
+        if (itemId == R.id.item_main_bottom_recite) {
             position = 0;
-        } else if (itemId == R.id.fragment_main_bottom_hearing) {
+        } else if (itemId == R.id.item_main_bottom_hearing) {
             position = 1;
-        } else if (itemId == R.id.fragment_main_bottom_analysis) {
+        } else if (itemId == R.id.item_main_bottom_analysis) {
             position = 2;
         }
         viewPager.setCurrentItem(position, false);
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onLongClick(View v) {
         int itemId = v.getId();
-        if (itemId == R.id.fragment_main_bottom_recite) {
+        if (itemId == R.id.item_main_bottom_recite) {
             // todo 跳转到搜索页面
         }
         return false;
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void bindView() {
         this.viewPageChangeNavigationView = findViewById(R.id.btn_main);
         this.viewPager = findViewById(R.id.fragment_main_adapter_viewpager);
-        this.bottomRecite = this.viewPageChangeNavigationView.findViewById(R.id.fragment_main_bottom_recite);
+        this.bottomRecite = this.viewPageChangeNavigationView.findViewById(R.id.item_main_bottom_recite);
 
         this.bottomRecite.setOnLongClickListener(this);
     }

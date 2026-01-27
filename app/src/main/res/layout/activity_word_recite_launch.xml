@@ -7,16 +7,49 @@
     android:background="@color/white"
     tools:context=".ui.fragment.WordCreditLaunchFragment">
 
-    <include
-        android:id="@+id/include"
-        layout="@layout/global_back_toolbar" />
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/toolbar_word_recite_launch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize">
+
+            <ImageButton
+                android:id="@+id/ib_toolbar_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/item_click_gray_round"
+                android:gravity="center"
+                android:scaleType="fitCenter"
+                android:src="?attr/actionModeCloseDrawable" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/recite_preference"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/fragment_word_credit_launch_start"
-        app:layout_constraintTop_toBottomOf="@id/include">
+        app:layout_constraintTop_toBottomOf="@id/toolbar_word_recite_launch">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,7 +66,7 @@
                     android:id="@+id/fragment_word_credit_launch_word_count_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="30dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginTop="10dp"
                     android:text="@string/select_count"
                     android:textSize="20sp" />

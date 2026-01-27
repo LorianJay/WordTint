@@ -1,5 +1,6 @@
 package com.github.lorenj.wordtint.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -19,16 +20,16 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
 import com.github.lorenj.wordtint.entity.local.DivideDTOLocal;
-import com.github.lorenj.wordtint.entity.waper.UserCreditStyleWrapper;
 import com.github.lorenj.wordtint.ui.MainActivity;
+import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.divide.ChildDivideListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.utils.JsonUtils;
-import com.github.lorenj.wordtint.R;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -137,9 +138,8 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
                         e.printStackTrace();
                     }
                     // 拷贝Bean
-                    UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
                     Bundle bundle = new Bundle();
-                    bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+                    bundle.putSerializable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyle);
                     // 首先将id转为String类型的List
                     bundle.putSerializable(CreditFragment.CHILD_DIVIDE_SET, divideSet);
                     // 统计当前的选词量
@@ -154,8 +154,9 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
                             Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
                                     StaticFactory.getSimpleNavOptions());
                         } else {
-                            Navigation.findNavController(getView()).navigate(R.id.action_main_navigation_to_navigation_word_credit_launch, bundle,
-                                    StaticFactory.getSimpleNavOptions());
+                            Intent intent = new Intent(requireContext(), WordReciteLaunchActivity.class);
+                            intent.putExtras(bundle);
+                            startActivity(intent);
                         }
                         loadingBar.setVisibility(View.INVISIBLE);
                     });
@@ -207,7 +208,7 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
         // 设置标题信息为选择语种
         this.title.setText(R.string.select_language_class);
         divideSet.clear();
-        viewPageChangeNavigationView.removeBadge(R.id.fragment_main_bottom_recite);
+        viewPageChangeNavigationView.removeBadge(R.id.item_main_bottom_recite);
 
         this.fragmentManager = getChildFragmentManager();
         // 开启事务，获得FragmentTransaction对象
@@ -242,11 +243,11 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
                 divideSet.add(divideDTO);
             }
             if (divideSet.size() < 1) {
-                viewPageChangeNavigationView.removeBadge(R.id.fragment_main_bottom_recite);
+                viewPageChangeNavigationView.removeBadge(R.id.item_main_bottom_recite);
             } else {
-                viewPageChangeNavigationView.getOrCreateBadge(R.id.fragment_main_bottom_recite).setNumber(divideSet.size());
-                viewPageChangeNavigationView.getOrCreateBadge(R.id.fragment_main_bottom_recite).setBadgeGravity(BadgeDrawable.TOP_END);
-                viewPageChangeNavigationView.getOrCreateBadge(R.id.fragment_main_bottom_recite).setMaxCharacterCount(3);
+                viewPageChangeNavigationView.getOrCreateBadge(R.id.item_main_bottom_recite).setNumber(divideSet.size());
+                viewPageChangeNavigationView.getOrCreateBadge(R.id.item_main_bottom_recite).setBadgeGravity(BadgeDrawable.TOP_END);
+                viewPageChangeNavigationView.getOrCreateBadge(R.id.item_main_bottom_recite).setMaxCharacterCount(3);
             }
         });
         // 提交事务
@@ -254,7 +255,7 @@ public class CreditFragment extends Fragment implements View.OnClickListener, Na
     }
 
     private void bindView() {
-        this.viewPageChangeNavigationView = ((MainActivity) rootView.getContext()).findViewById(R.id.fragment_home_navigation_view);
+        this.viewPageChangeNavigationView = ((MainActivity) rootView.getContext()).findViewById(R.id.btn_main);
         this.startLearning = rootView.findViewById(R.id.fragment_credit_start_credit);
         this.loadingBar = rootView.findViewById(R.id.credit_fragment_loading_bar);
         this.switchLanguageClass = rootView.findViewById(R.id.fragment_credit_divide_backup);
