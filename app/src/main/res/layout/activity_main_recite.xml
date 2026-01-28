@@ -344,39 +344,9 @@
                 android:layout_height="wrap_content">
 
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:gravity="center"
-                        android:text="@string/default_rate"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:text="@string/rate"
-                        android:textColor="@color/gray_black"
-                        android:textSize="14sp" />
-
-
-                </LinearLayout>
-
-
-                <LinearLayout
                     android:id="@+id/fragment_word_credit_click_flag"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
                     android:clickable="true"
                     android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
@@ -390,7 +360,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/flag_close" />
+                        android:src="@drawable/ic_toast" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -421,7 +391,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/chameleon" />
+                        android:src="@drawable/ic_toast_chameleon" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -540,7 +510,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/jump_next" />
+                        android:src="@drawable/ic_jump_next" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -570,7 +540,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/start" />
+                        android:src="@drawable/ic_star" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -601,7 +571,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/shuffle" />
+                        android:src="@drawable/ic_shuffle" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -632,7 +602,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/section" />
+                        android:src="@drawable/ic_section" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -710,7 +680,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/save_progress" />
+                        android:src="@drawable/ic_bnv_history" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -802,7 +772,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/search_word" />
+                        android:src="@drawable/ic_search" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -919,7 +889,7 @@
                 android:foreground="@drawable/item_gray_select_radius_18dp"
                 android:gravity="center"
                 android:scaleType="fitCenter"
-                android:src="@drawable/open_after"
+                android:src="@drawable/ic_unfold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

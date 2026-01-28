@@ -4,18 +4,16 @@ import android.content.Context;
 
 import androidx.navigation.NavOptions;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.category.WordMetaInfoFilter;
 import com.github.lorenj.wordtint.context.support.category.WordMetaInfoFilterImpl;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.handler.HomeMessageStreamHandler;
 import com.github.lorenj.wordtint.handler.WordMeaningConvertHandler;
-import com.github.lorenj.wordtint.handler.impl.HomeMessageStreamHandlerImpl;
 import com.github.lorenj.wordtint.handler.impl.WordMeaningConvertHandlerImpl;
 import com.github.lorenj.wordtint.ui.markdown.plugin.GlobalMarkwonPlugin;
 import com.github.lorenj.wordtint.utils.JsonUtils;
-import com.github.lorenj.wordtint.R;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -66,10 +64,6 @@ public class StaticFactory {
                 .setExitAnim(R.anim.fade_out)
                 .setPopExitAnim(R.anim.slide_out_left)
                 .build();
-    }
-
-    private static final class HomeMessageStreamHandlerHolder {
-        static final HomeMessageStreamHandler HOME_MESSAGE_STREAM_HANDLER = new HomeMessageStreamHandlerImpl();
     }
 
     private static final class CssInlineStyleParserHolder {
@@ -144,16 +138,6 @@ public class StaticFactory {
      */
     public static NavOptions getSimpleNavOptions() {
         return SimpleNavOptionsHolder.NAV_OPTIONS;
-    }
-
-    /**
-     * 得到主页信息流功能的处理Handler<br>
-     * 详情见{@link HomeMessageStreamHandler}接口
-     *
-     * @return 返回封装动画参数的NavOptions实例
-     */
-    public static HomeMessageStreamHandler getHomeMessageStreamHandler() {
-        return HomeMessageStreamHandlerHolder.HOME_MESSAGE_STREAM_HANDLER;
     }
 
     /**

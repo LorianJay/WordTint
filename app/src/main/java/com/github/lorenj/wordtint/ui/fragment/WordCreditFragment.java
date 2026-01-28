@@ -379,12 +379,12 @@ public class WordCreditFragment extends Fragment implements View.OnClickListener
         if (clickViewId == R.id.fragment_word_credit_pop_more_function) {
             if (moreFunctionOpen) {
                 if (AnimationUtil.with().moveToViewBottom(moreFunctionHorizontalScrollView, 500)) {
-                    popMoreFunction.setImageResource(R.drawable.open_previous);
+                    popMoreFunction.setImageResource(R.drawable.ic_fold);
                     moreFunctionOpen = !moreFunctionOpen;
                 }
             } else {
                 if (AnimationUtil.with().bottomMoveToViewLocation(moreFunctionHorizontalScrollView, 500)) {
-                    popMoreFunction.setImageResource(R.drawable.open_after);
+                    popMoreFunction.setImageResource(R.drawable.ic_unfold);
                     moreFunctionOpen = !moreFunctionOpen;
                 }
             }

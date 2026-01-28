@@ -56,7 +56,7 @@ public class ChildDivideListAdapter extends RecyclerView.Adapter<ChildDivideList
         DivideDTOLocal divideDTO = allDivideDTOList.get(position);
         holder.divideTextView.setText(divideDTO.getName());
         if (divideIdSet.contains(divideDTO)) {
-            holder.childDivideButton.setImageResource(R.drawable.add_to_plane);
+            holder.childDivideButton.setImageResource(R.drawable.ic_add_plan);
         } else {
             holder.childDivideButton.setImageDrawable(null);
         }
@@ -150,7 +150,7 @@ public class ChildDivideListAdapter extends RecyclerView.Adapter<ChildDivideList
                 divideIdSet.add(divideDTO);
             }
             if (divideIdSet.contains(divideDTO)) {
-                childDivideButton.setImageResource(R.drawable.add_to_plane);
+                childDivideButton.setImageResource(R.drawable.ic_add_plan);
             } else {
                 childDivideButton.setImageDrawable(null);
             }

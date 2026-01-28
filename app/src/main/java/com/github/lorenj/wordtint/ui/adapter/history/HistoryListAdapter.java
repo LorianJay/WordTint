@@ -60,7 +60,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
         HistoryDTOLocal divideDTO = allDivideDTOList.get(position);
         holder.divideTextView.setText(divideDTO.getName());
         if (divideIdSet.contains(divideDTO)) {
-            holder.childDivideButton.setImageResource(R.drawable.add_to_plane);
+            holder.childDivideButton.setImageResource(R.drawable.ic_add_plan);
         } else {
             holder.childDivideButton.setImageDrawable(null);
         }
@@ -126,7 +126,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
             divideIdSet.clear();
             if (clickId == R.id.credit_fragment_history_divide_element) {
                 divideIdSet.add(divideDTO);
-                childDivideButton.setImageResource(R.drawable.add_to_plane);
+                childDivideButton.setImageResource(R.drawable.ic_add_plan);
                 recycleViewItemOnClickListener.viewClickCallBack(divideDTO);
             } else if (clickId == R.id.fragment_word_history_delete) {
                 allDivideDTOList.remove(position);

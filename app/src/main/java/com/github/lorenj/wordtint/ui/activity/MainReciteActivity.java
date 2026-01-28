@@ -438,12 +438,12 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.fragment_word_credit_pop_more_function) {
             if (moreFunctionOpen) {
                 if (AnimationUtil.with().moveToViewBottom(moreFunctionHorizontalScrollView, 500)) {
-                    popMoreFunction.setImageResource(R.drawable.open_previous);
+                    popMoreFunction.setImageResource(R.drawable.ic_fold);
                     moreFunctionOpen = !moreFunctionOpen;
                 }
             } else {
                 if (AnimationUtil.with().bottomMoveToViewLocation(moreFunctionHorizontalScrollView, 500)) {
-                    popMoreFunction.setImageResource(R.drawable.open_after);
+                    popMoreFunction.setImageResource(R.drawable.ic_unfold);
                     moreFunctionOpen = !moreFunctionOpen;
                 }
             }
@@ -1229,7 +1229,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 关闭旗帜改变区域显示时调用
      */
     private void closeFlagChangeAreaFlush() {
-        clickFlagImageView.setImageResource(R.drawable.flag_close);
+        clickFlagImageView.setImageResource(R.drawable.ic_toast);
         viewFlagArea.setPadding(0, 0, 5, 0);
         // 最开始除了绿色旗帜外,所有旗帜的对应的View全部置为不显示
         for (int i = 0; i < viewFlagArea.getChildCount(); i++) {
@@ -1249,7 +1249,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 打开旗帜改变区域显示时调用
      */
     private void openFlagChangeAreaFlush() {
-        clickFlagImageView.setImageResource(R.drawable.flag_open);
+        clickFlagImageView.setImageResource(R.drawable.ic_toast_solid);
         viewFlagArea.setPadding(5, 0, 0, 0);
         // 最开始除了绿色旗帜外,所有旗帜的对应的View全部置为不显示
         for (int i = 0; i < viewFlagArea.getChildCount(); i++) {

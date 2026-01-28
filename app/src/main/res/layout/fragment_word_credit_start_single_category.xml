@@ -33,12 +33,12 @@
                 android:gravity="center"
                 android:rotation="90"
                 android:scaleType="fitCenter"
-                android:src="@drawable/up"
+                android:src="@drawable/ic_up"
                 app:tint="@color/dark_gray" />
 
             <LinearLayout
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="7dp"
                 android:layout_marginTop="3dp"
                 android:orientation="vertical">
@@ -121,7 +121,8 @@
                 android:background="@drawable/style_image_padding"
                 android:gravity="center"
                 android:scaleType="fitCenter"
-                android:src="@drawable/element_move" />
+                android:src="@drawable/ic_element_move"
+                app:tint="@color/dark_gray" />
         </LinearLayout>
 
 

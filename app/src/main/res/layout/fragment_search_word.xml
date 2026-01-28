@@ -151,7 +151,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/start" />
+                        android:src="@drawable/ic_star" />
 
                     <TextView
                         android:layout_width="wrap_content"

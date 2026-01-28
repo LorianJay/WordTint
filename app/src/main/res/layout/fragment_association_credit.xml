@@ -163,7 +163,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/save_progress" />
+                        android:src="@drawable/ic_bnv_history" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -313,7 +313,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/start" />
+                        android:src="@drawable/ic_star" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -344,7 +344,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/search_word" />
+                        android:src="@drawable/ic_search" />
 
                     <TextView
                         android:layout_width="wrap_content"
