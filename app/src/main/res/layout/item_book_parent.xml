@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/light_blue_ff"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/iv_item_book"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_bnv_recite" />
+
+        <TextView
+            android:id="@+id/tv_item_book"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="5dp"
+            android:layout_toEndOf="@id/iv_item_book"
+            android:gravity="center"
+            android:text="@string/book_name"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+        <!--todo 标签功能快速选择-->
+
+        <TextView
+            android:id="@+id/tv_item_book_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="5dp"
+            android:gravity="center"
+            android:text="@string/divide_element_count"
+            android:textColor="@color/gold"
+            android:textSize="16sp" />
+    </RelativeLayout>
+
+    <!--每本书对应的片段-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_book_section_child"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray"
+        tools:ignore="RtlSymmetry" />
+
+</LinearLayout>

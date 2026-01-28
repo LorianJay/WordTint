@@ -81,249 +81,66 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/fragment_word_credit_flag_constraint_layout"
+                <RelativeLayout
+                    android:id="@+id/fragment_word_credit_change_flag_area"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:id="@+id/fragment_word_credit_view_flag_area"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rc_recite_mark_area"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        app:layout_constraintStart_toStartOf="parent">
+                        android:layout_height="wrap_content" />
+                </RelativeLayout>
 
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_green"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/theme_color" />
+                <!--<androidx.constraintlayout.widget.ConstraintLayout-->
+                <!--    android:id="@+id/fragment_word_credit_flag_constraint_layout"-->
+                <!--    android:layout_width="wrap_content"-->
+                <!--    android:layout_height="match_parent"-->
+                <!--    android:orientation="horizontal">-->
+                <!--    -->
+                <!--    <LinearLayout-->
+                <!--        android:id="@+id/fragment_word_credit_view_flag_area"-->
+                <!--        android:layout_width="wrap_content"-->
+                <!--        android:layout_height="match_parent"-->
+                <!--        android:orientation="vertical"-->
+                <!--        app:layout_constraintStart_toStartOf="parent">-->
 
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_red"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@android:color/holo_red_dark" />
+                <!--        <View-->
+                <!--            android:id="@+id/fragment_word_credit_view_flag_green"-->
+                <!--            android:layout_width="5dp"-->
+                <!--            android:layout_height="30dp"-->
+                <!--            android:layout_marginTop="10dp"-->
+                <!--            android:layout_marginBottom="10dp"-->
+                <!--            android:background="@color/theme_color" />-->
+                <!--        -->
+                <!--    </LinearLayout>-->
 
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_orange"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@android:color/holo_orange_dark" />
+                <!--    <LinearLayout-->
+                <!--        android:id="@+id/fragment_word_credit_change_flag_area"-->
+                <!--        android:layout_width="wrap_content"-->
+                <!--        android:layout_height="match_parent"-->
+                <!--        android:orientation="vertical"-->
+                <!--        app:layout_constraintEnd_toEndOf="parent"-->
+                <!--        app:layout_constraintTop_toTopOf="parent">-->
+                <!--        &lt;!&ndash;这里旗帜颜色的顺序一定要和FlagColor枚举类中定义的颜色顺序一致,否则会出错!&ndash;&gt;-->
+                <!--        <ImageButton-->
+                <!--            android:id="@+id/fragment_word_credit_button_flag_green"-->
+                <!--            android:layout_width="50dp"-->
+                <!--            android:layout_height="50dp"-->
+                <!--            android:layout_gravity="center_vertical"-->
+                <!--            android:background="@drawable/style_image_padding"-->
+                <!--            android:foreground="@drawable/item_gray_select"-->
+                <!--            android:gravity="center"-->
+                <!--            android:scaleType="fitCenter"-->
+                <!--            android:src="@drawable/flag_close"-->
+                <!--            app:tint="@color/theme_color" />-->
+                <!--        -->
+                <!--    </LinearLayout>-->
+                <!--    -->
+                <!--    -->
+                <!--    -->
+                <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
 
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_yellow"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/holo_yellow_dark" />
-
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_blue"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@android:color/holo_blue_dark" />
-
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_cyan"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/holo_cyan_dark" />
-
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_purple"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@android:color/holo_purple" />
-
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_pink"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/holo_pink_dark" />
-
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_gray"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/dark_gray" />
-
-                        <View
-                            android:id="@+id/fragment_word_credit_view_flag_black"
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/black" />
-
-                        <View
-                            android:layout_width="5dp"
-                            android:layout_height="30dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@color/halo_brown_dark" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/fragment_word_credit_change_flag_area"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-                        <!--这里旗帜颜色的顺序一定要和FlagColor枚举类中定义的颜色顺序一致,否则会出错!-->
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_green"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/theme_color" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_red"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@android:color/holo_red_dark" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_orange"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@android:color/holo_orange_dark" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_yellow"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/holo_yellow_dark" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_blue"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@android:color/holo_blue_dark" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_cyan"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/holo_cyan_dark" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_purple"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@android:color/holo_purple" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_pink"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/holo_pink_dark" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_gray"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/dark_gray" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_black"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/black" />
-
-                        <ImageButton
-                            android:id="@+id/fragment_word_credit_button_flag_brown"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/style_image_padding"
-                            android:foreground="@drawable/item_gray_select"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/flag_close"
-                            app:tint="@color/halo_brown_dark" />
-
-                    </LinearLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.core.widget.NestedScrollView>
 
 

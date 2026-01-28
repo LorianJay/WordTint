@@ -1,6 +1,6 @@
 package com.github.lorenj.wordtint.entity.local;
 
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -20,7 +20,7 @@ public class FunctionWordDTOLocal implements Serializable {
     /**
      * 当前单词的标记
      */
-    private Set<FlagColor> wordsFlagList;
+    private Set<MarkColor> wordsFlagList;
 
     public FunctionWordDTOLocal() {
     }
@@ -33,11 +33,11 @@ public class FunctionWordDTOLocal implements Serializable {
         this.id = id;
     }
 
-    public Set<FlagColor> getWordsFlagList() {
+    public Set<MarkColor> getWordsFlagList() {
         return wordsFlagList;
     }
 
-    public void setWordsFlagList(Set<FlagColor> wordsFlagList) {
+    public void setWordsFlagList(Set<MarkColor> wordsFlagList) {
         this.wordsFlagList = wordsFlagList;
     }
 }

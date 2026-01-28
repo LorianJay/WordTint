@@ -18,11 +18,11 @@ import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
 import com.github.lorenj.wordtint.entity.waper.UserCreditStyleWrapper;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
-import com.github.lorenj.wordtint.handler.WordSupplementReviewHandler;
+import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
 import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
-import com.github.lorenj.wordtint.handler.impl.WordSupplementReviewHandlerImpl;
+import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
 import com.github.lorenj.wordtint.ui.adapter.StartViewAdapter;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.github.lorenj.wordtint.R;
@@ -39,14 +39,14 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     private ViewPager viewPager;
     private SlidingTabLayout slidingTabLayout;
     private List<Fragment> listFragment;
-    private ArrayList<FlagColor> flagColorList;
+    private ArrayList<MarkColor> markColorList;
     private ImageButton creditComplete, creditSupplement;
     private TextView completeCount, supplementCount;
     private WordAnalysisHandler wordAnalysisHandler;
     private WordSupplementReviewHandler wordSupplementReviewHandler;
     private Handler updateUIHandler;
     // 当前选中的标记
-    private FlagColor currentFlagColor;
+    private MarkColor currentMarkColor;
     // 背词风格
     private UserCreditStyle userCreditStyle;
     private AlertDialog loadingDialog = null;
@@ -70,19 +70,19 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     private void initView() {
         this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
         this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(getContext());
-        this.flagColorList = new ArrayList<>();
+        this.markColorList = new ArrayList<>();
         this.listFragment = new ArrayList<>();
         this.updateUIHandler = new Handler();
         loadingDialog = new AlertDialog.Builder(getContext()).setView(LayoutInflater.from(getContext()).inflate(R.layout.dialog_loading, null)).setCancelable(false).create();
 
-        for (FlagColor flagColor : FlagColor.values()) {
-            if (flagColor == FlagColor.GREEN || flagColor == FlagColor.BROWN) {
+        for (MarkColor markColor : MarkColor.values()) {
+            if (markColor == MarkColor.GREEN || markColor == MarkColor.BROWN) {
                 continue;
             }
-            flagColorList.add(flagColor);
-            listFragment.add(new FlagPageFragment(flagColor, wordAnalysisHandler));
+            markColorList.add(markColor);
+            listFragment.add(new FlagPageFragment(markColor, wordAnalysisHandler));
         }
-        String[] pageTitle = flagColorList.stream()
+        String[] pageTitle = markColorList.stream()
                 .map(Enum::name)
                 .collect(Collectors.toList())
                 .toArray(new String[]{});
@@ -121,18 +121,18 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
 
             ArrayList<Long> currentFlagWord = null;
             if (itemId == R.id.fragment_rank_complete) {
-                currentFlagWord = wordAnalysisHandler.queryFlagRankByFlagColor(currentFlagColor);
+                currentFlagWord = wordAnalysisHandler.queryFlagRankByFlagColor(currentMarkColor);
             } else if (itemId == R.id.fragment_rank_supplement) {
-                currentFlagWord = wordSupplementReviewHandler.querySupplementByFlagColor(currentFlagColor);
+                currentFlagWord = wordSupplementReviewHandler.querySupplementByFlagColor(currentMarkColor);
                 userCreditStyle.setReview(true);
             }
 
             Bundle bundle = new Bundle();
-            bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+            bundle.putParcelable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
             // 设置背诵列表
-            bundle.putSerializable(CreditFragment.REVIEW_WORD_List, currentFlagWord);
+            bundle.putSerializable(BookListFragment.REVIEW_WORD_List, currentFlagWord);
             // 统计当前的选词量
-            bundle.putInt(CreditFragment.SELECT_WORD_COUNT, currentFlagWord.size());
+            bundle.putInt(BookListFragment.SELECT_WORD_COUNT, currentFlagWord.size());
             updateUIHandler.post(() -> {
                 if (userCreditStyle.isIgnore()) {
                     Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
@@ -149,12 +149,12 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     @Override
     public void onPageSelected(int position) {
         // 更改旗帜颜色
-        this.currentFlagColor = flagColorList.get(position);
-        this.creditComplete.getDrawable().setTint(getResources().getColor(currentFlagColor.getMapColorID(), null));
+        this.currentMarkColor = markColorList.get(position);
+        this.creditComplete.getDrawable().setTint(getResources().getColor(currentMarkColor.getMapColorID(), null));
         // 更改总数
         StaticFactory.getExecutorService().submit(() -> {
-            int count = wordAnalysisHandler.countFlagRankByFlagColor(currentFlagColor);
-            int supplementCount = wordSupplementReviewHandler.countSupplementFlagColor(currentFlagColor);
+            int count = wordAnalysisHandler.countFlagRankByFlagColor(currentMarkColor);
+            int supplementCount = wordSupplementReviewHandler.countSupplementFlagColor(currentMarkColor);
             updateUIHandler.post(() -> {
                 this.completeCount.setText(String.valueOf(count));
                 this.supplementCount.setText(String.valueOf(supplementCount));

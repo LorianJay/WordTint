@@ -5,7 +5,7 @@ import com.github.lorenj.wordtint.entity.local.FunctionWordDTOLocal;
 import com.github.lorenj.wordtint.entity.local.ProjectorDTOLocal;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.enums.CreditState;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 
 import java.util.List;
@@ -91,10 +91,10 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * 如果想要修改当前单词的标记,请使用:addFlagToCurrentWord(FlagColor)方法和removeFlagToCurrentWord(FlagColor)方法
      *
      * @return 返回当前单词所有的标记颜色集合
-     * @see WordFunctionHandler#addFlagToCurrentWord(FlagColor)
-     * @see WordFunctionHandler#removeFlagToCurrentWord(FlagColor)
+     * @see WordFunctionHandler#addFlagToCurrentWord(MarkColor)
+     * @see WordFunctionHandler#removeFlagToCurrentWord(MarkColor)
      */
-    Set<FlagColor> getCurrentWordFlagColor();
+    Set<MarkColor> getCurrentWordFlagColor();
 
     /**
      * 为当前单词添加一个标记
@@ -103,7 +103,7 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * @return {@code true} if this set did not already contain the specified
      * element
      */
-    boolean addFlagToCurrentWord(FlagColor tobeAddFlag);
+    boolean addFlagToCurrentWord(MarkColor tobeAddFlag);
 
     /**
      * 为当前单词删除一个标记d
@@ -111,15 +111,15 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * @param tobeAddFlag 待删除的标记颜色
      * @return {@code true} if this set contained the specified element
      */
-    boolean removeFlagToCurrentWord(FlagColor tobeAddFlag);
+    boolean removeFlagToCurrentWord(MarkColor tobeAddFlag);
 
     /**
      * 得到当前的变色龙状态,默认状态为FlagColor.GREEN
      *
-     * @return {@link FlagColor} 返回代表变色龙的颜色.
-     * @see FlagColor
+     * @return {@link MarkColor} 返回代表变色龙的颜色.
+     * @see MarkColor
      */
-    FlagColor getChameleon();
+    MarkColor getChameleon();
 
     /**
      * 设置变色龙颜色,此时函数的各个方法的返回值都会因为FlagColor的改变而改变.
@@ -127,7 +127,7 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      *
      * @param chameleonColor FlagColor
      */
-    void setChameleon(FlagColor chameleonColor);
+    void setChameleon(MarkColor chameleonColor);
 
     /**
      * 根据当前的chameleonColor进行打乱,也就是按颜色打乱.

@@ -1,4 +1,4 @@
-package com.github.lorenj.wordtint.handler.impl;
+package com.github.lorenj.wordtint.database.impl;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.github.lorenj.wordtint.entity.local.AddWordReViewParamLocal;
-import com.github.lorenj.wordtint.enums.FlagColor;
-import com.github.lorenj.wordtint.handler.WordSupplementReviewHandler;
+import com.github.lorenj.wordtint.enums.MarkColor;
+import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
 
 import java.util.ArrayList;
 
@@ -50,10 +50,10 @@ public class WordSupplementReviewHandlerImpl extends SQLiteOpenHelper implements
         }
         // 插入单词
         String insertSql = "INSERT INTO word_review(word_id,word_flag) VALUES(?,?);";
-        for (FlagColor flagColor : addWordAnalysisParamLocal.getWordFlag()) {
+        for (MarkColor markColor : addWordAnalysisParamLocal.getWordFlag()) {
             writableDatabase.execSQL(insertSql, new Object[]{
                     addWordAnalysisParamLocal.getId(),
-                    flagColor.name()
+                    markColor.name()
             });
         }
         writableDatabase.close();
@@ -68,12 +68,12 @@ public class WordSupplementReviewHandlerImpl extends SQLiteOpenHelper implements
     }
 
     @Override
-    public ArrayList<Long> querySupplementByFlagColor(FlagColor flagColor) {
+    public ArrayList<Long> querySupplementByFlagColor(MarkColor markColor) {
         ArrayList<Long> result = new ArrayList<>();
         String searchSql = "SELECT * FROM word_review WHERE word_flag = ? GROUP BY word_id";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询所有单词
-        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{flagColor.name()});
+        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{markColor.name()});
         int wordIdIndex = searchSqlCursor.getColumnIndex("word_id");
         while (searchSqlCursor.moveToNext()) {
             result.add(searchSqlCursor.getLong(wordIdIndex));
@@ -83,11 +83,11 @@ public class WordSupplementReviewHandlerImpl extends SQLiteOpenHelper implements
     }
 
     @Override
-    public int countSupplementFlagColor(FlagColor flagColor) {
+    public int countSupplementFlagColor(MarkColor markColor) {
         String countSql = "SELECT COUNT(*) FROM(SELECT word_id FROM word_review WHERE word_flag = ? GROUP BY word_id);";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询当前单词的数量
-        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{flagColor.name()});
+        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{markColor.name()});
         countCursor.moveToNext();
         int count = countCursor.getInt(0);
         sqLiteDatabase.close();

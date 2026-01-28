@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.github.lorenj.wordtint.R;
 
@@ -22,9 +22,9 @@ public class FlagClickRecyclerViewAdapter extends RecyclerView.Adapter<FlagClick
 
     private Context context;
     // 保存所有的旗帜
-    private final List<RecyclerViewHolder> allFlags = new ArrayList<>(FlagColor.values().length);
+    private final List<RecyclerViewHolder> allFlags = new ArrayList<>(MarkColor.values().length);
     private volatile boolean open = true;
-    private RecycleViewItemClickCallBack<FlagColor> recycleViewItemClickCallBack;
+    private RecycleViewItemClickCallBack<MarkColor> recycleViewItemClickCallBack;
 
     public FlagClickRecyclerViewAdapter(Context context) {
         this.context = context;
@@ -39,7 +39,7 @@ public class FlagClickRecyclerViewAdapter extends RecyclerView.Adapter<FlagClick
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, @SuppressLint("RecyclerView") int position) {
         if (allFlags.size() != getItemCount()) {
-            holder.flagImageButton.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(FlagColor.values()[position].getMapColorID(), null)));
+            holder.flagImageButton.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(MarkColor.values()[position].getMapColorID(), null)));
             allFlags.add(holder);
         }
     }
@@ -51,10 +51,10 @@ public class FlagClickRecyclerViewAdapter extends RecyclerView.Adapter<FlagClick
 
     @Override
     public int getItemCount() {
-        return FlagColor.values().length;
+        return MarkColor.values().length;
     }
 
-    public void setRecycleViewItemOnClickListener(RecycleViewItemClickCallBack<FlagColor> recycleViewItemClickCallBack) {
+    public void setRecycleViewItemOnClickListener(RecycleViewItemClickCallBack<MarkColor> recycleViewItemClickCallBack) {
         this.recycleViewItemClickCallBack = recycleViewItemClickCallBack;
     }
 
@@ -86,7 +86,7 @@ public class FlagClickRecyclerViewAdapter extends RecyclerView.Adapter<FlagClick
         public void onClick(View v) {
             // 负责传递消息给上一层
             if (recycleViewItemClickCallBack != null) {
-                recycleViewItemClickCallBack.viewClickCallBack(FlagColor.values()[getAdapterPosition()]);
+                recycleViewItemClickCallBack.viewClickCallBack(MarkColor.values()[getAdapterPosition()]);
             }
         }
     }

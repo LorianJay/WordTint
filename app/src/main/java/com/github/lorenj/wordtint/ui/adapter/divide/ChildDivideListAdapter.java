@@ -46,7 +46,7 @@ public class ChildDivideListAdapter extends RecyclerView.Adapter<ChildDivideList
     @NonNull
     @Override
     public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerViewHolder(LayoutInflater.from(context).inflate(R.layout.credit_fragment_child_divide_element, parent, false));
+        return new RecyclerViewHolder(LayoutInflater.from(context).inflate(R.layout.item_book_section, parent, false));
     }
 
     @SuppressLint("SetTextI18n")
@@ -133,9 +133,9 @@ public class ChildDivideListAdapter extends RecyclerView.Adapter<ChildDivideList
         public RecyclerViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
-            this.divideTextView = itemView.findViewById(R.id.credit_fragment_child_divide_textview);
-            this.childDivideButton = itemView.findViewById(R.id.credit_fragment_child_divide_image_button);
-            this.elementCount = itemView.findViewById(R.id.credit_fragment_child_divide_element_count);
+            this.divideTextView = itemView.findViewById(R.id.tv_item_book_section);
+            this.childDivideButton = itemView.findViewById(R.id.ib_item_book_section);
+            this.elementCount = itemView.findViewById(R.id.tv_item_book_section_count);
 
             itemView.setOnClickListener(this);
         }

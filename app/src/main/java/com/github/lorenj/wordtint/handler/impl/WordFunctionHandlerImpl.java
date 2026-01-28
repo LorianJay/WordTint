@@ -5,7 +5,7 @@ import com.github.lorenj.wordtint.entity.local.FunctionWordDTOLocal;
 import com.github.lorenj.wordtint.entity.local.ProjectorDTOLocal;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.enums.CreditState;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
@@ -55,7 +55,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     /**
      * 当前变色龙的颜色
      */
-    private FlagColor currentChameleon = FlagColor.GREEN;
+    private MarkColor currentChameleon = MarkColor.GREEN;
 
     /**
      * 默认的单词功能为空
@@ -99,7 +99,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     }
 
     @Override
-    public Set<FlagColor> getCurrentWordFlagColor() {
+    public Set<MarkColor> getCurrentWordFlagColor() {
         return Collections.unmodifiableSet(allFunctionWordList.get(currentIndex).getWordsFlagList());
     }
 
@@ -170,22 +170,22 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
 
 
     @Override
-    public boolean addFlagToCurrentWord(FlagColor tobeAddFlag) {
+    public boolean addFlagToCurrentWord(MarkColor tobeAddFlag) {
         return allFunctionWordList.get(currentIndex).getWordsFlagList().add(tobeAddFlag);
     }
 
     @Override
-    public boolean removeFlagToCurrentWord(FlagColor tobeAddFlag) {
+    public boolean removeFlagToCurrentWord(MarkColor tobeAddFlag) {
         return allFunctionWordList.get(currentIndex).getWordsFlagList().remove(tobeAddFlag);
     }
 
     @Override
-    public FlagColor getChameleon() {
+    public MarkColor getChameleon() {
         return this.currentChameleon;
     }
 
     @Override
-    public void setChameleon(FlagColor chameleonColor) {
+    public void setChameleon(MarkColor chameleonColor) {
         this.currentChameleon = chameleonColor;
     }
 
@@ -216,10 +216,10 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
         // 要找到对应颜色的区间
         int realIndex = findColorCursor(start);
         int count = end - start + 1;
-        FlagColor currentFlagColor = getChameleon();
+        MarkColor currentMarkColor = getChameleon();
         for (int i = realIndex; count > 0; i++) {
             FunctionWordDTOLocal tempWord = allFunctionWordList.get(i);
-            if (tempWord.getWordsFlagList().contains(currentFlagColor)) {
+            if (tempWord.getWordsFlagList().contains(currentMarkColor)) {
                 dummyWordList.add(tempWord);
                 count--;
             }
@@ -343,10 +343,10 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
      * @return 返回用户输入的颜色索引所对应的数组元素索引
      */
     private int findColorCursor(int currentIndex) {
-        FlagColor currentFlagColor = getChameleon();
+        MarkColor currentMarkColor = getChameleon();
         int result = 0;
         for (; result < this.size() && currentIndex > -1; result++) {
-            if (allFunctionWordList.get(result).getWordsFlagList().contains(currentFlagColor)) {
+            if (allFunctionWordList.get(result).getWordsFlagList().contains(currentMarkColor)) {
                 currentIndex--;
             }
         }

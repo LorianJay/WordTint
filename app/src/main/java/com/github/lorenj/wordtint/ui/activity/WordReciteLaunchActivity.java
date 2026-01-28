@@ -21,7 +21,7 @@ import com.github.lorenj.wordtint.enums.CreditFilter;
 import com.github.lorenj.wordtint.enums.CreditFormat;
 import com.github.lorenj.wordtint.enums.CreditOrder;
 import com.github.lorenj.wordtint.enums.CreditState;
-import com.github.lorenj.wordtint.ui.fragment.CreditFragment;
+import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 
 import java.io.IOException;
@@ -111,7 +111,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         // 得到背诵风格
         Bundle bundle = getIntent().getExtras();
         this.userCreditStyle = (UserCreditStyle) Optional.ofNullable(bundle)
-                .map(b -> b.getSerializable(CreditFragment.USER_CREDIT_STYLE_WRAPPER))
+                .map(b -> b.getSerializable(BookListFragment.USER_CREDIT_STYLE_WRAPPER))
                 .orElse(null);
 
         this.saveSettings.setOnClickListener(this);
@@ -128,7 +128,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         // 设置选词量
         Bundle bundle = getIntent().getExtras();
         int selectWordCount = Optional.ofNullable(bundle)
-                .map(p -> p.getInt(CreditFragment.SELECT_WORD_COUNT))
+                .map(p -> p.getInt(BookListFragment.SELECT_WORD_COUNT))
                 .orElse(0);
         this.selectWordCount.setText(String.valueOf(selectWordCount));
         if (this.userCreditStyle.isReview()) {

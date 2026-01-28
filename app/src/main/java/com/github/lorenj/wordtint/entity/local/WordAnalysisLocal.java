@@ -1,6 +1,6 @@
 package com.github.lorenj.wordtint.entity.local;
 
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 
 import java.util.Map;
 
@@ -9,16 +9,16 @@ import java.util.Map;
  * @date 2024/12/20 18:35
  */
 public class WordAnalysisLocal {
-    private Map<FlagColor, FlagColorMapInfo> mapMessage;
+    private Map<MarkColor, FlagColorMapInfo> mapMessage;
 
     public WordAnalysisLocal() {
     }
 
-    public Map<FlagColor, FlagColorMapInfo> getMapMessage() {
+    public Map<MarkColor, FlagColorMapInfo> getMapMessage() {
         return mapMessage;
     }
 
-    public void setMapMessage(Map<FlagColor, FlagColorMapInfo> mapMessage) {
+    public void setMapMessage(Map<MarkColor, FlagColorMapInfo> mapMessage) {
         this.mapMessage = mapMessage;
     }
 

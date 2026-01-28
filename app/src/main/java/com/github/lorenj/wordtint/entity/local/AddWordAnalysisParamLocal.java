@@ -1,6 +1,6 @@
 package com.github.lorenj.wordtint.entity.local;
 
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 
 import java.util.Set;
 
@@ -17,7 +17,7 @@ public class AddWordAnalysisParamLocal {
     /**
      * 单词的标记
      */
-    private Set<FlagColor> wordFlag;
+    private Set<MarkColor> wordFlag;
 
     /**
      * 单词的时间戳
@@ -35,11 +35,11 @@ public class AddWordAnalysisParamLocal {
         this.id = id;
     }
 
-    public Set<FlagColor> getWordFlag() {
+    public Set<MarkColor> getWordFlag() {
         return wordFlag;
     }
 
-    public void setWordFlag(Set<FlagColor> wordFlag) {
+    public void setWordFlag(Set<MarkColor> wordFlag) {
         this.wordFlag = wordFlag;
     }
 

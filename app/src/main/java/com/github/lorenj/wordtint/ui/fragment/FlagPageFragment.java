@@ -16,7 +16,7 @@ import com.github.lorenj.wordtint.entity.dto.DataPage;
 import com.github.lorenj.wordtint.entity.dto.PageQueryParam;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.entity.local.WordFlagRankLocal;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
 import com.github.lorenj.wordtint.ui.adapter.WordFlagRankRecyclerViewAdapter;
 import com.github.lorenj.wordtint.R;
@@ -43,12 +43,12 @@ public class FlagPageFragment extends Fragment {
     // 单词分析工具
     private WordAnalysisHandler wordAnalysisHandler;
     // 当前页面对应哪个FlagColor
-    private FlagColor flagColor;
+    private MarkColor markColor;
     // 单词字典
     private Map<Long, WordDTOLocal> allWordDict;
 
-    public FlagPageFragment(FlagColor flagColor, WordAnalysisHandler wordAnalysisHandler) {
-        this.flagColor = flagColor;
+    public FlagPageFragment(MarkColor markColor, WordAnalysisHandler wordAnalysisHandler) {
+        this.markColor = markColor;
         this.wordAnalysisHandler = wordAnalysisHandler;
     }
 
@@ -120,7 +120,7 @@ public class FlagPageFragment extends Fragment {
             @Override
             public void run() {
                 StaticFactory.getExecutorService().submit(() -> {
-                    DataPage<WordFlagRankLocal> page = wordAnalysisHandler.pageQueryFlagRankByFlagColor(flagColor, pageQueryParam);
+                    DataPage<WordFlagRankLocal> page = wordAnalysisHandler.pageQueryFlagRankByFlagColor(markColor, pageQueryParam);
                     // 替换为单词原文内容
                     page.getContent().forEach(wordFlagRankLocal -> wordFlagRankLocal
                             .setWordOrigin(allWordDict.get((long) wordFlagRankLocal.getWordId())

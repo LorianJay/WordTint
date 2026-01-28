@@ -246,6 +246,8 @@
     <string name="recite_preference">偏好设置</string>
     <string name="default_txt">default</string>
     <string name="phrase_with_translation">%1$s %2$s</string>
+    <string name="book_name">book_name</string>
+    <string name="book_section">book_section</string>
 
 
 </resources>

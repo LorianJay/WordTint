@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.R;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class FlagDecorateRecyclerViewAdapter extends RecyclerView.Adapter<FlagDe
 
     private final Context context;
     // 保存所有的旗帜
-    private final List<RecyclerViewHolder> allFlags = new ArrayList<>(FlagColor.values().length);
+    private final List<RecyclerViewHolder> allFlags = new ArrayList<>(MarkColor.values().length);
 
     public FlagDecorateRecyclerViewAdapter(Context context) {
         this.context = context;
@@ -35,8 +35,8 @@ public class FlagDecorateRecyclerViewAdapter extends RecyclerView.Adapter<FlagDe
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, @SuppressLint("RecyclerView") int position) {
         if (allFlags.size() != getItemCount()) {
             // 所有颜色都初始化,但是只有棕色和绿色显示
-            holder.flagDecorate.setBackgroundColor(context.getResources().getColor(FlagColor.values()[position].getMapColorID(), null));
-            if (FlagColor.values()[position] != FlagColor.BROWN) {
+            holder.flagDecorate.setBackgroundColor(context.getResources().getColor(MarkColor.values()[position].getMapColorID(), null));
+            if (MarkColor.values()[position] != MarkColor.BROWN) {
                 holder.flagDecorate.setAlpha(0.0f);
             }
             allFlags.add(holder);
@@ -50,22 +50,22 @@ public class FlagDecorateRecyclerViewAdapter extends RecyclerView.Adapter<FlagDe
 
     @Override
     public int getItemCount() {
-        return FlagColor.values().length;
+        return MarkColor.values().length;
     }
 
     /**
      * 设置当前的旗帜状态,参数是一个数组<br>
-     * 例如你设置的参数为{@link FlagColor#BLUE}和{@link FlagColor#RED},那么右侧就会将BLUE和RED这两种颜色的旗帜设置为标记状态<br>
-     * 此外{@link FlagColor#BROWN}旗帜是无法进行任何更改的
+     * 例如你设置的参数为{@link MarkColor#BLUE}和{@link MarkColor#RED},那么右侧就会将BLUE和RED这两种颜色的旗帜设置为标记状态<br>
+     * 此外{@link MarkColor#BROWN}旗帜是无法进行任何更改的
      *
-     * @param flagColors 提供一个旗帜颜色数组
+     * @param markColors 提供一个旗帜颜色数组
      */
-    public void setFlagStatus(List<FlagColor> flagColors) {
+    public void setFlagStatus(List<MarkColor> markColors) {
         for (RecyclerViewHolder allFlag : allFlags) {
             allFlag.flagDecorate.setAlpha(0.0f);
         }
-        for (int i = 0; i < flagColors.size(); i++) {
-            allFlags.get(flagColors.get(i).ordinal()).flagDecorate.setAlpha(1.0f);
+        for (int i = 0; i < markColors.size(); i++) {
+            allFlags.get(markColors.get(i).ordinal()).flagDecorate.setAlpha(1.0f);
         }
     }
 

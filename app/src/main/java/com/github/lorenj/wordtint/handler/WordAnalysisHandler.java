@@ -5,7 +5,7 @@ import com.github.lorenj.wordtint.entity.dto.PageQueryParam;
 import com.github.lorenj.wordtint.entity.local.AddWordAnalysisParamLocal;
 import com.github.lorenj.wordtint.entity.local.WordAnalysisLocal;
 import com.github.lorenj.wordtint.entity.local.WordFlagRankLocal;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 
 import java.util.ArrayList;
 
@@ -34,26 +34,26 @@ public interface WordAnalysisHandler {
     /**
      * 分页查询单词排行榜
      *
-     * @param flagColor      目标单词标记
+     * @param markColor      目标单词标记
      * @param pageQueryParam 分页查询参数
      * @return 返回分页查询结果
      */
-    DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(FlagColor flagColor, PageQueryParam pageQueryParam);
+    DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(MarkColor markColor, PageQueryParam pageQueryParam);
 
     /**
      * 查询某个标记下的所有单词
      *
-     * @param flagColor 目标单词标记
+     * @param markColor 目标单词标记
      * @return 返回分页查询结果
      */
-    ArrayList<Long> queryFlagRankByFlagColor(FlagColor flagColor);
+    ArrayList<Long> queryFlagRankByFlagColor(MarkColor markColor);
 
     /**
      * 统计某个标记单词有多少种颜色
      *
-     * @param flagColor 目标单词的标记
+     * @param markColor 目标单词的标记
      * @return 返回目标单词标记的总数
      */
-    int countFlagRankByFlagColor(FlagColor flagColor);
+    int countFlagRankByFlagColor(MarkColor markColor);
 
 }

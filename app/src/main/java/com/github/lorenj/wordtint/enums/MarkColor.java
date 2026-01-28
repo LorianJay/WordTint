@@ -2,7 +2,7 @@ package com.github.lorenj.wordtint.enums;
 
 import com.github.lorenj.wordtint.R;
 
-public enum FlagColor {
+public enum MarkColor {
     /*
      fragment_word_credit中旗帜颜色定义的顺序一定要和这里的枚举类定义的顺序一致,否则会无法工作.
      */

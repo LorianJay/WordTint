@@ -1,7 +1,7 @@
-package com.github.lorenj.wordtint.handler;
+package com.github.lorenj.wordtint.database;
 
 import com.github.lorenj.wordtint.entity.local.AddWordReViewParamLocal;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 
 import java.util.ArrayList;
 
@@ -28,17 +28,17 @@ public interface WordSupplementReviewHandler {
     /**
      * 查询某个标记下的所有增量单词
      *
-     * @param flagColor 目标单词标记
+     * @param markColor 目标单词标记
      * @return 返回单词的所有id
      */
-    ArrayList<Long> querySupplementByFlagColor(FlagColor flagColor);
+    ArrayList<Long> querySupplementByFlagColor(MarkColor markColor);
 
     /**
      * 统计某个标记单词当前的增量单词是多少
      *
-     * @param flagColor 目标单词的标记
+     * @param markColor 目标单词的标记
      * @return 返回增量总数
      */
-    int countSupplementFlagColor(FlagColor flagColor);
+    int countSupplementFlagColor(MarkColor markColor);
 
 }

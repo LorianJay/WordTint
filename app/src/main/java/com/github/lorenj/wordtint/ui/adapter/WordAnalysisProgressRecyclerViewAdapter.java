@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.entity.local.WordAnalysisLocal;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.R;
 
@@ -34,7 +34,7 @@ public class WordAnalysisProgressRecyclerViewAdapter extends RecyclerView.Adapte
 
     private final Context context;
     private WordAnalysisLocal wordAnalysisLocal;
-    private final List<FlagColor> flagColorList = new ArrayList<>(5);
+    private final List<MarkColor> markColorList = new ArrayList<>(5);
     private Integer maxValue = Integer.MIN_VALUE;
 
     public WordAnalysisProgressRecyclerViewAdapter(Context context) {
@@ -55,8 +55,8 @@ public class WordAnalysisProgressRecyclerViewAdapter extends RecyclerView.Adapte
             wordAnalysisProgressViewHolder = (WordAnalysisProgressViewHolder) holder;
         }
         // 设置总记录次数
-        FlagColor flagColor = flagColorList.get(position);
-        WordAnalysisLocal.FlagColorMapInfo flagColorMapInfo = wordAnalysisLocal.getMapMessage().get(flagColor);
+        MarkColor markColor = markColorList.get(position);
+        WordAnalysisLocal.FlagColorMapInfo flagColorMapInfo = wordAnalysisLocal.getMapMessage().get(markColor);
         wordAnalysisProgressViewHolder.percentage.setText(String.valueOf(flagColorMapInfo.getTotal()));
         // 计算比例
         int progressValue = BigDecimal
@@ -66,7 +66,7 @@ public class WordAnalysisProgressRecyclerViewAdapter extends RecyclerView.Adapte
                 .intValue();
         wordAnalysisProgressViewHolder.progressBar.setProgress(progressValue);
         // 设置旗帜颜色
-        wordAnalysisProgressViewHolder.flag.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(flagColor.getMapColorID(), null)));
+        wordAnalysisProgressViewHolder.flag.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(markColor.getMapColorID(), null)));
         // 设置上次标记的时间
         wordAnalysisProgressViewHolder.last.setText(String.format(
                 context.getString(R.string.word_analysis_last_flag),
@@ -91,11 +91,11 @@ public class WordAnalysisProgressRecyclerViewAdapter extends RecyclerView.Adapte
     public void addItem(WordAnalysisLocal item) {
         this.wordAnalysisLocal = item;
         // 找出最大值
-        for (Map.Entry<FlagColor, WordAnalysisLocal.FlagColorMapInfo> entry : wordAnalysisLocal.getMapMessage().entrySet()) {
-            flagColorList.add(entry.getKey());
+        for (Map.Entry<MarkColor, WordAnalysisLocal.FlagColorMapInfo> entry : wordAnalysisLocal.getMapMessage().entrySet()) {
+            markColorList.add(entry.getKey());
             maxValue = Math.max(entry.getValue().getTotal(), maxValue);
         }
-        flagColorList.sort((o1, o2) -> o1.ordinal() - o2.ordinal());
+        markColorList.sort((o1, o2) -> o1.ordinal() - o2.ordinal());
     }
 
     @Override

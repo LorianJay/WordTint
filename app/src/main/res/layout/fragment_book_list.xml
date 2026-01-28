@@ -5,15 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".ui.fragment.CreditFragment">
+    tools:context=".ui.fragment.BookListFragment">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/fragment_credit_barlayout"
+        android:id="@+id/abl_book_list"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@android:color/white"
         android:theme="@style/ThemeOverlay.AppCompat.Light"
-        app:layout_constraintBottom_toTopOf="@id/fragment_credit_frame_layout"
+        app:layout_constraintBottom_toTopOf="@id/rl_book_list"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,22 +21,7 @@
             android:layout_height="match_parent">
 
             <ImageButton
-                android:id="@+id/fragment_credit_divide_backup"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="10dp"
-                android:background="@drawable/item_click_gray_round"
-                android:gravity="center"
-                android:scaleType="fitCenter"
-                android:src="?attr/actionModeCloseDrawable"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-
-            <ImageButton
-                android:id="@+id/fragment_credit_quick_choose"
+                android:id="@+id/ib_book_list_quick"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="10dp"
@@ -49,7 +34,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/fragment_credit_title"
+                android:id="@+id/ib_book_list_title"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
@@ -62,17 +47,17 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
-                android:id="@+id/credit_fragment_loading_bar"
+                android:id="@+id/ib_book_list_loading_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:indeterminateTint="@color/theme_color"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_credit_start_credit"
+                app:layout_constraintEnd_toStartOf="@+id/ib_book_list_start_learn"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/fragment_credit_start_credit"
+                android:id="@+id/ib_book_list_start_learn"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="10dp"
@@ -86,15 +71,25 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!--显示单词语种/划分的FrameLayout-->
-    <FrameLayout
-        android:id="@+id/fragment_credit_frame_layout"
+    <!--书籍列表的显示,这里是二级列表-->
+    <RelativeLayout
+        android:id="@+id/rl_book_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fragment_credit_barlayout">
+        app:layout_constraintTop_toBottomOf="@id/abl_book_list">
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_book_list_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="5dp">
+            </androidx.recyclerview.widget.RecyclerView>
+        </androidx.core.widget.NestedScrollView>
 
-    </FrameLayout>
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,7 +10,7 @@ import com.github.lorenj.wordtint.entity.dto.PageQueryParam;
 import com.github.lorenj.wordtint.entity.local.AddWordAnalysisParamLocal;
 import com.github.lorenj.wordtint.entity.local.WordAnalysisLocal;
 import com.github.lorenj.wordtint.entity.local.WordFlagRankLocal;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
 
 import java.util.ArrayList;
@@ -54,19 +54,19 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
     @Override
     public WordAnalysisLocal queryWordAnalysis(int id) {
         WordAnalysisLocal result = new WordAnalysisLocal();
-        Map<FlagColor, WordAnalysisLocal.FlagColorMapInfo> map = new HashMap<>();
+        Map<MarkColor, WordAnalysisLocal.FlagColorMapInfo> map = new HashMap<>();
         SQLiteDatabase reader = this.getReadableDatabase();
         String lastRecordSql = "SELECT * from word_analysis WHERE word_id = ? and word_flag = ?  ORDER BY create_timestamp DESC LIMIT 1";
         String totalSql = "SELECT COUNT(*)  FROM word_analysis WHERE word_id = ? and word_flag = ?";
-        for (FlagColor flagColor : FlagColor.values()) {
-            if (flagColor == FlagColor.GREEN || flagColor == FlagColor.BROWN) {
+        for (MarkColor markColor : MarkColor.values()) {
+            if (markColor == MarkColor.GREEN || markColor == MarkColor.BROWN) {
                 continue;
             }
             WordAnalysisLocal.FlagColorMapInfo flagColorMapInfo = new WordAnalysisLocal.FlagColorMapInfo();
             // 查询最后一次标记的时间点
             Cursor lastCursor = reader.rawQuery(lastRecordSql, new String[]{
                     String.valueOf(id),
-                    flagColor.name()});
+                    markColor.name()});
             int createTimestampIndex = lastCursor.getColumnIndex("create_timestamp");
             //  如果没有最后一次标记的时间点,则跳过当前
             if (!lastCursor.moveToNext()) {
@@ -76,10 +76,10 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
             // 查询总数
             Cursor totalCursor = reader.rawQuery(totalSql, new String[]{
                     String.valueOf(id),
-                    flagColor.name()});
+                    markColor.name()});
             totalCursor.moveToNext();
             flagColorMapInfo.setTotal(totalCursor.getInt(0));
-            map.put(flagColor, flagColorMapInfo);
+            map.put(markColor, flagColorMapInfo);
         }
         reader.close();
         result.setMapMessage(map);
@@ -90,10 +90,10 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
     public void insertWordAnalysis(AddWordAnalysisParamLocal addWordAnalysisParamLocal) {
         SQLiteDatabase writableDatabase = this.getWritableDatabase();
         String insertSql = "INSERT INTO word_analysis(word_id,word_flag,create_timestamp) VALUES(?,?,?);";
-        for (FlagColor flagColor : addWordAnalysisParamLocal.getWordFlag()) {
+        for (MarkColor markColor : addWordAnalysisParamLocal.getWordFlag()) {
             writableDatabase.execSQL(insertSql, new Object[]{
                     addWordAnalysisParamLocal.getId(),
-                    flagColor.name(),
+                    markColor.name(),
                     addWordAnalysisParamLocal.getCreateTimestamp()
             });
         }
@@ -101,14 +101,14 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
     }
 
     @Override
-    public DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(FlagColor flagColor, PageQueryParam pageQueryParam) {
+    public DataPage<WordFlagRankLocal> pageQueryFlagRankByFlagColor(MarkColor markColor, PageQueryParam pageQueryParam) {
         DataPage<WordFlagRankLocal> result = new DataPage<>();
         List<WordFlagRankLocal> data = new ArrayList<>();
         String searchSql = "select * from (SELECT COUNT(*) as count,word_id FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id) ORDER BY count DESC LIMIT ?,?";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询所有单词
         Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{
-                flagColor.name(),
+                markColor.name(),
                 String.valueOf((pageQueryParam.getCurrent() - 1) * pageQueryParam.getSize()),
                 String.valueOf((pageQueryParam.getCurrent() * pageQueryParam.getSize()))
         });
@@ -120,7 +120,7 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
             wordFlagRankLocal.setWordId(searchSqlCursor.getInt(wordIdIndex));
             data.add(wordFlagRankLocal);
         }
-        int count = this.countFlagRankByFlagColor(flagColor);
+        int count = this.countFlagRankByFlagColor(markColor);
         if (count - pageQueryParam.getCurrent() * 20 <= 0) {
             result.setLast(true);
         }
@@ -131,12 +131,12 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
     }
 
     @Override
-    public ArrayList<Long> queryFlagRankByFlagColor(FlagColor flagColor) {
+    public ArrayList<Long> queryFlagRankByFlagColor(MarkColor markColor) {
         ArrayList<Long> result = new ArrayList<>();
         String searchSql = "SELECT *,MAX(create_timestamp) FROM \"word_analysis\" WHERE word_flag = ? GROUP BY word_id ORDER BY create_timestamp ASC";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询所有单词
-        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{flagColor.name()});
+        Cursor searchSqlCursor = sqLiteDatabase.rawQuery(searchSql, new String[]{markColor.name()});
         int wordIdIndex = searchSqlCursor.getColumnIndex("word_id");
         while (searchSqlCursor.moveToNext()) {
             result.add(searchSqlCursor.getLong(wordIdIndex));
@@ -146,11 +146,11 @@ public class WordAnalysisHandlerImpl extends SQLiteOpenHelper implements WordAna
     }
 
     @Override
-    public int countFlagRankByFlagColor(FlagColor flagColor) {
+    public int countFlagRankByFlagColor(MarkColor markColor) {
         String countSql = "SELECT COUNT(*) FROM(SELECT word_id FROM word_analysis WHERE word_flag = ? GROUP BY word_id);";
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         // 查询当前单词的数量
-        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{flagColor.name()});
+        Cursor countCursor = sqLiteDatabase.rawQuery(countSql, new String[]{markColor.name()});
         countCursor.moveToNext();
         int count = countCursor.getInt(0);
         sqLiteDatabase.close();

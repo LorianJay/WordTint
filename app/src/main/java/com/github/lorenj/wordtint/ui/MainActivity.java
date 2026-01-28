@@ -21,7 +21,7 @@ import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.ui.activity.WelcomeActivity;
 import com.github.lorenj.wordtint.ui.adapter.BottomViewAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
-import com.github.lorenj.wordtint.ui.fragment.CreditFragment;
+import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.ui.fragment.HistoryFragment;
 import com.github.lorenj.wordtint.ui.fragment.RankFragment;
 import com.github.lorenj.wordtint.utils.JsonUtils;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem nowSelectMenuItem;
     private ArrayList<Fragment> listFragment;
     private volatile int position = 0;
-    private final Fragment creditFragment = new CreditFragment(), rankFragment = new RankFragment(), analysisFragment = new HistoryFragment();
+    private final Fragment creditFragment = new BookListFragment(), rankFragment = new RankFragment(), analysisFragment = new HistoryFragment();
     private BottomNavigationItemView bottomRecite;
 
     @Override

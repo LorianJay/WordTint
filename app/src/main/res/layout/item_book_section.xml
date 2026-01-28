@@ -1,58 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/credit_fragment_child_divide_element"
+    android:id="@+id/rl_item_book_parent"
     android:layout_width="match_parent"
     android:layout_height="50dp"
     android:layout_marginBottom="5dp"
     android:background="@color/gray"
     android:clickable="true"
-    android:foreground="@drawable/item_gray_select">
+    android:foreground="?attr/selectableItemBackground">
 
     <ImageView
-        android:id="@+id/credit_fragment_child_divide_point"
+        android:id="@+id/iv_item_book_section"
         android:layout_width="30dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:importantForAccessibility="no"
         android:src="@drawable/ic_point" />
 
-
     <TextView
-        android:id="@+id/credit_fragment_child_divide_textview"
+        android:id="@+id/tv_item_book_section"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="-3dp"
-        android:layout_toEndOf="@id/credit_fragment_child_divide_point"
+        android:layout_toEndOf="@id/iv_item_book_section"
         android:gravity="center"
-        android:text="@string/divide"
+        android:text="@string/book_section"
         android:textColor="@color/black"
         android:textSize="20sp" />
-
+    <!--todo 标签-->
     <TextView
-        android:id="@+id/credit_fragment_child_divide_element_count"
+        android:id="@+id/tv_item_book_section_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginEnd="15dp"
-        android:layout_toStartOf="@id/credit_fragment_child_divide_image_button"
+        android:layout_toStartOf="@id/ib_item_book_section"
         android:gravity="center"
         android:text="@string/divide_element_count"
         android:textColor="@color/blue"
         android:textSize="16sp" />
 
-    <ImageButton
-        android:id="@+id/credit_fragment_child_divide_image_button"
+    <ImageView
+        android:id="@+id/ib_item_book_section"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:background="@color/gray"
         android:clickable="false"
-        android:paddingStart="5dp"
-        android:paddingTop="5dp"
-        android:paddingEnd="5dp"
-        android:paddingBottom="5dp"
         android:scaleType="fitCenter"
         app:tint="@color/theme_color" />
 </RelativeLayout>

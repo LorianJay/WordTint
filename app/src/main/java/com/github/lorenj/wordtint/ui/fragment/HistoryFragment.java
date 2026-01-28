@@ -88,15 +88,15 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
                 // 拷贝Bean
                 UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
                 Bundle bundle = new Bundle();
-                bundle.putParcelable(CreditFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+                bundle.putParcelable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
                 // 首先将id转为String类型的List
-                bundle.putSerializable(CreditFragment.HISTORY_WORD_SET, historyDTOSet);
+                bundle.putSerializable(BookListFragment.HISTORY_WORD_SET, historyDTOSet);
                 // 统计当前的选词量
                 int selectWordCount = 0;
                 for (HistoryDTOLocal historyDTOLocal : historyDTOSet) {
                     selectWordCount += historyDTOLocal.getSerializeWordList().size();
                 }
-                bundle.putInt(CreditFragment.SELECT_WORD_COUNT, selectWordCount);
+                bundle.putInt(BookListFragment.SELECT_WORD_COUNT, selectWordCount);
                 updateUIHandler.post(() -> {
                     if (userCreditStyle.isIgnore()) {
                         Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,

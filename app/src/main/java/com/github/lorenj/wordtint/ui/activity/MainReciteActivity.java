@@ -25,13 +25,13 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -58,24 +58,24 @@ import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.enums.CreditFilter;
 import com.github.lorenj.wordtint.enums.CreditOrder;
 import com.github.lorenj.wordtint.enums.CreditState;
-import com.github.lorenj.wordtint.enums.FlagColor;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.structure.EnglishStructure;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
-import com.github.lorenj.wordtint.handler.WordSupplementReviewHandler;
+import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
 import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
 import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
-import com.github.lorenj.wordtint.handler.impl.WordSupplementReviewHandlerImpl;
+import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.StarChineseAnswerRecyclerViewAdapter;
 import com.github.lorenj.wordtint.ui.adapter.StartSingleCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ChineseAnswerHandler;
-import com.github.lorenj.wordtint.ui.fragment.CreditFragment;
+import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.ui.fragment.WordCreditFragment;
 import com.github.lorenj.wordtint.utils.AnimationUtil;
-import com.github.lorenj.wordtint.utils.DPUtils;
 import com.github.lorenj.wordtint.utils.FileUtils;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.gson.Gson;
@@ -109,10 +109,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private Handler updateUIHandler;
     private WordFunctionHandler wordFunctionHandler;
     private DrawerLayout startDrawer;
-    private RecyclerView chineseAnswerDrawer, starSingleCategory;
+    private RecyclerView chineseAnswerDrawer, starSingleCategory, reciteMarkArea;
     private ChineseAnswerHandler chineseAnswerHandler;
     private StarChineseAnswerRecyclerViewAdapter chineseAnswerAdapterDrawer;
     private StartSingleCategoryAdapter startSingleCategoryAdapter;
+    private ReciteMarkToastAdapter reciteMarkToastAdapter;
     /**
      * 所有单词信息详细信息<br>
      * Key:单词的id<br>
@@ -130,18 +131,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private TextView currentIndexTextView, wordCount, chameleonCount, projectorHint;
     private TextView sourceWordDrawer, phraseHintDrawer, phraseAnswerDrawer, addNewStartCategory;
     private AlertDialog loadingDialog = null;
-    private LinearLayout jumpNextWord, flagChangeArea, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, projector, changeMode, quickPosition, start, searchWord, saveProgress, wordAnalysis;
+    private LinearLayout jumpNextWord, clickFlag, chameleonMode, swingSwitch, lockAnswer, blueTooth, viewFlagArea, shuffle, section, projector, changeMode, quickPosition, start, searchWord, saveProgress, wordAnalysis;
     private LinearLayout getAnswerParentLayout;
+    private RelativeLayout flagChangeArea;
     private CardView popWindowChangeModeLayout, getAnswer;
     private ImageView clickFlagImageView, chameleonImageView, swingSwitchImageView, lockAnswerImageView, blueToothImageView, shuffleImageView, sectionImageView, quickPositionImageView, starRefresh;
     private TextView listeningWriteMode, englishTranslationChineseModeHearing, englishTranslationChineseModeNoHearing, chineseTranslationEnglish, onlyCreditMode, hideProNoun;
     private TextView countDownTop, countDownBottom, countDownInterrupt, countDownExit;
     private long exitLastTime = 0;
-    /**
-     * 旗帜
-     */
-    private ImageButton greenFlag, redFlag, orangeFlag, yellowFlag, blueFlag, cyanFlag, purpleFlag, pinkFlag, grayFlag, blackFlag, brownFlag;
-    private List<ImageButton> selectList;
+
     private ImageButton currentSelectFlagButton;
 
     /**
@@ -153,7 +151,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      */
     private WordAnalysisHandler wordAnalysisHandler;
     private WordSupplementReviewHandler wordSupplementReviewHandler;
-    private final Set<FlagColor> recordFlagColor = new HashSet<>(10);
+    private final Set<MarkColor> recordMarkColor = new HashSet<>(10);
 
     /**
      * 滑动显示答案组件时的坐标<br>
@@ -207,24 +205,26 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void initView() {
-        this.chineseAnswerHandler = new ChineseAnswerHandler(this, findViewById(R.id.fragment_word_credit_chinese_answer));
         // 弹出Dialog不要阻塞UI线程,通过一个新的线程去请求所有单词信息.
         loadingDialog = new AlertDialog.Builder(this)
                 .setView(LayoutInflater.from(this).inflate(R.layout.dialog_loading, null))
                 .setCancelable(false)
                 .show();
+        // 显示中文的处理器
+        this.chineseAnswerHandler = new ChineseAnswerHandler(this, findViewById(R.id.fragment_word_credit_chinese_answer));
         // 锁定startDrawable的关闭
         startDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         // 必须在这里设置LayoutManager
         this.chineseAnswerDrawer.setLayoutManager(new LinearLayoutManager(this));
         this.starSingleCategory.setLayoutManager(new LinearLayoutManager(this));
+        this.reciteMarkArea.setLayoutManager(new LinearLayoutManager(this));
         // 读取状态
         Bundle bundle = getIntent().getExtras();
         if (bundle == null) {
             return;
         }
-        this.userCreditStyle = (UserCreditStyle) Optional.ofNullable(bundle)
-                .map(b -> b.getSerializable(CreditFragment.USER_CREDIT_STYLE_WRAPPER))
+        this.userCreditStyle = (UserCreditStyle) Optional.of(bundle)
+                .map(b -> b.getSerializable(BookListFragment.USER_CREDIT_STYLE_WRAPPER))
                 .orElse(null);
         // 读取所有单词信息,通过Bundle得到当前用户选中的单词分类,这里暂时以样本单词进行测试.
         // 异步执行
@@ -232,13 +232,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 根据自定义风格背诵,获取当前要加载的所有单词
             List<FunctionWordDTOLocal> allFunctionWordList = new ArrayList<>(30);
             // 初始化单词操作
-            HashSet<DivideDTOLocal> divideList = bundle.getSerializable(CreditFragment.CHILD_DIVIDE_SET, HashSet.class);
-            HashSet<HistoryDTOLocal> historyDTOSet = bundle.getSerializable(CreditFragment.HISTORY_WORD_SET, HashSet.class);
-            ArrayList<Long> reViewList = bundle.getSerializable(CreditFragment.REVIEW_WORD_List, ArrayList.class);
+            HashSet<DivideDTOLocal> divideList = (HashSet<DivideDTOLocal>) bundle.getSerializable(BookListFragment.CHILD_DIVIDE_SET);
+            HashSet<HistoryDTOLocal> historyDTOSet = (HashSet<HistoryDTOLocal>) bundle.getSerializable(BookListFragment.HISTORY_WORD_SET);
+            ArrayList<Long> reViewList = (ArrayList<Long>) bundle.getSerializable(BookListFragment.REVIEW_WORD_List);
             // 删除bundle内容
-            bundle.remove(CreditFragment.CHILD_DIVIDE_SET);
-            bundle.remove(CreditFragment.HISTORY_WORD_SET);
-            bundle.remove(CreditFragment.REVIEW_WORD_List);
+            bundle.remove(BookListFragment.CHILD_DIVIDE_SET);
+            bundle.remove(BookListFragment.HISTORY_WORD_SET);
+            bundle.remove(BookListFragment.REVIEW_WORD_List);
             // 新的背词
             if (divideList != null) {
                 // 初始化
@@ -249,9 +249,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 for (int i = 0; i < initWordList.size(); i++) {
                     FunctionWordDTOLocal functionWordDTOLocal = new FunctionWordDTOLocal();
                     functionWordDTOLocal.setId(initWordList.get(i));
-                    HashSet<FlagColor> wordsFlagList = new HashSet<>();
-                    wordsFlagList.add(FlagColor.GREEN);
-                    wordsFlagList.add(FlagColor.BROWN);
+                    HashSet<MarkColor> wordsFlagList = new HashSet<>();
+                    wordsFlagList.add(MarkColor.GREEN);
+                    wordsFlagList.add(MarkColor.BROWN);
                     functionWordDTOLocal.setWordsFlagList(wordsFlagList);
                     allFunctionWordList.add(functionWordDTOLocal);
                 }
@@ -267,9 +267,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 for (int i = 0; i < reViewList.size(); i++) {
                     FunctionWordDTOLocal functionWordDTOLocal = new FunctionWordDTOLocal();
                     functionWordDTOLocal.setId(reViewList.get(i));
-                    HashSet<FlagColor> wordsFlagList = new HashSet<>();
-                    wordsFlagList.add(FlagColor.GREEN);
-                    wordsFlagList.add(FlagColor.BROWN);
+                    HashSet<MarkColor> wordsFlagList = new HashSet<>();
+                    wordsFlagList.add(MarkColor.GREEN);
+                    wordsFlagList.add(MarkColor.BROWN);
                     functionWordDTOLocal.setWordsFlagList(wordsFlagList);
                     allFunctionWordList.add(functionWordDTOLocal);
                 }
@@ -290,13 +290,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             if (userCreditStyle != null) {
                 this.wordFunctionHandler.setCurrentCreditState(userCreditStyle.getCreditState());
             }
-            // 设置收藏夹列表中中文意思显示的adapter
+            // 设置recycleView的各个adapter
             this.chineseAnswerAdapterDrawer = new StarChineseAnswerRecyclerViewAdapter(this, 2L);
             this.startSingleCategoryAdapter = new StartSingleCategoryAdapter(this);
+            this.reciteMarkToastAdapter = new ReciteMarkToastAdapter(this);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(startSingleCategoryAdapter));
             startSingleCategoryAdapter.setStartDragListener(touchHelper::startDrag);
             startSingleCategoryAdapter.setStartFunctionHandler(wordFunctionHandler);
+
             // 读取用户收藏夹信息
             try {
                 wordFunctionHandler.batchAddCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
@@ -309,11 +311,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             updateUIHandler.post(() -> {
                 this.chineseAnswerDrawer.setAdapter(chineseAnswerAdapterDrawer);
                 this.starSingleCategory.setAdapter(startSingleCategoryAdapter);
+                this.reciteMarkArea.setAdapter(reciteMarkToastAdapter);
                 touchHelper.attachToRecyclerView(starSingleCategory);
                 reciteWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.getWordByIndex(0));
                 wordCount.setText(String.valueOf(wordFunctionHandler.size()));
-                flagChangeArea.setVisibility(View.GONE);
-                closeFlagChangeAreaFlush();
                 updateChangeModePopWindowState();
                 loadingDialog.dismiss();
             });
@@ -488,7 +489,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         } else if (clickViewId == R.id.fragment_word_credit_click_flag) {
             if (openFlagChange) {
                 if (AnimationUtil.with().moveToViewEnd(flagChangeArea, 500)) {
-                    closeFlagChangeAreaFlush();
+                    //closeFlagChangeAreaFlush();
                     openFlagChange = !openFlagChange;
                 }
             } else {
@@ -832,175 +833,175 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_green) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.GREEN);
+                wordFunctionHandler.setChameleon(MarkColor.GREEN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GREEN)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.GREEN)) {
                 findViewById(R.id.fragment_word_credit_view_flag_green).setAlpha(0.0f);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.GREEN)) {
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.GREEN)) {
                 findViewById(R.id.fragment_word_credit_view_flag_green).setAlpha(1.0f);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_red) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.RED);
+                wordFunctionHandler.setChameleon(MarkColor.RED);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.RED)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.RED)) {
                 findViewById(R.id.fragment_word_credit_view_flag_red).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.RED);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.RED)) {
+                recordMarkColor.remove(MarkColor.RED);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.RED)) {
                 findViewById(R.id.fragment_word_credit_view_flag_red).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.RED);
+                recordMarkColor.add(MarkColor.RED);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_orange) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.ORANGE);
+                wordFunctionHandler.setChameleon(MarkColor.ORANGE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_orange_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.ORANGE)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.ORANGE)) {
                 findViewById(R.id.fragment_word_credit_view_flag_orange).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.ORANGE);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.ORANGE)) {
+                recordMarkColor.remove(MarkColor.ORANGE);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.ORANGE)) {
                 findViewById(R.id.fragment_word_credit_view_flag_orange).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.ORANGE);
+                recordMarkColor.add(MarkColor.ORANGE);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_yellow) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.YELLOW);
+                wordFunctionHandler.setChameleon(MarkColor.YELLOW);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_yellow_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.YELLOW)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.YELLOW)) {
                 findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.YELLOW);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.YELLOW)) {
+                recordMarkColor.remove(MarkColor.YELLOW);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.YELLOW)) {
                 findViewById(R.id.fragment_word_credit_view_flag_yellow).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.YELLOW);
+                recordMarkColor.add(MarkColor.YELLOW);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_blue) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.BLUE);
+                wordFunctionHandler.setChameleon(MarkColor.BLUE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLUE)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.BLUE)) {
                 findViewById(R.id.fragment_word_credit_view_flag_blue).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.BLUE);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLUE)) {
+                recordMarkColor.remove(MarkColor.BLUE);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.BLUE)) {
                 findViewById(R.id.fragment_word_credit_view_flag_blue).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.BLUE);
+                recordMarkColor.add(MarkColor.BLUE);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_cyan) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.CYAN);
+                wordFunctionHandler.setChameleon(MarkColor.CYAN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_cyan_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.CYAN)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.CYAN)) {
                 findViewById(R.id.fragment_word_credit_view_flag_cyan).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.CYAN);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.CYAN)) {
+                recordMarkColor.remove(MarkColor.CYAN);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.CYAN)) {
                 findViewById(R.id.fragment_word_credit_view_flag_cyan).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.CYAN);
+                recordMarkColor.add(MarkColor.CYAN);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_purple) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.PURPLE);
+                wordFunctionHandler.setChameleon(MarkColor.PURPLE);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PURPLE)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.PURPLE)) {
                 findViewById(R.id.fragment_word_credit_view_flag_purple).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.PURPLE);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.PURPLE)) {
+                recordMarkColor.remove(MarkColor.PURPLE);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.PURPLE)) {
                 findViewById(R.id.fragment_word_credit_view_flag_purple).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.PURPLE);
+                recordMarkColor.add(MarkColor.PURPLE);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_pink) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.PINK);
+                wordFunctionHandler.setChameleon(MarkColor.PINK);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.holo_pink_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.PINK)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.PINK)) {
                 findViewById(R.id.fragment_word_credit_view_flag_pink).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.PINK);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.PINK)) {
+                recordMarkColor.remove(MarkColor.PINK);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.PINK)) {
                 findViewById(R.id.fragment_word_credit_view_flag_pink).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.PINK);
+                recordMarkColor.add(MarkColor.PINK);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_gray) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.GRAY);
+                wordFunctionHandler.setChameleon(MarkColor.GRAY);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(R.color.dark_gray, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.GRAY)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.GRAY)) {
                 findViewById(R.id.fragment_word_credit_view_flag_gray).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.GRAY);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.GRAY)) {
+                recordMarkColor.remove(MarkColor.GRAY);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.GRAY)) {
                 findViewById(R.id.fragment_word_credit_view_flag_gray).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.GRAY);
+                recordMarkColor.add(MarkColor.GRAY);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_black) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.BLACK);
+                wordFunctionHandler.setChameleon(MarkColor.BLACK);
                 this.nextWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
                 this.previousWord.getForeground().setTint(getResources().getColor(android.R.color.black, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
-            if (wordFunctionHandler.removeFlagToCurrentWord(FlagColor.BLACK)) {
+            if (wordFunctionHandler.removeFlagToCurrentWord(MarkColor.BLACK)) {
                 findViewById(R.id.fragment_word_credit_view_flag_black).setAlpha(0.0f);
-                recordFlagColor.remove(FlagColor.BLACK);
-            } else if (wordFunctionHandler.addFlagToCurrentWord(FlagColor.BLACK)) {
+                recordMarkColor.remove(MarkColor.BLACK);
+            } else if (wordFunctionHandler.addFlagToCurrentWord(MarkColor.BLACK)) {
                 findViewById(R.id.fragment_word_credit_view_flag_black).setAlpha(1.0f);
-                recordFlagColor.add(FlagColor.BLACK);
+                recordMarkColor.add(MarkColor.BLACK);
             }
         } else if (clickViewId == R.id.fragment_word_credit_button_flag_brown) {
             if (changingChameleon) {
                 changingChameleon = false;
-                wordFunctionHandler.setChameleon(FlagColor.BROWN);
+                wordFunctionHandler.setChameleon(MarkColor.BROWN);
                 this.nextWord.getForeground().setTint(getResources().getColor(R.color.halo_brown_dark, null));
                 wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
                 currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
@@ -1044,8 +1045,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                         userMove = 8;
                     }
                     // 修改样式
-                    selectList.forEach(imageButton -> imageButton.setBackground(this.getDrawable(R.drawable.style_image_padding)));
-                    this.currentSelectFlagButton = selectList.get(userMove);
+                    //selectList.forEach(imageButton -> imageButton.setBackground(this.getDrawable(R.drawable.style_image_padding)));
+                    //this.currentSelectFlagButton = selectList.get(userMove);
                     this.currentSelectFlagButton.setBackground(this.getDrawable(R.drawable.style_image_padding_selective));
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP && longClickAnswer) {
@@ -1131,9 +1132,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 展示单词是一种状态,随着单词的变化,页面的UI也要跟随变化.
      *
      * @param previousWord 上一个单词(当前正在背诵的单词)
-     * @param wordDTOLocal 待被展示的单词
+     * @param currentWord  待被展示的单词
      */
-    private void reciteWord(WordDTOLocal previousWord, WordDTOLocal wordDTOLocal) {
+    private void reciteWord(WordDTOLocal previousWord, WordDTOLocal currentWord) {
         // 异步写入单词背诵记录
         StaticFactory.getExecutorService().submit(() -> {
             // 先清除增量,只要当前看过该单词就算清除
@@ -1145,14 +1146,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 正常全量增加
             AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
             addWordAnalysisParamLocal.setId(Math.toIntExact(previousWord.getId()));
-            addWordAnalysisParamLocal.setWordFlag(recordFlagColor);
+            addWordAnalysisParamLocal.setWordFlag(recordMarkColor);
             addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
             wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
             // 当然也可以再把当前单词增加到末尾
-            addWordReViewParamLocal.setWordFlag(recordFlagColor);
+            addWordReViewParamLocal.setWordFlag(recordMarkColor);
             wordSupplementReviewHandler.insertWordReView(addWordReViewParamLocal);
             // 每次记录之后都要清除一下
-            recordFlagColor.clear();
+            recordMarkColor.clear();
         });
         // 更新UI相关
         updateUIHandler.post(() -> {
@@ -1160,34 +1161,34 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 case LISTENING:
                     // 听写模式只播放音频
                     chineseAnswerHandler.gone();
-                    playWordAudio(wordDTOLocal);
+                    playWordAudio(currentWord);
                     break;
                 case ENGLISH_TRANSLATION_CHINESE_HEARING:
                     // 先展示单词的所有信息,然后将单词的中文意思进行隐藏,再将单词额外信息进行隐藏(必须在UI线程中隐藏)
-                    visibleWordAllMessage(wordDTOLocal);
+                    visibleWordAllMessage(currentWord);
                     chineseAnswerHandler.gone();
-                    playWordAudio(wordDTOLocal);
+                    playWordAudio(currentWord);
                     break;
                 case ENGLISH_TRANSLATION_CHINESE_NO_HEARING:
                     // 先展示单词的所有信息,然后将单词的中文意思进行隐藏,再将单词额外信息进行隐藏(必须在UI线程中隐藏)
-                    visibleWordAllMessage(wordDTOLocal);
+                    visibleWordAllMessage(currentWord);
                     chineseAnswerHandler.gone();
                     break;
                 case CHINESE_TRANSLATION_ENGLISH:
                     // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
                     // 这里设置模式是为了防止播放音频
                     wordFunctionHandler.setCurrentCreditState(CreditState.CREDIT);
-                    String phaseValue = wordDTOLocal.getValue().get(EnglishStructure.PHRASE);
-                    wordDTOLocal.getValue().remove(EnglishStructure.PHRASE);
-                    visibleWordAllMessage(wordDTOLocal);
-                    wordDTOLocal.getValue().put(EnglishStructure.PHRASE, phaseValue);
+                    String phaseValue = currentWord.getValue().get(EnglishStructure.PHRASE);
+                    currentWord.getValue().remove(EnglishStructure.PHRASE);
+                    visibleWordAllMessage(currentWord);
+                    currentWord.getValue().put(EnglishStructure.PHRASE, phaseValue);
                     sourceWord.setText("");
                     wordFunctionHandler.setCurrentCreditState(CreditState.CHINESE_TRANSLATION_ENGLISH);
                     break;
                 case CREDIT:
                     // 不隐藏任何信息
-                    visibleWordAllMessage(wordDTOLocal);
-                    playWordAudio(wordDTOLocal);
+                    visibleWordAllMessage(currentWord);
+                    playWordAudio(currentWord);
                     break;
             }
             /*
@@ -1195,15 +1196,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             不管是什么状态,都需要显示当前背诵的位置和总的单词个数.
             不管什么状态,都需要更新drawer里面单词的内容
              */
-            chineseAnswerAdapterDrawer.addItem(wordDTOLocal);
+            chineseAnswerAdapterDrawer.addItem(currentWord);
             // 设置右侧展开列表单词的原文
-            Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
+            Optional.ofNullable(currentWord.getValue().get(EnglishStructure.WORD_ORIGIN))
                     .ifPresent(wordDTOS -> sourceWordDrawer
                             .setText(wordDTOS));
             // 设置短语
-            String phraseTranslation = Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.PHRASE_TRANSLATION))
+            String phraseTranslation = Optional.ofNullable(currentWord.getValue().get(EnglishStructure.PHRASE_TRANSLATION))
                     .orElse("");
-            String phraseTxt = wordDTOLocal.getValue().get(EnglishStructure.PHRASE);
+            String phraseTxt = currentWord.getValue().get(EnglishStructure.PHRASE);
             if (phraseTxt != null) {
                 phraseAnswerDrawer.setText(getString(R.string.phrase_with_translation, phraseTxt, phraseTranslation));
                 phraseHintDrawer.setVisibility(View.VISIBLE);
@@ -1216,12 +1217,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
             currentIndexTextView.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
             chameleonCount.setText(String.format("%s/%s", wordFunctionHandler.getCurrentIndex() + 1, wordFunctionHandler.size()));
-            if (openFlagChange) {
-                openFlagChangeAreaFlush();
-            } else {
-                closeFlagChangeAreaFlush();
-            }
+            // 刷新旗帜
+            refreshMarkArea(currentWord);
         });
+    }
+
+    private void refreshMarkArea(WordDTOLocal currentWord) {
+        //reciteMarkToastAdapter.replaceAll(currentWord.getMarkColorList());
     }
 
 
@@ -1236,12 +1238,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             viewFlagArea.getChildAt(i).setVisibility(View.GONE);
             ((LinearLayout.LayoutParams) viewFlagArea.getChildAt(i).getLayoutParams()).setMargins(0, 0, 0, 0);
         }
-        for (FlagColor flagColor : wordFunctionHandler.getCurrentWordFlagColor()) {
-            viewFlagArea.getChildAt(flagColor.ordinal()).setVisibility(View.VISIBLE);
-            viewFlagArea.getChildAt(flagColor.ordinal()).setAlpha(1.0f);
+        for (MarkColor markColor : wordFunctionHandler.getCurrentWordFlagColor()) {
+            viewFlagArea.getChildAt(markColor.ordinal()).setVisibility(View.VISIBLE);
+            viewFlagArea.getChildAt(markColor.ordinal()).setAlpha(1.0f);
         }
         // 将所有选择框复原
-        selectList.forEach(imageButton -> imageButton.setBackground(ContextCompat.getDrawable(this, R.drawable.style_image_padding)));
         blueToothMoveIndex = -1;
     }
 
@@ -1250,17 +1251,17 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      */
     private void openFlagChangeAreaFlush() {
         clickFlagImageView.setImageResource(R.drawable.ic_toast_solid);
-        viewFlagArea.setPadding(5, 0, 0, 0);
+        //viewFlagArea.setPadding(5, 0, 0, 0);
         // 最开始除了绿色旗帜外,所有旗帜的对应的View全部置为不显示
-        for (int i = 0; i < viewFlagArea.getChildCount(); i++) {
-            View child = viewFlagArea.getChildAt(i);
-            child.setVisibility(View.VISIBLE);
-            child.setAlpha(0.0f);
-            // 10dp转px的方法
-            ((LinearLayout.LayoutParams) child.getLayoutParams()).setMargins(0, DPUtils.dp2px(10), 0, DPUtils.dp2px(10));
-        }
-        for (FlagColor flagColor : wordFunctionHandler.getCurrentWordFlagColor()) {
-            viewFlagArea.getChildAt(flagColor.ordinal()).setAlpha(1.0f);
+        //for (int i = 0; i < viewFlagArea.getChildCount(); i++) {
+        //    View child = viewFlagArea.getChildAt(i);
+        //    child.setVisibility(View.VISIBLE);
+        //    child.setAlpha(0.0f);
+        //    // 10dp转px的方法
+        //    ((LinearLayout.LayoutParams) child.getLayoutParams()).setMargins(0, DPUtils.dp2px(10), 0, DPUtils.dp2px(10));
+        //}
+        for (MarkColor markColor : wordFunctionHandler.getCurrentWordFlagColor()) {
+            viewFlagArea.getChildAt(markColor.ordinal()).setAlpha(1.0f);
         }
     }
 
@@ -1419,6 +1420,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.saveProgress = findViewById(R.id.fragment_word_credit_click_save_progress);
         this.chameleonCount = findViewById(R.id.fragment_word_credit_chameleon_word_count);
         this.wordAnalysis = findViewById(R.id.fragment_word_credit_click_analysis_word);
+        this.reciteMarkArea = findViewById(R.id.rc_recite_mark_area);
         this.vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         this.projectorParent = findViewById(R.id.fragment_word_credit_projector_parent);
@@ -1432,28 +1434,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.chineseAnswerDrawer = findViewById(R.id.fragment_word_credit_drawer_chinese_answer);
         this.phraseHintDrawer = findViewById(R.id.fragment_word_credit_drawer_phrase_hint);
         this.phraseAnswerDrawer = findViewById(R.id.fragment_word_credit_drawer_phrase_answer);
-
-        this.greenFlag = findViewById(R.id.fragment_word_credit_button_flag_green);
-        this.redFlag = findViewById(R.id.fragment_word_credit_button_flag_red);
-        this.orangeFlag = findViewById(R.id.fragment_word_credit_button_flag_orange);
-        this.yellowFlag = findViewById(R.id.fragment_word_credit_button_flag_yellow);
-        this.blueFlag = findViewById(R.id.fragment_word_credit_button_flag_blue);
-        this.cyanFlag = findViewById(R.id.fragment_word_credit_button_flag_cyan);
-        this.purpleFlag = findViewById(R.id.fragment_word_credit_button_flag_purple);
-        this.pinkFlag = findViewById(R.id.fragment_word_credit_button_flag_pink);
-        this.grayFlag = findViewById(R.id.fragment_word_credit_button_flag_gray);
-        this.blackFlag = findViewById(R.id.fragment_word_credit_button_flag_black);
-        this.brownFlag = findViewById(R.id.fragment_word_credit_button_flag_brown);
-        this.selectList = new ArrayList<>(9);
-        this.selectList.add(redFlag);
-        this.selectList.add(orangeFlag);
-        this.selectList.add(yellowFlag);
-        this.selectList.add(blueFlag);
-        this.selectList.add(cyanFlag);
-        this.selectList.add(purpleFlag);
-        this.selectList.add(pinkFlag);
-        this.selectList.add(grayFlag);
-        this.selectList.add(blackFlag);
         bindListener();
     }
 
@@ -1496,18 +1476,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.countDownInterrupt.setOnClickListener(this);
         this.countDownExit.setOnClickListener(this);
         this.projectorParent.setOnClickListener(this);
-
-        this.greenFlag.setOnClickListener(this);
-        this.redFlag.setOnClickListener(this);
-        this.orangeFlag.setOnClickListener(this);
-        this.yellowFlag.setOnClickListener(this);
-        this.blueFlag.setOnClickListener(this);
-        this.cyanFlag.setOnClickListener(this);
-        this.purpleFlag.setOnClickListener(this);
-        this.pinkFlag.setOnClickListener(this);
-        this.grayFlag.setOnClickListener(this);
-        this.blackFlag.setOnClickListener(this);
-        this.brownFlag.setOnClickListener(this);
     }
 
 
