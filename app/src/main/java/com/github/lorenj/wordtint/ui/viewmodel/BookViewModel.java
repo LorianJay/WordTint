@@ -9,10 +9,10 @@ import java.util.Set;
 
 public class BookViewModel extends ViewModel {
 
-    private final MutableLiveData<Set<Long>> selectedSectionList =
+    private final MutableLiveData<Set<Integer>> selectedSectionList =
             new MutableLiveData<>(new HashSet<>());
 
-    public LiveData<Set<Long>> getSelectedSectionList() {
+    public LiveData<Set<Integer>> getSelectedSectionList() {
         return selectedSectionList;
     }
 
@@ -21,8 +21,8 @@ public class BookViewModel extends ViewModel {
      *
      * @param sectionId 章节的id
      */
-    public void selectSection(long sectionId) {
-        Set<Long> current = selectedSectionList.getValue();
+    public void selectSection(int sectionId) {
+        Set<Integer> current = selectedSectionList.getValue();
         // 必须创建新的对象
         if (current == null) {
             current = new HashSet<>();

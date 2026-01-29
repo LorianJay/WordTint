@@ -93,6 +93,7 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
     public void batchSelectSection(MarkColor selectMarkColor) {
         for (WordBookSectionEntityVO wordBookSectionEntityVO : wordBookSectionEntityList) {
             if (wordBookSectionEntityVO.tagColor == selectMarkColor) {
+                bookViewModel.selectSection(wordBookSectionEntityVO.wordBookSectionEntity.id);
                 wordBookSectionEntityVO.selection = !wordBookSectionEntityVO.selection;
             }
         }

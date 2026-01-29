@@ -8,9 +8,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -29,12 +26,10 @@ import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEn
 import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
 import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
-import com.github.lorenj.wordtint.entity.local.DivideDTOLocal;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
-import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
 import com.github.lorenj.wordtint.utils.JsonUtils;
@@ -44,6 +39,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BookListFragment extends Fragment implements View.OnClickListener, NavigationItemSelectListener {
@@ -56,15 +53,10 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
     private TextView startLearning;
     private ProgressBar loadingBar;
     private boolean isLoading;
+
     private UserCreditStyle userCreditStyle;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private APPDatabase appDatabase;
-    /**
-     * 快速选择
-     */
-    private ImageButton quickChoose;
-    private LinearLayout quickChoosePopWindowLayout;
-    private View coreChoose, basisChoose, mockExamine;
     private RecyclerView bookListRecyclerView;
     private BookListAdapter bookListAdapter;
 
@@ -74,15 +66,9 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
     private TextView title;
 
     /**
-     * 单词划分的fragment
+     * 用于监听当前用户选择了哪些章节
      */
-    private DivideFragment divideFragment;
     private BookViewModel bookViewModel;
-
-    /**
-     * 记录当前选中的所有子划分
-     */
-    private final HashSet<DivideDTOLocal> divideSet = new HashSet<>();
 
     /**
      * 用户背诵风格
@@ -105,9 +91,9 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      */
     public static final String SELECT_WORD_COUNT = "SELECT_WORD_COUNT";
     /**
-     * 快速选择弹窗
+     * 所有的书本以及其对应的信息
      */
-    private PopupWindow changeModePopupWindow;
+    private List<WordBookWithSectionVO> wordBookWithSectionVOList;
 
 
     @Override
@@ -142,14 +128,20 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyle);
                     // 首先将id转为String类型的List
-                    bundle.putSerializable(BookListFragment.CHILD_DIVIDE_SET, divideSet);
+                    //bundle.putSerializable(BookListFragment.CHILD_DIVIDE_SET, divideSet);
                     // 统计当前的选词量
                     int selectWordCount = 0;
-                    for (DivideDTOLocal divideDTO : divideSet) {
-                        selectWordCount += divideDTO.getWordIdList().size();
+                    Set<Integer> allSelectSection = Optional.ofNullable(bookViewModel.getSelectedSectionList().getValue())
+                            .orElse(new HashSet<>());
+                    for (WordBookWithSectionVO wordBookWithSectionVO : wordBookWithSectionVOList) {
+                        for (WordBookSectionEntityVO wordBookSectionEntityVO : wordBookWithSectionVO.wordBookSectionEntityVOList) {
+                            if (allSelectSection.contains(wordBookSectionEntityVO.wordBookSectionEntity.id)) {
+                                selectWordCount += wordBookSectionEntityVO.elementCount;
+                            }
+                        }
                     }
                     bundle.putInt(BookListFragment.SELECT_WORD_COUNT, selectWordCount);
-                    // 设置当前的语种
+                    // 是否进入背诵格式界面
                     updateUIHandler.post(() -> {
                         if (userCreditStyle.isIgnore()) {
                             Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
@@ -163,29 +155,6 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                     });
                 });
             }
-        } else if (itemId == R.id.ib_book_list_quick) {
-            this.changeModePopupWindow = new PopupWindow(
-                    quickChoosePopWindowLayout,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            changeModePopupWindow.setOutsideTouchable(true);
-            changeModePopupWindow.setFocusable(true);
-            changeModePopupWindow.setAnimationStyle(R.style.pop_window_anim_style);
-            changeModePopupWindow.showAsDropDown(quickChoose, -100, 0);
-        } else if (itemId == R.id.fragment_word_credit_pop_listening_write_mode) {
-            if (bookListRecyclerView == null) {
-                this.bookListRecyclerView = divideFragment.getDivideRecyclerView();
-            }
-            BookSectionListAdapter bookSectionListAdapter = (BookSectionListAdapter) bookListRecyclerView.getAdapter();
-        } else if (itemId == R.id.fragment_word_credit_pop_english_translation_chinese_hearing) {
-            if (bookListRecyclerView == null) {
-                this.bookListRecyclerView = divideFragment.getDivideRecyclerView();
-            }
-            BookSectionListAdapter bookSectionListAdapter = (BookSectionListAdapter) bookListRecyclerView.getAdapter();
-        } else if (itemId == R.id.fragment_word_credit_pop_english_mock_examine) {
-            changeModePopupWindow.dismiss();
-            Navigation.findNavController(getView()).navigate(R.id.action_navigation_welcome_to_navigation_mock_examine, null,
-                    StaticFactory.getSimpleNavOptions());
         }
     }
 
@@ -199,22 +168,10 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
         this.viewPageChangeNavigationView = ((MainActivity) rootView.getContext()).findViewById(R.id.btn_main);
         this.startLearning = rootView.findViewById(R.id.ib_book_list_start_learn);
         this.loadingBar = rootView.findViewById(R.id.ib_book_list_loading_bar);
-        this.quickChoose = rootView.findViewById(R.id.ib_book_list_quick);
         this.title = rootView.findViewById(R.id.ib_book_list_title);
         this.bookListRecyclerView = rootView.findViewById(R.id.rv_book_list_parent);
-
-        this.quickChoosePopWindowLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.fragment_word_credit_quick_choose, null);
-        this.coreChoose = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_listening_write_mode);
-        this.basisChoose = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_english_translation_chinese_hearing);
-        this.mockExamine = this.quickChoosePopWindowLayout.findViewById(R.id.fragment_word_credit_pop_english_mock_examine);
-
         // 设置各种监听事件
         this.startLearning.setOnClickListener(this);
-        this.quickChoose.setOnClickListener(this);
-        this.coreChoose.setOnClickListener(this);
-        this.basisChoose.setOnClickListener(this);
-        this.mockExamine.setOnClickListener(this);
-
         // 初始化数据库
         this.appDatabase = APPDatabase.getInstance(requireContext());
     }
@@ -244,7 +201,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
             List<WordBookWithSectionEntity> allBookAndSection = appDatabase.wordBookDao().findAllBookAndSections();
             allBookAndSection.forEach(wordBookWithSectionEntity -> wordBookWithSectionEntity.wordBookSectionEntityList.sort((o1, o2) -> o1.order - o2.order));
             // 将所有entity转为对应需要的VO使用
-            List<WordBookWithSectionVO> wordBookWithSectionVOList = allBookAndSection.stream()
+            wordBookWithSectionVOList = allBookAndSection.stream()
                     .map(wordBookWithSectionEntity -> {
                         List<WordBookSectionEntityVO> wordBookSectionEntityVOList = wordBookWithSectionEntity
                                 .wordBookSectionEntityList
