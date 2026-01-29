@@ -24,25 +24,45 @@
 
         <TextView
             android:id="@+id/tv_item_book"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="5dp"
             android:layout_toEndOf="@id/iv_item_book"
-            android:gravity="center"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
             android:text="@string/book_name"
+            android:textAlignment="viewStart"
             android:textColor="@color/black"
             android:textSize="20sp" />
-        <!--todo 标签功能快速选择-->
+
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="80dp"
+            android:layout_toStartOf="@id/tv_item_book_count"
+            android:layout_toEndOf="@id/tv_item_book">
+            <!--标签选择-->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_book_tag_selection"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:ignore="RtlSymmetry" />
+
+        </HorizontalScrollView>
 
         <TextView
             android:id="@+id/tv_item_book_count"
-            android:layout_width="wrap_content"
+            android:layout_width="35dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="5dp"
+            android:autoSizeTextType="uniform"
             android:gravity="center"
+            android:maxLines="1"
             android:text="@string/divide_element_count"
             android:textColor="@color/gold"
             android:textSize="16sp" />

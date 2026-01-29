@@ -70,4 +70,15 @@ public enum MarkColor {
      */
     public abstract int getMapColorID();
 
+    public static MarkColor valueOfName(String name) {
+        if (name == null) return null;
+        for (MarkColor e : MarkColor.values()) {
+            if (e.name().equals(name)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+
 }

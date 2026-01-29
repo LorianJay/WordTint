@@ -28,20 +28,40 @@
         android:textColor="@color/black"
         android:textSize="20sp" />
     <!--todo 标签-->
+
+    <ImageView
+        android:id="@+id/iv_item_book_tag"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="5dp"
+        android:layout_toStartOf="@id/tv_item_book_section_count"
+        android:clickable="false"
+        android:importantForAccessibility="no"
+        android:paddingStart="5dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="5dp"
+        android:paddingBottom="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_toast_solid" />
+
     <TextView
         android:id="@+id/tv_item_book_section_count"
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginEnd="15dp"
-        android:layout_toStartOf="@id/ib_item_book_section"
+        android:layout_toStartOf="@id/iv_item_book_section_selection"
+        android:autoSizeStepGranularity="1sp"
+        android:autoSizeTextType="uniform"
         android:gravity="center"
+        android:maxLines="1"
         android:text="@string/divide_element_count"
         android:textColor="@color/blue"
         android:textSize="16sp" />
 
     <ImageView
-        android:id="@+id/ib_item_book_section"
+        android:id="@+id/iv_item_book_section_selection"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_alignParentEnd="true"

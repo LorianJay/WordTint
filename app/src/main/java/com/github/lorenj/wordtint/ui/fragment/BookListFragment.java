@@ -30,12 +30,13 @@ import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
 import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
 import com.github.lorenj.wordtint.entity.local.DivideDTOLocal;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
-import com.github.lorenj.wordtint.ui.viewmodel.BookSectionViewModel;
+import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -76,7 +77,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      * 单词划分的fragment
      */
     private DivideFragment divideFragment;
-    private BookSectionViewModel bookSectionViewModel;
+    private BookViewModel bookViewModel;
 
     /**
      * 记录当前选中的所有子划分
@@ -219,10 +220,10 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
     }
 
     private void initView() {
-        this.title.setText(R.string.add_to_plan);
-        bookSectionViewModel = new ViewModelProvider(this)
-                .get(BookSectionViewModel.class);
-        bookSectionViewModel.getSelectedSectionList()
+        this.title.setText(R.string.choose_chapter);
+        bookViewModel = new ViewModelProvider(this)
+                .get(BookViewModel.class);
+        bookViewModel.getSelectedSectionList()
                 .observe(getViewLifecycleOwner(), sectionList -> {
                     // 根据是否有选择,控制按钮状态和导航栏数字显示
                     if (sectionList.isEmpty()) {
@@ -236,7 +237,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                     }
                 });
         this.bookListRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        this.bookListAdapter = new BookListAdapter(requireContext(), bookSectionViewModel);
+        this.bookListAdapter = new BookListAdapter(requireContext(), bookViewModel);
         this.bookListRecyclerView.setAdapter(bookListAdapter);
         StaticFactory.getExecutorService().execute(() -> {
             // 查询所有的书籍
@@ -252,6 +253,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                                     WordBookSectionEntityVO result = new WordBookSectionEntityVO(wordBookSectionEntity);
                                     // 查询element_count
                                     result.elementCount = appDatabase.wordBookSectionDao().countBySectionId(wordBookSectionEntity.id);
+                                    result.tagColor = MarkColor.valueOfName(result.wordBookSectionEntity.tagColor);
                                     return result;
                                 })
                                 .collect(Collectors.toList());

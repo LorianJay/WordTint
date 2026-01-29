@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BookSectionViewModel extends ViewModel {
+public class BookViewModel extends ViewModel {
 
     private final MutableLiveData<Set<Long>> selectedSectionList =
             new MutableLiveData<>(new HashSet<>());
@@ -16,7 +16,12 @@ public class BookSectionViewModel extends ViewModel {
         return selectedSectionList;
     }
 
-    public void toggleSection(long sectionId) {
+    /**
+     * 选择某一个章节/片段
+     *
+     * @param sectionId 章节的id
+     */
+    public void selectSection(long sectionId) {
         Set<Long> current = selectedSectionList.getValue();
         // 必须创建新的对象
         if (current == null) {

@@ -249,6 +249,7 @@
     <string name="book_name">book_name</string>
     <string name="book_section">book_section</string>
     <string name="initialization">正在初始化...</string>
+    <string name="choose_chapter">选择章节</string>
 
 
 </resources>

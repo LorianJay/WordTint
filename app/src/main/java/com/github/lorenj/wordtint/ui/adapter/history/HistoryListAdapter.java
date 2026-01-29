@@ -108,7 +108,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
             this.itemView = itemView;
             this.itemView.getLayoutParams().height = DPUtils.dp2px(70);
             this.divideTextView = itemView.findViewById(R.id.tv_item_book_section);
-            this.childDivideButton = itemView.findViewById(R.id.ib_item_book_section);
+            this.childDivideButton = itemView.findViewById(R.id.iv_item_book_section_selection);
             this.elementCount = itemView.findViewById(R.id.tv_item_book_section_count);
             this.historyRelativeLayout = itemView.findViewById(R.id.credit_fragment_history_divide_element);
             this.historyDelete = itemView.findViewById(R.id.fragment_word_history_delete);
