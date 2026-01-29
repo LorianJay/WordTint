@@ -25,7 +25,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
-import com.github.lorenj.wordtint.database.entity.WordBookWithSectionEntity;
+import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
 import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
 import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
@@ -37,6 +37,7 @@ import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.viewmodel.BookSectionViewModel;
 import com.github.lorenj.wordtint.utils.JsonUtils;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
@@ -223,13 +224,16 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                 .get(BookSectionViewModel.class);
         bookSectionViewModel.getSelectedSectionList()
                 .observe(getViewLifecycleOwner(), sectionList -> {
-                    // 根据是否有选择,控制按钮状态
+                    // 根据是否有选择,控制按钮状态和导航栏数字显示
                     if (sectionList.isEmpty()) {
                         startLearning.setVisibility(View.GONE);
+                        viewPageChangeNavigationView.removeBadge(R.id.item_main_bottom_recite);
                     } else {
                         startLearning.setVisibility(View.VISIBLE);
+                        viewPageChangeNavigationView.getOrCreateBadge(R.id.item_main_bottom_recite).setNumber(sectionList.size());
+                        viewPageChangeNavigationView.getOrCreateBadge(R.id.item_main_bottom_recite).setBadgeGravity(BadgeDrawable.TOP_END);
+                        viewPageChangeNavigationView.getOrCreateBadge(R.id.item_main_bottom_recite).setMaxCharacterCount(3);
                     }
-
                 });
         this.bookListRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         this.bookListAdapter = new BookListAdapter(requireContext(), bookSectionViewModel);
@@ -244,7 +248,12 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                         List<WordBookSectionEntityVO> wordBookSectionEntityVOList = wordBookWithSectionEntity
                                 .wordBookSectionEntityList
                                 .stream()
-                                .map(WordBookSectionEntityVO::new)
+                                .map(wordBookSectionEntity -> {
+                                    WordBookSectionEntityVO result = new WordBookSectionEntityVO(wordBookSectionEntity);
+                                    // 查询element_count
+                                    result.elementCount = appDatabase.wordBookSectionDao().countBySectionId(wordBookSectionEntity.id);
+                                    return result;
+                                })
                                 .collect(Collectors.toList());
                         return new WordBookWithSectionVO(wordBookWithSectionEntity.wordBookEntity, wordBookSectionEntityVOList);
                     })

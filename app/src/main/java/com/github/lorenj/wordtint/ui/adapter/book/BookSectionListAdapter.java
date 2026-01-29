@@ -43,10 +43,24 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, @SuppressLint("RecyclerView") int position) {
         WordBookSectionEntityVO wordBookSectionEntity = wordBookSectionEntityList.get(position);
         holder.sectionTextView.setText(wordBookSectionEntity.wordBookSectionEntity.name);
+        holder.elementCount.setText(String.valueOf(wordBookSectionEntity.elementCount));
         if (wordBookSectionEntity.selection) {
             holder.bookSectionSelection.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_add_plan));
         } else {
             holder.bookSectionSelection.setImageDrawable(null);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads);
+        WordBookSectionEntityVO wordBookSectionEntity = wordBookSectionEntityList.get(position);
+        for (Object payload : payloads) {
+            if (payload == Item.CLICK_SECTION && wordBookSectionEntity.selection) {
+                holder.bookSectionSelection.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_add_plan));
+            } else if (payload == Item.CLICK_SECTION) {
+                holder.bookSectionSelection.setImageDrawable(null);
+            }
         }
     }
 
@@ -85,9 +99,11 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
             WordBookSectionEntityVO selectWordBookSectionEntityVO = wordBookSectionEntityList.get(position);
             bookSectionViewModel.toggleSection(selectWordBookSectionEntityVO.wordBookSectionEntity.id);
             selectWordBookSectionEntityVO.selection = !selectWordBookSectionEntityVO.selection;
-            notifyItemChanged(position);
+            notifyItemChanged(position, Item.CLICK_SECTION);
         }
     }
 
-
+    private enum Item {
+        CLICK_SECTION
+    }
 }

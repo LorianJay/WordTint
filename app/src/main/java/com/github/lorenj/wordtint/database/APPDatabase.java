@@ -9,8 +9,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.dao.WordBookDao;
+import com.github.lorenj.wordtint.database.dao.WordBookSectionDao;
 import com.github.lorenj.wordtint.database.entity.WordBookEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
+import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
 import com.github.lorenj.wordtint.ui.viewmodel.WelcomeViewModel;
 
 import java.io.BufferedReader;
@@ -19,13 +21,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 
-@Database(entities = {WordBookEntity.class,
-        WordBookSectionEntity.class}, version = 5)
+@Database(entities = {
+        WordBookEntity.class, WordBookSectionEntity.class, WordBookSectionWordIdEntity.class}, version = 5)
 public abstract class APPDatabase extends RoomDatabase {
 
     private static volatile APPDatabase INSTANCE = null;
 
     public abstract WordBookDao wordBookDao();
+
+    public abstract WordBookSectionDao wordBookSectionDao();
 
     public static APPDatabase getInstance(Context context) {
         if (INSTANCE == null) {

@@ -4,7 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
-import com.github.lorenj.wordtint.database.entity.WordBookWithSectionEntity;
+import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
 
 import java.util.List;
 
