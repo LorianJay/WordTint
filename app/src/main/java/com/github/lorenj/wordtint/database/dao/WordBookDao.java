@@ -4,7 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
-import com.github.lorenj.wordtint.database.entity.WordBookWithSection;
+import com.github.lorenj.wordtint.database.entity.WordBookWithSectionEntity;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ public interface WordBookDao {
      */
     @Transaction
     @Query("SELECT * FROM word_book")
-    List<WordBookWithSection> findAllBookAndSections();
+    List<WordBookWithSectionEntity> findAllBookAndSections();
 }

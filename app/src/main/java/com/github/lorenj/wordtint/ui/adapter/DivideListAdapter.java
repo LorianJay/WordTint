@@ -121,7 +121,7 @@ public class DivideListAdapter extends RecyclerView.Adapter<DivideListAdapter.Re
             //this.elementCount = itemView.findViewById(R.id.credit_fragment_divide_element_count);
 
             this.childDivideListRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-            this.bookSectionListAdapter = new BookSectionListAdapter(context);
+            this.bookSectionListAdapter = new BookSectionListAdapter(context,null);
             this.childDivideListRecyclerView.setAdapter(bookSectionListAdapter);
             this.childDivideListRecyclerView.setVisibility(View.GONE);
             //this.childDivideListAdapter.setRecycleViewItemOnClickListener(recycleViewItemOnClickListener);

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,25 +13,28 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.database.entity.WordBookWithSection;
+import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
+import com.github.lorenj.wordtint.ui.viewmodel.BookSectionViewModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.RecyclerViewHolder>
-        implements RecyclerViewAdapterItemChange<WordBookWithSection> {
+        implements RecyclerViewAdapterItemChange<WordBookWithSectionVO> {
 
     private final Context context;
-    private final List<WordBookWithSection> wordBookEntityList = new ArrayList<>();
+    private final List<WordBookWithSectionVO> wordBookEntityList = new ArrayList<>();
+    private final BookSectionViewModel bookSectionViewModel;
     /**
      * 二级列表贡献缓存
      */
     private final RecyclerView.RecycledViewPool sharedPool;
 
-    public BookListAdapter(Context context) {
+    public BookListAdapter(Context context, BookSectionViewModel bookSectionViewModel) {
         this.context = context;
+        this.bookSectionViewModel = bookSectionViewModel;
         sharedPool = new RecyclerView.RecycledViewPool();
     }
 
@@ -42,15 +46,21 @@ public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.Recycl
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        WordBookWithSection wordBook = wordBookEntityList.get(position);
-        holder.bookName.setText(wordBook.wordBookEntity.name);
-        holder.count.setText(String.valueOf(wordBook.wordBookSectionEntityList.size()));
+        WordBookWithSectionVO wordBookWithSectionVO = wordBookEntityList.get(position);
+        holder.bookName.setText(wordBookWithSectionVO.wordBookEntity.name);
+        holder.count.setText(String.valueOf(wordBookWithSectionVO.wordBookSectionEntityVOList.size()));
+        // 章节初始化
         LinearLayoutManager lm = new LinearLayoutManager(holder.itemView.getContext(), RecyclerView.VERTICAL, false);
         holder.bookSection.setLayoutManager(lm);
-        BookSectionListAdapter bookSectionListAdapter = new BookSectionListAdapter(holder.itemView.getContext());
+        BookSectionListAdapter bookSectionListAdapter = new BookSectionListAdapter(holder.itemView.getContext(), bookSectionViewModel);
         holder.bookSection.setAdapter(bookSectionListAdapter);
         holder.bookSection.setRecycledViewPool(sharedPool);
-        bookSectionListAdapter.replaceAll(wordBook.wordBookSectionEntityList);
+        bookSectionListAdapter.replaceAll(wordBookWithSectionVO.wordBookSectionEntityVOList);
+        if (wordBookWithSectionVO.folded) {
+            holder.bookSection.setVisibility(View.GONE);
+        } else {
+            holder.bookSection.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -59,25 +69,26 @@ public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.Recycl
     }
 
     @Override
-    public void addItem(WordBookWithSection item) {
+    public void addItem(WordBookWithSectionVO item) {
     }
 
     @Override
-    public void removeItem(WordBookWithSection item) {
+    public void removeItem(WordBookWithSectionVO item) {
 
     }
 
     @Override
-    public void replaceAll(Collection<WordBookWithSection> wordBookEntityCollection) {
+    public void replaceAll(Collection<WordBookWithSectionVO> wordBookEntityCollection) {
         wordBookEntityList.clear();
         wordBookEntityList.addAll(wordBookEntityCollection);
         notifyItemRangeChanged(0, wordBookEntityCollection.size());
     }
 
-    public static class RecyclerViewHolder extends RecyclerView.ViewHolder {
-        private View itemView;
-        private TextView bookName, count;
-        private RecyclerView bookSection;
+    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final View itemView;
+        private final RelativeLayout bookItem;
+        private final TextView bookName, count;
+        private final RecyclerView bookSection;
 
         public RecyclerViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -85,8 +96,21 @@ public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.Recycl
             this.bookName = itemView.findViewById(R.id.tv_item_book);
             this.bookSection = itemView.findViewById(R.id.rv_book_section_child);
             this.count = itemView.findViewById(R.id.tv_item_book_count);
+            this.bookItem = itemView.findViewById(R.id.rl_item_book);
+
+            bookItem.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            int vId = v.getId();
+            if (vId == R.id.rl_item_book) {
+                int position = getAdapterPosition();
+                WordBookWithSectionVO wordBookWithSectionVO = wordBookEntityList.get(position);
+                wordBookWithSectionVO.folded = !wordBookWithSectionVO.folded;
+                notifyItemChanged(position);
+            }
+        }
     }
 
 

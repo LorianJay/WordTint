@@ -98,7 +98,7 @@ public class DivideFragment extends Fragment {
     private void initView() {
         this.divideLayoutManager = new LinearLayoutManager(getContext());
         this.divideRecyclerView.setLayoutManager(divideLayoutManager);
-        this.bookSectionListAdapter = new BookSectionListAdapter(getContext());
+        this.bookSectionListAdapter = new BookSectionListAdapter(getContext(),null);
 
         this.divideRecyclerView.setAdapter(bookSectionListAdapter);
         //this.bookSectionListAdapter.setRecycleViewItemOnClickListener(recycleViewItemOnClickListener);

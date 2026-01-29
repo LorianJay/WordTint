@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +25,9 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
-import com.github.lorenj.wordtint.database.entity.WordBookWithSection;
+import com.github.lorenj.wordtint.database.entity.WordBookWithSectionEntity;
+import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
+import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
 import com.github.lorenj.wordtint.entity.local.DivideDTOLocal;
 import com.github.lorenj.wordtint.ui.MainActivity;
@@ -32,12 +35,14 @@ import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
+import com.github.lorenj.wordtint.ui.viewmodel.BookSectionViewModel;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookListFragment extends Fragment implements View.OnClickListener, NavigationItemSelectListener {
 
@@ -70,6 +75,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      * 单词划分的fragment
      */
     private DivideFragment divideFragment;
+    private BookSectionViewModel bookSectionViewModel;
 
     /**
      * 记录当前选中的所有子划分
@@ -213,14 +219,37 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
 
     private void initView() {
         this.title.setText(R.string.add_to_plan);
+        bookSectionViewModel = new ViewModelProvider(this)
+                .get(BookSectionViewModel.class);
+        bookSectionViewModel.getSelectedSectionList()
+                .observe(getViewLifecycleOwner(), sectionList -> {
+                    // 根据是否有选择,控制按钮状态
+                    if (sectionList.isEmpty()) {
+                        startLearning.setVisibility(View.GONE);
+                    } else {
+                        startLearning.setVisibility(View.VISIBLE);
+                    }
+
+                });
         this.bookListRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        this.bookListAdapter = new BookListAdapter(requireContext());
+        this.bookListAdapter = new BookListAdapter(requireContext(), bookSectionViewModel);
         this.bookListRecyclerView.setAdapter(bookListAdapter);
         StaticFactory.getExecutorService().execute(() -> {
             // 查询所有的书籍
-            List<WordBookWithSection> allBookAndSection = appDatabase.wordBookDao().findAllBookAndSections();
-            allBookAndSection.forEach(wordBookWithSection -> wordBookWithSection.wordBookSectionEntityList.sort((o1, o2) -> o1.order - o2.order));
-            updateUIHandler.post(() -> bookListAdapter.replaceAll(allBookAndSection));
+            List<WordBookWithSectionEntity> allBookAndSection = appDatabase.wordBookDao().findAllBookAndSections();
+            allBookAndSection.forEach(wordBookWithSectionEntity -> wordBookWithSectionEntity.wordBookSectionEntityList.sort((o1, o2) -> o1.order - o2.order));
+            // 将所有entity转为对应需要的VO使用
+            List<WordBookWithSectionVO> wordBookWithSectionVOList = allBookAndSection.stream()
+                    .map(wordBookWithSectionEntity -> {
+                        List<WordBookSectionEntityVO> wordBookSectionEntityVOList = wordBookWithSectionEntity
+                                .wordBookSectionEntityList
+                                .stream()
+                                .map(WordBookSectionEntityVO::new)
+                                .collect(Collectors.toList());
+                        return new WordBookWithSectionVO(wordBookWithSectionEntity.wordBookEntity, wordBookSectionEntityVOList);
+                    })
+                    .collect(Collectors.toList());
+            updateUIHandler.post(() -> bookListAdapter.replaceAll(wordBookWithSectionVOList));
         });
     }
 

@@ -18,8 +18,13 @@ public class WelcomeViewModel extends ViewModel {
     }
 
     public void initDatabase(Context context) {
+        /*
+        当初始化数据库时进度条发生变动时会回调该方法
+        回调的对象是APPDatabase中,回调的方法是这里的第二个方法
+        */
         APPDatabase.initDatabase(context, progress -> initState.postValue(new WelcomeActivity.InitState(progress)));
     }
+
 
     public interface InitProgressCallback {
         void onProgress(int progress);

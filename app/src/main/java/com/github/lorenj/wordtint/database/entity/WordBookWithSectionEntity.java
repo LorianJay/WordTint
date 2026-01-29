@@ -5,7 +5,7 @@ import androidx.room.Relation;
 
 import java.util.List;
 
-public class WordBookWithSection {
+public class WordBookWithSectionEntity {
     @Embedded
     public WordBookEntity wordBookEntity;
 

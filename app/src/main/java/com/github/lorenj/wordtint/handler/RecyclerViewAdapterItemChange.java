@@ -19,14 +19,18 @@ public interface RecyclerViewAdapterItemChange<T> {
      *
      * @param item
      */
-    void addItem(T item);
+    default void addItem(T item) {
+
+    }
 
     /**
      * 从列表中删除一个Item
      *
      * @param item
      */
-    void removeItem(T item);
+    default void removeItem(T item) {
+
+    }
 
     /**
      * 添加一个Item数组到列表中
