@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -55,15 +57,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AnyLanguageWordProperties.setExternalFilesDir(getExternalFilesDir(""));
         // 申请权限
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        // 得到用户信息文件
-        try {
-            userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // 如果当前还没有同意用户协议则跳转到用户协议界面
-        userAssertCheck();
-        bindView();
+
         initView();
     }
 
@@ -141,11 +135,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.bottomRecite.setOnLongClickListener(this);
     }
 
+    /**
+     * welcome页面跳转的返回
+     */
+    private final ActivityResultLauncher<Intent> welcomeLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    initView();
+                }
+            }
+    );
 
     /**
      * 初始化ViewPage,实现滑动切换的功能
      */
     private void initView() {
+        // 得到用户信息文件
+        try {
+            userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 如果当前还没有同意用户协议则跳转到用户协议界面
+        if (!userSettings.isAcceptUserAgreement()) {
+            welcomeLauncher.launch(new Intent(this, WelcomeActivity.class));
+            return;
+        }
+        // 绑定相关的view
+        bindView();
         this.listFragment = new ArrayList<>(4);
         listFragment.add(creditFragment);
         listFragment.add(rankFragment);
@@ -170,13 +188,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             viewPager.endFakeDrag();
         }
         this.viewPageChangeNavigationView.setOnItemSelectedListener(this);
-    }
-
-    private void userAssertCheck() {
-        // 还没有同意用户协议跳转到用户协议界面
-        if (!userSettings.isAcceptUserAgreement()) {
-            Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
-            startActivity(intent);
-        }
     }
 }

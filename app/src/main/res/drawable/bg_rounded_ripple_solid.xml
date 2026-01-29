@@ -2,7 +2,8 @@
     android:color="?attr/colorControlHighlight">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="12dp"/>
+            <solid android:color="@color/black" />
+            <corners android:radius="12dp" />
         </shape>
     </item>
 </ripple>

@@ -23,14 +23,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.database.WordBookDatabase;
-import com.github.lorenj.wordtint.database.entity.WordBook;
+import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordBookWithSection;
 import com.github.lorenj.wordtint.entity.UserCreditStyle;
 import com.github.lorenj.wordtint.entity.local.DivideDTOLocal;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
-import com.github.lorenj.wordtint.ui.adapter.divide.ChildDivideListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -51,7 +51,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
     private boolean isLoading;
     private UserCreditStyle userCreditStyle;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
-    private WordBookDatabase wordBookDatabase;
+    private APPDatabase appDatabase;
     /**
      * 快速选择
      */
@@ -168,14 +168,12 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
             if (bookListRecyclerView == null) {
                 this.bookListRecyclerView = divideFragment.getDivideRecyclerView();
             }
-            ChildDivideListAdapter childDivideListAdapter = (ChildDivideListAdapter) bookListRecyclerView.getAdapter();
-            childDivideListAdapter.coreChoose();
+            BookSectionListAdapter bookSectionListAdapter = (BookSectionListAdapter) bookListRecyclerView.getAdapter();
         } else if (itemId == R.id.fragment_word_credit_pop_english_translation_chinese_hearing) {
             if (bookListRecyclerView == null) {
                 this.bookListRecyclerView = divideFragment.getDivideRecyclerView();
             }
-            ChildDivideListAdapter childDivideListAdapter = (ChildDivideListAdapter) bookListRecyclerView.getAdapter();
-            childDivideListAdapter.basisChoose();
+            BookSectionListAdapter bookSectionListAdapter = (BookSectionListAdapter) bookListRecyclerView.getAdapter();
         } else if (itemId == R.id.fragment_word_credit_pop_english_mock_examine) {
             changeModePopupWindow.dismiss();
             Navigation.findNavController(getView()).navigate(R.id.action_navigation_welcome_to_navigation_mock_examine, null,
@@ -210,7 +208,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
         this.mockExamine.setOnClickListener(this);
 
         // 初始化数据库
-        this.wordBookDatabase = WordBookDatabase.getInstance(requireContext());
+        this.appDatabase = APPDatabase.getInstance(requireContext());
     }
 
     private void initView() {
@@ -220,8 +218,9 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
         this.bookListRecyclerView.setAdapter(bookListAdapter);
         StaticFactory.getExecutorService().execute(() -> {
             // 查询所有的书籍
-            List<WordBook> wordBookList = wordBookDatabase.wordBookDao().findAll();
-            updateUIHandler.post(() -> bookListAdapter.replaceAll(wordBookList));
+            List<WordBookWithSection> allBookAndSection = appDatabase.wordBookDao().findAllBookAndSections();
+            allBookAndSection.forEach(wordBookWithSection -> wordBookWithSection.wordBookSectionEntityList.sort((o1, o2) -> o1.order - o2.order));
+            updateUIHandler.post(() -> bookListAdapter.replaceAll(allBookAndSection));
         });
     }
 

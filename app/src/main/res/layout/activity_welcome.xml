@@ -57,32 +57,65 @@
             android:textSize="18sp" />
 
         <LinearLayout
+            android:id="@+id/ll_agreement"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="visible">
 
-            <Button
+            <TextView
                 android:id="@+id/btn_welcome_disagree_agreement"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/welcome_disagree_button"
+                android:background="@drawable/bg_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
+                android:gravity="center"
                 android:text="@string/disagree"
                 android:textColor="@color/theme_color"
-                android:textSize="25sp" />
+                android:textSize="20sp" />
 
-            <Button
+            <TextView
                 android:id="@+id/btn_welcome_accept_agreement"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="30dp"
                 android:layout_weight="1"
-                android:background="@drawable/welcome_accept_button"
+                android:background="@drawable/bg_rounded_ripple_solid"
                 android:backgroundTint="@color/theme_color"
+                android:gravity="center"
                 android:text="@string/accept"
                 android:textColor="@android:color/white"
-                android:textSize="25sp" />
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_init_progress"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/initialization"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
+
+            <ProgressBar
+                android:id="@+id/pb_init_progress"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:max="100"
+                android:progress="0" />
+
         </LinearLayout>
 
 

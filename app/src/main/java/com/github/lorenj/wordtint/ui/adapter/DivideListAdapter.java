@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.entity.dto.DivideDTO;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
-import com.github.lorenj.wordtint.ui.adapter.divide.ChildDivideListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.github.lorenj.wordtint.R;
 
@@ -109,7 +109,7 @@ public class DivideListAdapter extends RecyclerView.Adapter<DivideListAdapter.Re
         /**
          * 子划分的adapter
          */
-        private ChildDivideListAdapter childDivideListAdapter;
+        private BookSectionListAdapter bookSectionListAdapter;
 
         public RecyclerViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -121,8 +121,8 @@ public class DivideListAdapter extends RecyclerView.Adapter<DivideListAdapter.Re
             //this.elementCount = itemView.findViewById(R.id.credit_fragment_divide_element_count);
 
             this.childDivideListRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-            this.childDivideListAdapter = new ChildDivideListAdapter(context);
-            this.childDivideListRecyclerView.setAdapter(childDivideListAdapter);
+            this.bookSectionListAdapter = new BookSectionListAdapter(context);
+            this.childDivideListRecyclerView.setAdapter(bookSectionListAdapter);
             this.childDivideListRecyclerView.setVisibility(View.GONE);
             //this.childDivideListAdapter.setRecycleViewItemOnClickListener(recycleViewItemOnClickListener);
 

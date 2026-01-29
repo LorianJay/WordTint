@@ -16,7 +16,7 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.entity.dto.LanguageClassDTO;
 import com.github.lorenj.wordtint.entity.dto.UserProfileDTO;
 import com.github.lorenj.wordtint.entity.local.DivideDTOLocal;
-import com.github.lorenj.wordtint.ui.adapter.divide.ChildDivideListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.book.BookSectionListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.github.lorenj.wordtint.R;
@@ -34,7 +34,7 @@ public class DivideFragment extends Fragment {
     private View rootView;
     private RecyclerView divideRecyclerView;
     private LinearLayoutManager divideLayoutManager;
-    private ChildDivideListAdapter childDivideListAdapter;
+    private BookSectionListAdapter bookSectionListAdapter;
     /**
      * 当前要展示的哪个语种下的所有划分
      */
@@ -98,17 +98,17 @@ public class DivideFragment extends Fragment {
     private void initView() {
         this.divideLayoutManager = new LinearLayoutManager(getContext());
         this.divideRecyclerView.setLayoutManager(divideLayoutManager);
-        this.childDivideListAdapter = new ChildDivideListAdapter(getContext());
+        this.bookSectionListAdapter = new BookSectionListAdapter(getContext());
 
-        this.divideRecyclerView.setAdapter(childDivideListAdapter);
-        this.childDivideListAdapter.setRecycleViewItemOnClickListener(recycleViewItemOnClickListener);
+        this.divideRecyclerView.setAdapter(bookSectionListAdapter);
+        //this.bookSectionListAdapter.setRecycleViewItemOnClickListener(recycleViewItemOnClickListener);
     }
 
     private void requestData() {
         // 查询当前用户的所有划分
         StaticFactory.getExecutorService().execute(() -> {
             if (allWordList != null) {
-                updateUIHandler.post(() -> childDivideListAdapter.replaceAll(allWordList));
+                //updateUIHandler.post(() -> bookSectionListAdapter.replaceAll(allWordList));
                 return;
             }
             // 读取文件列表
@@ -123,7 +123,7 @@ public class DivideFragment extends Fragment {
                 }
             }
             allWordList.sort((o1, o2) -> Math.toIntExact(o1.getOrder() - o2.getOrder()));
-            updateUIHandler.post(() -> childDivideListAdapter.replaceAll(allWordList));
+            //updateUIHandler.post(() -> bookSectionListAdapter.replaceAll(allWordList));
         });
     }
 

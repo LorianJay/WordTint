@@ -248,6 +248,7 @@
     <string name="phrase_with_translation">%1$s %2$s</string>
     <string name="book_name">book_name</string>
     <string name="book_section">book_section</string>
+    <string name="initialization">正在初始化...</string>
 
 
 </resources>

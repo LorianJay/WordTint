@@ -5,15 +5,18 @@ import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.UserSettings;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.ui.viewmodel.WelcomeViewModel;
 import com.github.lorenj.wordtint.utils.FileUtils;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 
@@ -23,9 +26,12 @@ import java.io.InputStream;
 import io.noties.markwon.Markwon;
 
 public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener, KeyEvent.Callback {
-    private Button disAgree, accept;
+    private TextView disAgree, accept;
     private TextView welcomeMessage;
     private AssetManager assetManager;
+    private LinearLayout agreementArea, initProgressArea;
+    private WelcomeViewModel welcomeViewModel;
+    private ProgressBar initProgressBar;
     String message = null;
 
     @Override
@@ -37,20 +43,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         initView();
     }
 
-    private void bindView() {
-        disAgree = findViewById(R.id.btn_welcome_disagree_agreement);
-        accept = findViewById(R.id.btn_welcome_accept_agreement);
-        this.welcomeMessage = findViewById(R.id.txt_welcome_message);
-        disAgree.setOnClickListener(this);
-        accept.setOnClickListener(this);
-    }
-
     @Override
     public void onClick(View v) {
         int vId = v.getId();
         if (vId == R.id.btn_welcome_disagree_agreement) {
             exitAPP();
         } else if (vId == R.id.btn_welcome_accept_agreement) {
+            agreementArea.setVisibility(View.GONE);
+            initProgressArea.setVisibility(View.VISIBLE);
             try {
                 UserSettings userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
                 userSettings.setAcceptUserAgreement(true);
@@ -58,7 +58,15 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            finish();
+            // 开始初始化数据库
+            welcomeViewModel.getInitState().observe(this, initState -> {
+                initProgressBar.setProgress(initState.progress);
+                if (initState.progress == 100) {
+                    setResult(RESULT_OK);
+                    finish();
+                }
+            });
+            welcomeViewModel.initDatabase(this);
         }
     }
 
@@ -82,6 +90,19 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         markwon.setMarkdown(welcomeMessage, message);
     }
 
+    private void bindView() {
+        disAgree = findViewById(R.id.btn_welcome_disagree_agreement);
+        accept = findViewById(R.id.btn_welcome_accept_agreement);
+        welcomeMessage = findViewById(R.id.txt_welcome_message);
+        initProgressBar = findViewById(R.id.pb_init_progress);
+        agreementArea = findViewById(R.id.ll_agreement);
+        initProgressArea = findViewById(R.id.ll_init_progress);
+
+        disAgree.setOnClickListener(this);
+        accept.setOnClickListener(this);
+        welcomeViewModel = new ViewModelProvider(this).get(WelcomeViewModel.class);
+    }
+
     private void exitAPP() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
@@ -89,4 +110,16 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         startActivity(intent);
     }
 
+    /**
+     * 初始化状态模型
+     */
+    public static class InitState {
+
+        public final int progress;
+
+        public InitState(int progress) {
+            this.progress = progress;
+        }
+
+    }
 }
