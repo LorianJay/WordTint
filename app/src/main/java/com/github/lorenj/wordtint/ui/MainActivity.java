@@ -3,6 +3,8 @@ package com.github.lorenj.wordtint.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,27 +20,26 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
-import com.github.lorenj.wordtint.context.UserSettings;
-import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
+import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
+import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.activity.WelcomeActivity;
 import com.github.lorenj.wordtint.ui.adapter.BottomViewAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.ui.fragment.HistoryFragment;
 import com.github.lorenj.wordtint.ui.fragment.RankFragment;
-import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         View.OnLongClickListener, NavigationBarView.OnItemSelectedListener {
 
-    private UserSettings userSettings;
     private BottomNavigationView viewPageChangeNavigationView;
     private ViewPager2 viewPager;
     private MenuItem nowSelectMenuItem;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private volatile int position = 0;
     private final Fragment creditFragment = new BookListFragment(), rankFragment = new RankFragment(), analysisFragment = new HistoryFragment();
     private BottomNavigationItemView bottomRecite;
+    private UserSettingRepository userSettingRepository;
+    private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AnyLanguageWordProperties.setExternalFilesDir(getExternalFilesDir(""));
         // 申请权限
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-
         initView();
     }
 
@@ -151,42 +153,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * 初始化ViewPage,实现滑动切换的功能
      */
     private void initView() {
-        // 得到用户信息文件
-        try {
-            userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // 如果当前还没有同意用户协议则跳转到用户协议界面
-        if (!userSettings.isAcceptUserAgreement()) {
-            welcomeLauncher.launch(new Intent(this, WelcomeActivity.class));
-            return;
-        }
-        // 绑定相关的view
-        bindView();
-        this.listFragment = new ArrayList<>(4);
-        listFragment.add(creditFragment);
-        listFragment.add(rankFragment);
-        listFragment.add(analysisFragment);
-        BottomViewAdapter adapter = new BottomViewAdapter(this, listFragment);
-        viewPager.setAdapter(adapter);
-        viewPager.setSaveEnabled(false);
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                if (nowSelectMenuItem != null) {
-                    nowSelectMenuItem.setChecked(false);
-                } else {
-                    viewPageChangeNavigationView.getMenu().getItem(0).setChecked(false);
-                }
-                nowSelectMenuItem = viewPageChangeNavigationView.getMenu().getItem(position);
-                nowSelectMenuItem.setChecked(true);
+        StaticFactory.getExecutorService().execute(() -> {
+            // 得到用户信息文件
+            userSettingRepository = UserSettingRepository.getInstance(APPDatabase.getInstance(MainActivity.this).userSettingDao());
+            Boolean acceptAgreement = userSettingRepository.getUserSettingValue(UserSettingKeyEnums.AGREE_USER_POLICY);
+            // 如果当前还没有同意用户协议则跳转到用户协议界面
+            if (!acceptAgreement) {
+                updateUIHandler.post(() -> welcomeLauncher.launch(new Intent(MainActivity.this, WelcomeActivity.class)));
+                return;
             }
+            updateUIHandler.post(() -> {
+                // 绑定相关的view
+                bindView();
+                listFragment = new ArrayList<>(4);
+                listFragment.add(creditFragment);
+                listFragment.add(rankFragment);
+                listFragment.add(analysisFragment);
+                BottomViewAdapter adapter = new BottomViewAdapter(MainActivity.this, listFragment);
+                viewPager.setAdapter(adapter);
+                viewPager.setSaveEnabled(false);
+                viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        if (nowSelectMenuItem != null) {
+                            nowSelectMenuItem.setChecked(false);
+                        } else {
+                            viewPageChangeNavigationView.getMenu().getItem(0).setChecked(false);
+                        }
+                        nowSelectMenuItem = viewPageChangeNavigationView.getMenu().getItem(position);
+                        nowSelectMenuItem.setChecked(true);
+                    }
+                });
+                viewPager.beginFakeDrag();
+                if (viewPager.fakeDragBy(100f)) {
+                    viewPager.endFakeDrag();
+                }
+                viewPageChangeNavigationView.setOnItemSelectedListener(MainActivity.this);
+            });
         });
-        viewPager.beginFakeDrag();
-        if (viewPager.fakeDragBy(100f)) {
-            viewPager.endFakeDrag();
-        }
-        this.viewPageChangeNavigationView.setOnItemSelectedListener(this);
     }
 }

@@ -13,12 +13,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.UserSettings;
-import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
+import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.viewmodel.WelcomeViewModel;
 import com.github.lorenj.wordtint.utils.FileUtils;
-import com.github.lorenj.wordtint.utils.JsonUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,13 +51,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         } else if (vId == R.id.btn_welcome_accept_agreement) {
             agreementArea.setVisibility(View.GONE);
             initProgressArea.setVisibility(View.VISIBLE);
-            try {
-                UserSettings userSettings = JsonUtils.readJson(UserInfoPath.USER_SETTINGS.getPath(), UserSettings.class);
-                userSettings.setAcceptUserAgreement(true);
-                JsonUtils.writeJson(UserInfoPath.USER_SETTINGS.getPath(), userSettings);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             // 开始初始化数据库
             welcomeViewModel.getInitState().observe(this, initState -> {
                 initProgressBar.setProgress(initState.progress);
@@ -66,7 +59,13 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                     finish();
                 }
             });
-            welcomeViewModel.initDatabase(this);
+            // 异步执行
+            StaticFactory.getExecutorService().execute(() -> {
+                welcomeViewModel.initDatabase(WelcomeActivity.this);
+                UserSettingRepository userSettingRepository = UserSettingRepository
+                        .getInstance(APPDatabase.getInstance(WelcomeActivity.this).userSettingDao());
+                userSettingRepository.update(UserSettingKeyEnums.AGREE_USER_POLICY, true);
+            });
         }
     }
 

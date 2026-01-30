@@ -141,6 +141,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                         }
                     }
                     bundle.putInt(BookListFragment.SELECT_WORD_COUNT, selectWordCount);
+                    if (selectWordCount < 1) return;
                     // 是否进入背诵格式界面
                     updateUIHandler.post(() -> {
                         if (userCreditStyle.isIgnore()) {

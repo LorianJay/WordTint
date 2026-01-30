@@ -7,9 +7,10 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.dao.UserSettingDao;
 import com.github.lorenj.wordtint.database.dao.WordBookDao;
 import com.github.lorenj.wordtint.database.dao.WordBookSectionDao;
+import com.github.lorenj.wordtint.database.entity.UserSettingEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
@@ -22,7 +23,8 @@ import java.io.InputStreamReader;
 import java.util.Optional;
 
 @Database(entities = {
-        WordBookEntity.class, WordBookSectionEntity.class, WordBookSectionWordIdEntity.class}, version = 5)
+        WordBookEntity.class, WordBookSectionEntity.class, WordBookSectionWordIdEntity.class,
+        UserSettingEntity.class}, version = 5)
 public abstract class APPDatabase extends RoomDatabase {
 
     private static volatile APPDatabase INSTANCE = null;
@@ -30,6 +32,8 @@ public abstract class APPDatabase extends RoomDatabase {
     public abstract WordBookDao wordBookDao();
 
     public abstract WordBookSectionDao wordBookSectionDao();
+
+    public abstract UserSettingDao userSettingDao();
 
     public static APPDatabase getInstance(Context context) {
         if (INSTANCE == null) {
@@ -55,52 +59,49 @@ public abstract class APPDatabase extends RoomDatabase {
     public static void initDatabase(Context context,
                                     WelcomeViewModel.InitProgressCallback callback) {
         APPDatabase database = getInstance(context);
-        StaticFactory.getExecutorService().execute(() -> {
+        database.runInTransaction(() -> {
+            try {
+                SupportSQLiteDatabase db =
+                        database.getOpenHelper().getWritableDatabase();
 
-            database.runInTransaction(() -> {
-                try {
-                    SupportSQLiteDatabase db =
-                            database.getOpenHelper().getWritableDatabase();
+                String[] files = Optional.ofNullable(context.getAssets().list("sql"))
+                        .orElse(new String[0]);
 
-                    String[] files = Optional.ofNullable(context.getAssets().list("sql"))
-                            .orElse(new String[0]);
+                int total = files.length;
+                int completed = 0;
 
-                    int total = files.length;
-                    int completed = 0;
+                for (String fileName : files) {
 
-                    for (String fileName : files) {
+                    try (InputStream is = context.getAssets().open("sql/" + fileName);
+                         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                        StringBuilder sql = new StringBuilder();
+                        String line;
 
-                        try (InputStream is = context.getAssets().open("sql/" + fileName);
-                             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-                            StringBuilder sql = new StringBuilder();
-                            String line;
+                        while ((line = reader.readLine()) != null) {
+                            line = line.trim();
 
-                            while ((line = reader.readLine()) != null) {
-                                line = line.trim();
+                            if (line.isEmpty() || line.startsWith("--")) {
+                                continue;
+                            }
 
-                                if (line.isEmpty() || line.startsWith("--")) {
-                                    continue;
-                                }
+                            sql.append(line);
 
-                                sql.append(line);
-
-                                if (line.endsWith(";")) {
-                                    db.execSQL(sql.toString());
-                                    sql.setLength(0);
-                                }
+                            if (line.endsWith(";")) {
+                                db.execSQL(sql.toString());
+                                sql.setLength(0);
                             }
                         }
-
-                        completed++;
-                        if (callback != null) {
-                            int progress = completed * 100 / total;
-                            callback.onProgress(progress);
-                        }
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+
+                    completed++;
+                    if (callback != null) {
+                        int progress = completed * 100 / total;
+                        callback.onProgress(progress);
+                    }
                 }
-            });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 }
