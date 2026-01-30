@@ -14,18 +14,17 @@ import androidx.navigation.Navigation;
 import androidx.viewpager.widget.ViewPager;
 
 import com.flyco.tablayout.SlidingTabLayout;
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.entity.UserCreditStyle;
-import com.github.lorenj.wordtint.entity.waper.UserCreditStyleWrapper;
+import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
+import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
+import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
-import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
 import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
-import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
 import com.github.lorenj.wordtint.ui.adapter.StartViewAdapter;
 import com.github.lorenj.wordtint.utils.JsonUtils;
-import com.github.lorenj.wordtint.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     // 当前选中的标记
     private MarkColor currentMarkColor;
     // 背词风格
-    private UserCreditStyle userCreditStyle;
+    private UserRecitePreference userRecitePreference;
     private AlertDialog loadingDialog = null;
 
     @Override
@@ -112,29 +111,27 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
         StaticFactory.getExecutorService().submit(() -> {
             // 读取用户背诵风格
             try {
-                userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
+                userRecitePreference = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserRecitePreference.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             // 拷贝Bean
-            UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
-
             ArrayList<Long> currentFlagWord = null;
             if (itemId == R.id.fragment_rank_complete) {
                 currentFlagWord = wordAnalysisHandler.queryFlagRankByFlagColor(currentMarkColor);
             } else if (itemId == R.id.fragment_rank_supplement) {
                 currentFlagWord = wordSupplementReviewHandler.querySupplementByFlagColor(currentMarkColor);
-                userCreditStyle.setReview(true);
+                userRecitePreference.setReview(true);
             }
 
             Bundle bundle = new Bundle();
-            bundle.putParcelable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+            //bundle.putParcelable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
             // 设置背诵列表
             bundle.putSerializable(BookListFragment.REVIEW_WORD_List, currentFlagWord);
             // 统计当前的选词量
             bundle.putInt(BookListFragment.SELECT_WORD_COUNT, currentFlagWord.size());
             updateUIHandler.post(() -> {
-                if (userCreditStyle.isIgnore()) {
+                if (userRecitePreference.isIgnore()) {
                     Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
                             StaticFactory.getSimpleNavOptions());
                 } else {

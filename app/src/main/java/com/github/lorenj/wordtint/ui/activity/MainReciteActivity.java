@@ -45,7 +45,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.entity.UserCreditStyle;
+import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
 import com.github.lorenj.wordtint.entity.local.AddWordAnalysisParamLocal;
@@ -55,9 +55,9 @@ import com.github.lorenj.wordtint.entity.local.FunctionWordDTOLocal;
 import com.github.lorenj.wordtint.entity.local.HistoryDTOLocal;
 import com.github.lorenj.wordtint.entity.local.ProjectorDTOLocal;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.enums.CreditFilter;
-import com.github.lorenj.wordtint.enums.CreditOrder;
-import com.github.lorenj.wordtint.enums.CreditState;
+import com.github.lorenj.wordtint.enums.ReciteFilter;
+import com.github.lorenj.wordtint.enums.ReciteOrder;
+import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.structure.EnglishStructure;
@@ -74,7 +74,6 @@ import com.github.lorenj.wordtint.ui.adapter.StartSingleCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ChineseAnswerHandler;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
-import com.github.lorenj.wordtint.ui.fragment.WordCreditFragment;
 import com.github.lorenj.wordtint.utils.AnimationUtil;
 import com.github.lorenj.wordtint.utils.FileUtils;
 import com.github.lorenj.wordtint.utils.JsonUtils;
@@ -145,7 +144,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     /**
      * 用户的背词风格
      */
-    private UserCreditStyle userCreditStyle;
+    private UserRecitePreference userRecitePreference;
     /**
      * 单词分析的功能
      */
@@ -223,8 +222,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (bundle == null) {
             return;
         }
-        this.userCreditStyle = (UserCreditStyle) Optional.of(bundle)
-                .map(b -> b.getSerializable(BookListFragment.USER_CREDIT_STYLE_WRAPPER))
+        this.userRecitePreference = (UserRecitePreference) Optional.of(bundle)
+                .map(b -> b.getSerializable(WordReciteLaunchActivity.USER_RECITE_PREFERENCE))
                 .orElse(null);
         // 读取所有单词信息,通过Bundle得到当前用户选中的单词分类,这里暂时以样本单词进行测试.
         // 异步执行
@@ -276,19 +275,19 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             }
             // 读取字典
             dict = StaticFactory.getAllWordDict();
-            if (userCreditStyle.getCreditOrder() == CreditOrder.DISORDER) {
+            if (userRecitePreference.getReciteOrder() == ReciteOrder.DISORDER) {
                 Collections.shuffle(allFunctionWordList);
-            } else if (userCreditStyle.getCreditOrder() == CreditOrder.LEXICOGRAPHIC) {
+            } else if (userRecitePreference.getReciteOrder() == ReciteOrder.LEXICOGRAPHIC) {
             }
-            if (userCreditStyle.getCreditFilter() == CreditFilter.PHRASE) {
+            if (userRecitePreference.getReciteFilter() == ReciteFilter.PHRASE) {
             }
             // 单词分析功能
             this.wordAnalysisHandler = new WordAnalysisHandlerImpl(this);
             this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(this);
 
             this.wordFunctionHandler = new WordFunctionHandlerImpl(allFunctionWordList, dict);
-            if (userCreditStyle != null) {
-                this.wordFunctionHandler.setCurrentCreditState(userCreditStyle.getCreditState());
+            if (userRecitePreference != null) {
+                this.wordFunctionHandler.setCurrentCreditState(userRecitePreference.getReciteMode());
             }
             // 设置recycleView的各个adapter
             this.chineseAnswerAdapterDrawer = new StarChineseAnswerRecyclerViewAdapter(this, 2L);
@@ -459,7 +458,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         } else if (clickViewId == R.id.fragment_word_credit_play_word) {
             reciteWord(wordFunctionHandler.getCurrentStructureWordMap(), wordFunctionHandler.getCurrentStructureWordMap());
             // 如果当前是听音频模式,需要手动播放音频
-            if (wordFunctionHandler.getCurrentCreditState() == CreditState.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
+            if (wordFunctionHandler.getCurrentCreditState() == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
                 playWordAudio(wordFunctionHandler.getCurrentStructureWordMap());
             }
         } else if (clickViewId == R.id.fragment_word_credit_jump_next) {
@@ -790,7 +789,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // todo 跳转单词搜索界面
         } else if (clickViewId == R.id.fragment_word_credit_click_analysis_word) {
             Bundle bundle = new Bundle();
-            bundle.putSerializable(WordCreditFragment.ANALYSIS_WORD, wordFunctionHandler.getCurrentStructureWordMap());
+            //bundle.putSerializable(WordCreditFragment.ANALYSIS_WORD, wordFunctionHandler.getCurrentStructureWordMap());
             // 跳转当前单词的分析界面
         } else if (clickViewId == R.id.fragment_word_credit_click_save_progress) {
             // 保存当前的进度
@@ -813,19 +812,19 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             toast.setGravity(Gravity.CENTER, 0, 500);
             toast.show();
         } else if (clickViewId == R.id.fragment_word_credit_pop_listening_write_mode) {
-            wordFunctionHandler.setCurrentCreditState(CreditState.LISTENING);
+            wordFunctionHandler.setCurrentCreditState(ReciteMode.LISTENING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_pop_english_translation_chinese_hearing) {
-            wordFunctionHandler.setCurrentCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING);
+            wordFunctionHandler.setCurrentCreditState(ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_pop_english_translation_chinese_no_hearing) {
-            wordFunctionHandler.setCurrentCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE_NO_HEARING);
+            wordFunctionHandler.setCurrentCreditState(ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_pop_chinese_translation_english) {
-            wordFunctionHandler.setCurrentCreditState(CreditState.CHINESE_TRANSLATION_ENGLISH);
+            wordFunctionHandler.setCurrentCreditState(ReciteMode.CHINESE_TRANSLATION_ENGLISH);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_pop_only_credit) {
-            wordFunctionHandler.setCurrentCreditState(CreditState.CREDIT);
+            wordFunctionHandler.setCurrentCreditState(ReciteMode.CREDIT);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.fragment_word_credit_pop_hide_pronoun) {
             wordFunctionHandler.setHidePronoun(!wordFunctionHandler.isHidePronoun());
@@ -1092,28 +1091,28 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.chineseTranslationEnglish.setBackground(null);
         this.onlyCreditMode.setBackground(null);
         this.hideProNoun.setBackground(null);
-        CreditState currentCreditState = wordFunctionHandler.getCurrentCreditState();
-        if (currentCreditState == CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING) {
+        ReciteMode currentReciteMode = wordFunctionHandler.getCurrentCreditState();
+        if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING) {
             this.englishTranslationChineseModeHearing.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
-        } else if (currentCreditState == CreditState.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
+        } else if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
             this.englishTranslationChineseModeNoHearing.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
-        } else if (currentCreditState == CreditState.CHINESE_TRANSLATION_ENGLISH) {
+        } else if (currentReciteMode == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
             this.chineseTranslationEnglish.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
-        } else if (currentCreditState == CreditState.LISTENING) {
+        } else if (currentReciteMode == ReciteMode.LISTENING) {
             this.listeningWriteMode.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
-        } else if (currentCreditState == CreditState.CREDIT) {
+        } else if (currentReciteMode == ReciteMode.CREDIT) {
             this.onlyCreditMode.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
@@ -1140,7 +1139,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 先清除增量,只要当前看过该单词就算清除
             AddWordReViewParamLocal addWordReViewParamLocal = new AddWordReViewParamLocal();
             addWordReViewParamLocal.setId(Math.toIntExact(previousWord.getId()));
-            if (userCreditStyle.isReview()) {
+            if (userRecitePreference.isReview()) {
                 wordSupplementReviewHandler.deleteWordReView(addWordReViewParamLocal.getId());
             }
             // 正常全量增加
@@ -1177,13 +1176,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 case CHINESE_TRANSLATION_ENGLISH:
                     // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
                     // 这里设置模式是为了防止播放音频
-                    wordFunctionHandler.setCurrentCreditState(CreditState.CREDIT);
+                    wordFunctionHandler.setCurrentCreditState(ReciteMode.CREDIT);
                     String phaseValue = currentWord.getValue().get(EnglishStructure.PHRASE);
                     currentWord.getValue().remove(EnglishStructure.PHRASE);
                     visibleWordAllMessage(currentWord);
                     currentWord.getValue().put(EnglishStructure.PHRASE, phaseValue);
                     sourceWord.setText("");
-                    wordFunctionHandler.setCurrentCreditState(CreditState.CHINESE_TRANSLATION_ENGLISH);
+                    wordFunctionHandler.setCurrentCreditState(ReciteMode.CHINESE_TRANSLATION_ENGLISH);
                     break;
                 case CREDIT:
                     // 不隐藏任何信息
@@ -1271,7 +1270,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      */
     private void visibleWordAllMessage(WordDTOLocal currentWord) {
         // 如果当前是中译英则播放单词,并且移除短语
-        if (wordFunctionHandler.getCurrentCreditState() == CreditState.CHINESE_TRANSLATION_ENGLISH) {
+        if (wordFunctionHandler.getCurrentCreditState() == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
             playWordAudio(currentWord);
         }
         // 如果是省略短语则直接移除短语

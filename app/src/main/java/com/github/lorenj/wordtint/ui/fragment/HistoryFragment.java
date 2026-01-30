@@ -17,18 +17,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.entity.UserCreditStyle;
+import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.entity.local.HistoryDTOLocal;
-import com.github.lorenj.wordtint.entity.waper.UserCreditStyleWrapper;
 import com.github.lorenj.wordtint.ui.adapter.history.HistoryListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.github.lorenj.wordtint.utils.JsonUtils;
-import com.github.lorenj.wordtint.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
     private final Handler updateUIHandler = new Handler();
     private TextView startLearn;
     private ProgressBar loadingBar;
-    private UserCreditStyle userCreditStyle;
+    private UserRecitePreference userRecitePreference;
     private final HashSet<HistoryDTOLocal> historyDTOSet = new HashSet<>();
     // 下拉刷新
     private SwipeRefreshLayout downRefreshLayout;
@@ -81,14 +80,13 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
             loadingBar.setVisibility(View.VISIBLE);
             StaticFactory.getExecutorService().submit(() -> {
                 try {
-                    userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
+                    userRecitePreference = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserRecitePreference.class);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 // 拷贝Bean
-                UserCreditStyleWrapper userCreditStyleWrapper = new UserCreditStyleWrapper(userCreditStyle);
                 Bundle bundle = new Bundle();
-                bundle.putParcelable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyleWrapper);
+                //bundle.putParcelable(WordReciteLaunchActivity.USER_RECITE_PREFERENCE, userCreditStyleWrapper);
                 // 首先将id转为String类型的List
                 bundle.putSerializable(BookListFragment.HISTORY_WORD_SET, historyDTOSet);
                 // 统计当前的选词量
@@ -98,7 +96,7 @@ public class HistoryFragment extends Fragment implements NavigationItemSelectLis
                 }
                 bundle.putInt(BookListFragment.SELECT_WORD_COUNT, selectWordCount);
                 updateUIHandler.post(() -> {
-                    if (userCreditStyle.isIgnore()) {
+                    if (userRecitePreference.isIgnore()) {
                         Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
                                 StaticFactory.getSimpleNavOptions());
                     } else {

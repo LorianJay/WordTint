@@ -47,8 +47,9 @@ public class UserSettingRepository {
      * @param userSettingKey 设置的key
      * @return
      */
-    public <T> UserSettingEntity getUserSettingEntity(UserSettingKeyEnums userSettingKey) {
-        return Optional.ofNullable(dao.findByKey(userSettingKey.name()))
+    public UserSettingEntity getUserSettingEntity(UserSettingKeyEnums userSettingKey) {
+        UserSettingEntity byKey = dao.findByKey(userSettingKey.name());
+        return Optional.ofNullable(byKey)
                 .orElseGet(() -> {
                     UserSettingEntity insert = new UserSettingEntity();
                     insert.settingKey = userSettingKey.name();

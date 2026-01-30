@@ -4,7 +4,7 @@ import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
 import com.github.lorenj.wordtint.entity.local.FunctionWordDTOLocal;
 import com.github.lorenj.wordtint.entity.local.ProjectorDTOLocal;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.enums.CreditState;
+import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 
@@ -158,9 +158,9 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     void shuffleRange(int start, int end);
 
     /**
-     * @param creditState
+     * @param reciteMode
      */
-    void setCurrentCreditState(CreditState creditState);
+    void setCurrentCreditState(ReciteMode reciteMode);
 
     /**
      * 隐藏介词
@@ -174,7 +174,7 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      */
     boolean isHidePronoun();
 
-    CreditState getCurrentCreditState();
+    ReciteMode getCurrentCreditState();
 
     /**
      * 得到当前的单词列表

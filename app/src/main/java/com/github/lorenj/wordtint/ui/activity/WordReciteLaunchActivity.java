@@ -3,6 +3,9 @@ package com.github.lorenj.wordtint.ui.activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewParent;
@@ -10,34 +13,48 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
-import com.github.lorenj.wordtint.entity.UserCreditStyle;
-import com.github.lorenj.wordtint.enums.CreditFilter;
-import com.github.lorenj.wordtint.enums.CreditFormat;
-import com.github.lorenj.wordtint.enums.CreditOrder;
-import com.github.lorenj.wordtint.enums.CreditState;
+import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
+import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
+import com.github.lorenj.wordtint.enums.ReciteFilter;
+import com.github.lorenj.wordtint.enums.ReciteMode;
+import com.github.lorenj.wordtint.enums.ReciteOrder;
+import com.github.lorenj.wordtint.enums.ReciteStyle;
+import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
-import com.github.lorenj.wordtint.utils.JsonUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class WordReciteLaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
+    /**
+     * UI相关
+     */
     private ImageButton toolBarBack;
-    private TextView start, saveSettings, restoreDefault, selectWordCount;
-    private AlertDialog loadingDialog = null;
-    private UserCreditStyle userCreditStyle;
+    private TextView start, saveSettings, restoreDefault, tvSelectWordCount;
     private final List<LinearLayout> settingsLinearLayouts = new ArrayList<>(4);
     private LinearLayout modeParent, orderParent, filterParent;
     private CheckBox ignore;
+    private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
+    private Toast toast;
+    /**
+     * 用户设置仓库
+     */
+    private UserSettingRepository userSettingRepository;
+    /**
+     * 背诵偏好
+     */
+    private UserRecitePreference userRecitePreference;
+    public static String USER_RECITE_PREFERENCE = "USER_RECITE_PREFERENCE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,47 +70,54 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         if (itemId == R.id.ib_toolbar_back) {
             finish();
         } else if (itemId == R.id.tv_word_recite_start) {
-            if (userCreditStyle.getCreditFormat() == CreditFormat.CLASSIC) {
+            if (userRecitePreference.getReciteStyle() == ReciteStyle.CLASSIC) {
                 Intent intent = new Intent(this, MainReciteActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(USER_RECITE_PREFERENCE, userRecitePreference);
                 intent.putExtras(getIntent());
                 startActivity(intent);
             } else {
 
             }
         } else if (itemId == R.id.fragment_word_credit_launch_save_settings) {
-            try {
-                JsonUtils.writeJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), userCreditStyle);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            // 保存用户的当前设置
+            StaticFactory.getExecutorService().execute(() -> {
+                userSettingRepository.update(UserSettingKeyEnums.RECITE_MODE, userRecitePreference.getReciteMode());
+                userSettingRepository.update(UserSettingKeyEnums.RECITE_ORDER, userRecitePreference.getReciteOrder());
+                userSettingRepository.update(UserSettingKeyEnums.RECITE_FILTER, userRecitePreference.getReciteFilter());
+                userSettingRepository.update(UserSettingKeyEnums.RECITE_STYLE, userRecitePreference.getReciteStyle());
+                userSettingRepository.update(UserSettingKeyEnums.SKIP_PREFERENCE, userRecitePreference.isIgnore());
+            });
+            toast.show();
         } else if (itemId == R.id.fragment_word_credit_launch_restore_default) {
-            userCreditStyle.setCreditState(CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING);
-            userCreditStyle.setCreditOrder(CreditOrder.ORDERLY);
-            userCreditStyle.setCreditFilter(CreditFilter.WORD);
-            userCreditStyle.setCreditFormat(CreditFormat.CLASSIC);
+            userRecitePreference.setReciteMode((ReciteMode) UserSettingKeyEnums.RECITE_MODE.defaultValue);
+            userRecitePreference.setReciteOrder((ReciteOrder) UserSettingKeyEnums.RECITE_ORDER.defaultValue);
+            userRecitePreference.setReciteFilter((ReciteFilter) UserSettingKeyEnums.RECITE_FILTER.defaultValue);
+            userRecitePreference.setReciteStyle((ReciteStyle) UserSettingKeyEnums.RECITE_STYLE.defaultValue);
+            updateUIByPreference(userRecitePreference);
         } else if (itemId == R.id.fragment_word_credit_launch_ignore) {
-            userCreditStyle.setIgnore(ignore.isChecked());
+            userRecitePreference.setIgnore(ignore.isChecked());
+            updateUIByPreference(userRecitePreference);
         } else if (v instanceof TextView) {
             ViewParent parent = v.getParent();
             if (parent == settingsLinearLayouts.get(0)) {
-                userCreditStyle.setCreditState(CreditState.values()[settingsLinearLayouts.get(0).indexOfChild(v)]);
+                userRecitePreference.setReciteMode(ReciteMode.values()[settingsLinearLayouts.get(0).indexOfChild(v)]);
             } else if (parent == settingsLinearLayouts.get(1)) {
-                userCreditStyle.setCreditOrder(CreditOrder.values()[settingsLinearLayouts.get(1).indexOfChild(v)]);
+                userRecitePreference.setReciteOrder(ReciteOrder.values()[settingsLinearLayouts.get(1).indexOfChild(v)]);
             } else if (parent == settingsLinearLayouts.get(2)) {
-                userCreditStyle.setCreditFilter(CreditFilter.values()[settingsLinearLayouts.get(2).indexOfChild(v)]);
+                userRecitePreference.setReciteFilter(ReciteFilter.values()[settingsLinearLayouts.get(2).indexOfChild(v)]);
             } else if (parent == settingsLinearLayouts.get(3)) {
-                userCreditStyle.setCreditFormat(CreditFormat.values()[settingsLinearLayouts.get(3).indexOfChild(v)]);
+                userRecitePreference.setReciteStyle(ReciteStyle.values()[settingsLinearLayouts.get(3).indexOfChild(v)]);
             }
+            updateUIByPreference(userRecitePreference);
         }
-        updateCreditStyle(userCreditStyle);
     }
-
 
     private void bindView() {
         this.toolBarBack = findViewById(R.id.ib_toolbar_back);
         this.start = findViewById(R.id.tv_word_recite_start);
         this.saveSettings = findViewById(R.id.fragment_word_credit_launch_save_settings);
-        this.selectWordCount = findViewById(R.id.fragment_word_credit_launch_word_count);
+        this.tvSelectWordCount = findViewById(R.id.fragment_word_credit_launch_word_count);
         this.restoreDefault = findViewById(R.id.fragment_word_credit_launch_restore_default);
         this.ignore = findViewById(R.id.fragment_word_credit_launch_ignore);
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_mode));
@@ -103,45 +127,64 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         this.modeParent = findViewById(R.id.fragment_word_credit_launch_mode_parent);
         this.orderParent = findViewById(R.id.fragment_word_credit_launch_order_parent);
         this.filterParent = findViewById(R.id.fragment_word_credit_launch_filter_parent);
+        // 批量设置所有能够被点击按钮的监听事件
         for (int i = 0; i < settingsLinearLayouts.size(); i++) {
             for (int j = 0; j < settingsLinearLayouts.get(i).getChildCount(); j++) {
                 settingsLinearLayouts.get(i).getChildAt(j).setOnClickListener(this);
             }
         }
-        // 得到背诵风格
-        Bundle bundle = getIntent().getExtras();
-        this.userCreditStyle = (UserCreditStyle) Optional.ofNullable(bundle)
-                .map(b -> b.getSerializable(BookListFragment.USER_CREDIT_STYLE_WRAPPER))
-                .orElse(null);
-
         this.saveSettings.setOnClickListener(this);
         this.restoreDefault.setOnClickListener(this);
         this.toolBarBack.setOnClickListener(this);
         this.start.setOnClickListener(this);
         this.ignore.setOnClickListener(this);
+        // 数据库
+        userSettingRepository = UserSettingRepository.getInstance(APPDatabase.getInstance(this).userSettingDao());
     }
 
     private void initView() {
-        loadingDialog = new AlertDialog.Builder(this)
+        AlertDialog loadingDialog = new AlertDialog.Builder(this)
                 .setView(LayoutInflater.from(this).inflate(R.layout.dialog_loading, null))
-                .setCancelable(false).show();
-        // 设置选词量
-        Bundle bundle = getIntent().getExtras();
-        int selectWordCount = Optional.ofNullable(bundle)
-                .map(p -> p.getInt(BookListFragment.SELECT_WORD_COUNT))
-                .orElse(0);
-        this.selectWordCount.setText(String.valueOf(selectWordCount));
-        if (this.userCreditStyle.isReview()) {
-            this.start.setForegroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.purple75, null)));
-            this.start.setTextColor(ColorStateList.valueOf(getResources().getColor(R.color.purple75, null)));
-        }
-        updateCreditStyle(userCreditStyle);
-        loadingDialog.dismiss();
+                .setCancelable(false)
+                .show();
+        toast = Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        // 批量查询所有的背诵偏好
+        StaticFactory.getExecutorService().execute(() -> {
+            userRecitePreference = new UserRecitePreference(
+                    userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_MODE),
+                    userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_ORDER),
+                    userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_FILTER),
+                    userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_STYLE),
+                    false,
+                    false
+            );
+
+            // 设置选词量
+            Bundle bundle = getIntent().getExtras();
+            int selectWordCount = Optional.ofNullable(bundle)
+                    .map(p -> p.getInt(BookListFragment.SELECT_WORD_COUNT))
+                    .orElse(0);
+            updateUIHandler.post(() -> {
+                tvSelectWordCount.setText(String.valueOf(selectWordCount));
+                updateUIByPreference(userRecitePreference);
+                //if (this.userCreditStyle.isReview()) {
+                //    this.start.setForegroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.purple75, null)));
+                //    this.start.setTextColor(ColorStateList.valueOf(getResources().getColor(R.color.purple75, null)));
+                //}
+                loadingDialog.dismiss();
+            });
+        });
     }
 
 
-    private void updateCreditStyle(UserCreditStyle userCreditStyle) {
-        ignore.setChecked(userCreditStyle.isIgnore());
+    /**
+     * 根据当前的背诵偏好更新UI
+     *
+     * @param userRecitePreference 背诵偏好设置
+     */
+    private void updateUIByPreference(UserRecitePreference userRecitePreference) {
+        ignore.setChecked(userRecitePreference.isIgnore());
         for (int i = 0; i < settingsLinearLayouts.size(); i++) {
             settingsLinearLayouts.get(i).getChildAt(0).setBackgroundResource(R.drawable.background_solid_radius_start_6dp);
             settingsLinearLayouts.get(i).getChildAt(0).setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.light_theme_color, null)));
@@ -149,11 +192,11 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
                 settingsLinearLayouts.get(i).getChildAt(j).setBackgroundResource(0);
             }
         }
-        changeState(userCreditStyle.getCreditState().ordinal(), 0);
-        changeState(userCreditStyle.getCreditOrder().ordinal(), 1);
-        changeState(userCreditStyle.getCreditFilter().ordinal(), 2);
-        changeState(userCreditStyle.getCreditFormat().ordinal(), 3);
-        if (userCreditStyle.getCreditFormat() == CreditFormat.ASSOCIATION) {
+        updateUnitUI(userRecitePreference.getReciteMode().ordinal(), 0);
+        updateUnitUI(userRecitePreference.getReciteOrder().ordinal(), 1);
+        updateUnitUI(userRecitePreference.getReciteFilter().ordinal(), 2);
+        updateUnitUI(userRecitePreference.getReciteStyle().ordinal(), 3);
+        if (userRecitePreference.getReciteStyle() == ReciteStyle.ASSOCIATION) {
             modeParent.setVisibility(View.GONE);
             orderParent.setVisibility(View.GONE);
             filterParent.setVisibility(View.GONE);
@@ -164,7 +207,13 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         }
     }
 
-    private void changeState(int ordinal, int position) {
+    /**
+     * 更新最小单元,其目标是位于第一个和最后一个元素要加圆角边框修饰
+     *
+     * @param ordinal
+     * @param position
+     */
+    private void updateUnitUI(int ordinal, int position) {
         if (ordinal == 0) {
             settingsLinearLayouts.get(position).getChildAt(ordinal).setBackgroundResource(R.drawable.background_solid_radius_start_6dp);
         } else if (ordinal == settingsLinearLayouts.get(position).getChildCount() - 1) {
@@ -172,7 +221,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         } else {
             settingsLinearLayouts.get(position).getChildAt(ordinal).setBackgroundColor(getResources().getColor(R.color.theme_color, null));
         }
-        settingsLinearLayouts.get(position).getChildAt(ordinal).setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.theme_color, null)));
+        settingsLinearLayouts.get(position).getChildAt(ordinal).getBackground().setTint(getResources().getColor(R.color.theme_color, null));
     }
 
 }

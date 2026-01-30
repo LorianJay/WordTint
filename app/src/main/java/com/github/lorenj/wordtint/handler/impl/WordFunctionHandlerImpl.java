@@ -4,7 +4,7 @@ import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
 import com.github.lorenj.wordtint.entity.local.FunctionWordDTOLocal;
 import com.github.lorenj.wordtint.entity.local.ProjectorDTOLocal;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.enums.CreditState;
+import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
@@ -65,7 +65,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     /**
      * 当前的背诵风格
      */
-    private CreditState creditState = CreditState.ENGLISH_TRANSLATION_CHINESE_HEARING;
+    private ReciteMode reciteMode = ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING;
 
     /**
      * 当前的放映规则
@@ -251,8 +251,8 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
 
 
     @Override
-    public void setCurrentCreditState(CreditState creditState) {
-        this.creditState = creditState;
+    public void setCurrentCreditState(ReciteMode reciteMode) {
+        this.reciteMode = reciteMode;
     }
 
     @Override
@@ -266,8 +266,8 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler imp
     }
 
     @Override
-    public CreditState getCurrentCreditState() {
-        return creditState;
+    public ReciteMode getCurrentCreditState() {
+        return reciteMode;
     }
 
     @Override

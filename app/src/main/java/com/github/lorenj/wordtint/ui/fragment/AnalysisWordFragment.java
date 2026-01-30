@@ -67,7 +67,7 @@ public class AnalysisWordFragment extends Fragment implements View.OnClickListen
         Bundle bundle = getArguments();
         if (bundle != null) {
             // 得到当前要分析的单词
-            this.currentWord = bundle.getSerializable(WordCreditFragment.ANALYSIS_WORD, WordDTOLocal.class);
+            //this.currentWord = bundle.getSerializable(WordCreditFragment.ANALYSIS_WORD, WordDTOLocal.class);
             StaticFactory
                     .getExecutorService()
                     .submit(() -> {

@@ -14,29 +14,26 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
+import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
 import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
 import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
-import com.github.lorenj.wordtint.entity.UserCreditStyle;
 import com.github.lorenj.wordtint.enums.MarkColor;
+import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
-import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +51,6 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
     private ProgressBar loadingBar;
     private boolean isLoading;
 
-    private UserCreditStyle userCreditStyle;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private APPDatabase appDatabase;
     private RecyclerView bookListRecyclerView;
@@ -70,10 +66,6 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      */
     private BookViewModel bookViewModel;
 
-    /**
-     * 用户背诵风格
-     */
-    public static final String USER_CREDIT_STYLE_WRAPPER = "USER_CREDIT_STYLE_WRAPPER";
     /**
      * 所有子划分
      */
@@ -94,6 +86,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      * 所有的书本以及其对应的信息
      */
     private List<WordBookWithSectionVO> wordBookWithSectionVOList;
+    private UserSettingRepository userSettingRepository;
 
 
     @Override
@@ -119,14 +112,11 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
             if (!isLoading) {
                 loadingBar.setVisibility(View.VISIBLE);
                 StaticFactory.getExecutorService().submit(() -> {
-                    try {
-                        userCreditStyle = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserCreditStyle.class);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     // 拷贝Bean
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable(BookListFragment.USER_CREDIT_STYLE_WRAPPER, userCreditStyle);
+                    // 是否跳过偏好设置
+                    userSettingRepository = UserSettingRepository.getInstance(APPDatabase.getInstance(getContext()).userSettingDao());
+                    Boolean skipPreference = userSettingRepository.getUserSettingValue(UserSettingKeyEnums.SKIP_PREFERENCE);
                     // 首先将id转为String类型的List
                     //bundle.putSerializable(BookListFragment.CHILD_DIVIDE_SET, divideSet);
                     // 统计当前的选词量
@@ -144,9 +134,8 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                     if (selectWordCount < 1) return;
                     // 是否进入背诵格式界面
                     updateUIHandler.post(() -> {
-                        if (userCreditStyle.isIgnore()) {
-                            Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
-                                    StaticFactory.getSimpleNavOptions());
+                        if (skipPreference) {
+                            // todo 直接跳转到背诵界面
                         } else {
                             Intent intent = new Intent(requireContext(), WordReciteLaunchActivity.class);
                             intent.putExtras(bundle);
