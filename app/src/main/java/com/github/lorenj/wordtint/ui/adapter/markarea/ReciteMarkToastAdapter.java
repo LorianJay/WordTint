@@ -11,11 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
+import com.github.lorenj.wordtint.handler.WordFunctionHandler;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 
@@ -23,14 +23,15 @@ import java.util.List;
  * @author cnsukidayo
  * @date 2023/1/7 17:35
  */
-public class ReciteMarkToastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToastAdapter.ToastViewHolder>
         implements RecyclerViewAdapterItemChange<MarkColor> {
 
     private final Context context;
-    private final List<MarkColor> markColorList = new ArrayList<>(2);
+    private final WordFunctionHandler wordFunctionHandler;
 
-    public ReciteMarkToastAdapter(Context context) {
+    public ReciteMarkToastAdapter(Context context, WordFunctionHandler wordFunctionHandler) {
         this.context = context;
+        this.wordFunctionHandler = wordFunctionHandler;
     }
 
     @NonNull
@@ -40,37 +41,42 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        if (holder instanceof ToastViewHolder) {
-            ToastViewHolder toastViewHolder = (ToastViewHolder) holder;
-            toastViewHolder.toastMark.getDrawable().setTint(context.getResources().getColor(MarkColor.values()[position].getMapColorID(), null));
-            toastViewHolder.viewMark.setBackgroundColor(context.getResources().getColor(MarkColor.values()[position].getMapColorID(), null));
+    public void onBindViewHolder(@NonNull ToastViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        MarkColor markColor = MarkColor.values()[position];
+        holder.toastMark.getDrawable().setTint(context.getResources().getColor(markColor.getMapColorID(), null));
+        holder.viewMark.setBackgroundColor(context.getResources().getColor(markColor.getMapColorID(), null));
+        if (!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
+            // 如果当前状态是展开
+            holder.toastMark.setVisibility(View.VISIBLE);
+            holder.viewMark.setVisibility(wordFunctionHandler.getCurrentFocusWord().getMarkColorList().contains(markColor) ?
+                    View.VISIBLE : View.INVISIBLE);
+        } else {
+            // 如果当前状态是折叠
+            holder.toastMark.setVisibility(View.GONE);
+            holder.viewMark.setVisibility(wordFunctionHandler.getCurrentFocusWord().getMarkColorList().contains(markColor) ?
+                    View.VISIBLE : View.GONE);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ToastViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads);
+        // 一定是展开状态才可以点击
+        for (Object payload : payloads) {
+            if (payload == Item.CLICK_MARK) {
+                MarkColor markColor = MarkColor.values()[position];
+                holder.viewMark.setVisibility(wordFunctionHandler.getCurrentFocusWord().getMarkColorList().contains(markColor) ?
+                        View.VISIBLE : View.INVISIBLE);
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        return markColorList.size();
+        return MarkColor.values().length;
     }
 
-    @Override
-    public void addItem(MarkColor item) {
-
-    }
-
-    @Override
-    public void removeItem(MarkColor item) {
-
-    }
-
-    @Override
-    public void replaceAll(Collection<MarkColor> markColorList) {
-        this.markColorList.clear();
-        this.markColorList.addAll(markColorList);
-        notifyItemRangeChanged(0, markColorList.size());
-    }
-
-    protected static class ToastViewHolder extends RecyclerView.ViewHolder {
+    public class ToastViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public View itemView;
         public ImageView toastMark;
         public View viewMark;
@@ -80,7 +86,39 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             this.itemView = itemView;
             this.toastMark = itemView.findViewById(R.id.iv_toast_mark);
             this.viewMark = itemView.findViewById(R.id.iv_view_mark);
+            this.toastMark.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int itemId = v.getId();
+            if (itemId != R.id.iv_toast_mark) {
+                return;
+            }
+            MarkColor markColor = MarkColor.values()[getAdapterPosition()];
+            // 如果当前正在选择变色龙
+            if (wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon()) {
+                wordFunctionHandler.getWordFunctionHandlerState().setFunctionAreaFold(true);
+                wordFunctionHandler.getWordFunctionHandlerState().setSelectChameleon(false);
+                wordFunctionHandler.getWordFunctionHandlerState().setChameleon(markColor);
+                notifyItemRangeChanged(0, getItemCount());
+                return;
+            }
+            // 如果是棕色就跳过(逻辑写死)
+            if (markColor == MarkColor.BROWN) return;
+            FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
+            if (currentFocusWord.getMarkColorList().contains(markColor)) {
+                currentFocusWord.getMarkColorList().remove(markColor);
+            } else {
+                currentFocusWord.getMarkColorList().add(markColor);
+            }
+            notifyItemChanged(getAdapterPosition(), Item.CLICK_MARK);
         }
     }
+
+    public enum Item {
+        CLICK_MARK
+    }
+
 
 }

@@ -1,11 +1,9 @@
 package com.github.lorenj.wordtint.handler;
 
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
-import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
-
-import java.util.Set;
+import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
 public interface WordFunctionHandler extends CategoryFunctionHandler {
     /**
@@ -65,52 +63,6 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     FunctionWordVO forceGotoWordWithOutMarkColor(int index);
 
     /**
-     * 获得当前指针指向的单词的标记列表<br>
-     * 根据索引获得当前单词所标记的颜色,颜色标记功能是不具备序列化能力的,只有一种情况单词的标记会被序列化<br>
-     * 就是保存现场功能.<br>
-     * 返回的集合只能用于查阅操作,所以返回的集合是不可变集合.<br>
-     * 如果想要修改当前单词的标记,请使用:addFlagToCurrentWord(FlagColor)方法和removeFlagToCurrentWord(FlagColor)方法
-     *
-     * @return 返回当前单词所有的标记颜色集合
-     * @see WordFunctionHandler#addMarkColorToCurrentWord(MarkColor)
-     * @see WordFunctionHandler#removeMarkColorToCurrentWord(MarkColor)
-     */
-    Set<MarkColor> getCurrentWordMarkColor();
-
-    /**
-     * 为当前单词添加一个标记
-     *
-     * @param markColor 待添加的标记颜色
-     * @return {@code true} if this set did not already contain the specified
-     * element
-     */
-    boolean addMarkColorToCurrentWord(MarkColor markColor);
-
-    /**
-     * 为当前单词删除一个标记d
-     *
-     * @param markColor 待删除的标记颜色
-     * @return {@code true} if this set contained the specified element
-     */
-    boolean removeMarkColorToCurrentWord(MarkColor markColor);
-
-    /**
-     * 得到当前的变色龙状态,默认状态为FlagColor.GREEN
-     *
-     * @return {@link MarkColor} 返回代表变色龙的颜色.
-     * @see MarkColor
-     */
-    MarkColor getChameleon();
-
-    /**
-     * 设置变色龙颜色,此时函数的各个方法的返回值都会因为FlagColor的改变而改变.
-     * 每次更改变色龙颜色之后,单词的索引都会从0开始
-     *
-     * @param chameleonColor FlagColor
-     */
-    void setChameleon(MarkColor chameleonColor);
-
-    /**
      * 根据当前的chameleonColor进行打乱,也就是按颜色打乱.
      * 当前在打乱的状态下是不能使用变色龙模式的,要想使用变色龙模式必须先退出打乱模式.
      */
@@ -132,11 +84,10 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     void restoreWordList();
 
     /**
-     * 得到当前单词功能的状态
-     *
-     * @return {@link WordFunctionState}代表返回的状态
+     * 得到当前功能区域的所有涉及状态
+     * @return 返回功能区状态实例
      */
-    WordFunctionState getWordFunctionState();
+    WordFunctionHandlerState getWordFunctionHandlerState();
 
     /**
      * 设置当前的背诵模式
@@ -144,13 +95,6 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * @param reciteMode
      */
     void setCurrentReciteMode(ReciteMode reciteMode);
-
-    /**
-     * 得到当前的背诵模式
-     *
-     * @return 非空
-     */
-    ReciteMode getCurrentReciteMode();
 
     /**
      * 隐藏介词

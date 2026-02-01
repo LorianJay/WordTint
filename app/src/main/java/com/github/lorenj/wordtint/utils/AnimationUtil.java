@@ -18,7 +18,7 @@ import java.util.Set;
 public class AnimationUtil {
     private volatile boolean ismHiddenActionStart = false;
     private static AnimationUtil mInstance;
-    private final Set<Integer> hiddenActionStartState = Collections.synchronizedSet(new HashSet<Integer>());
+    private final Set<Integer> hiddenActionStartState = Collections.synchronizedSet(new HashSet<>());
 
     public static AnimationUtil getInstance() {
         if (mInstance == null) {
@@ -39,18 +39,17 @@ public class AnimationUtil {
      * @return 返回值为是否执行成功, true为执行成功, false为执行不成功
      */
     public boolean moveToViewBottom(final View v, long Duration) {
-        if (v.getVisibility() != View.VISIBLE) return false;
         if (hiddenActionStartState.contains(v.getId())) return false;
-        TranslateAnimation mHiddenAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
-                0.0f, Animation.RELATIVE_TO_SELF, 1.0f);
+        hiddenActionStartState.add(v.getId());
+        TranslateAnimation mHiddenAction = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 1.0f);
         mHiddenAction.setDuration(Duration);
-        v.clearAnimation();
-        v.setAnimation(mHiddenAction);
         mHiddenAction.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                hiddenActionStartState.add(v.getId());
             }
 
             @Override
@@ -61,9 +60,10 @@ public class AnimationUtil {
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
             }
         });
+        v.clearAnimation();
+        v.setAnimation(mHiddenAction);
         return true;
     }
 
@@ -74,16 +74,33 @@ public class AnimationUtil {
      * @param Duration 动画时间
      * @return 返回值为是否执行成功, true为执行成功, false为执行不成功
      */
-    public boolean bottomMoveToViewLocation(View v, long Duration) {
-        if (v.getVisibility() == View.VISIBLE)
-            return false;
+    public boolean bottomMoveToViewLocation(final View v, long duration) {
+        if (hiddenActionStartState.contains(v.getId())) return false;
+        hiddenActionStartState.add(v.getId());
         v.setVisibility(View.VISIBLE);
-        TranslateAnimation mShowAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
-                1.0f, Animation.RELATIVE_TO_SELF, 0.0f);
-        mShowAction.setDuration(Duration);
+        TranslateAnimation anim = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 1f,
+                Animation.RELATIVE_TO_SELF, 0f
+        );
+        anim.setDuration(duration);
+        anim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                hiddenActionStartState.remove(v.getId());
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
         v.clearAnimation();
-        v.setAnimation(mShowAction);
+        v.startAnimation(anim);
         return true;
     }
 
@@ -95,18 +112,17 @@ public class AnimationUtil {
      * @return 返回值为是否执行成功, true为执行成功, false为执行不成功
      */
     public boolean moveToViewEnd(final View v, long Duration) {
-        if (v.getVisibility() != View.VISIBLE) return false;
         if (hiddenActionStartState.contains(v.getId())) return false;
+        hiddenActionStartState.add(v.getId());
         TranslateAnimation mHiddenAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF,
-                0.0f, Animation.RELATIVE_TO_SELF, 0.0f);
+                Animation.RELATIVE_TO_SELF, 1.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f);
         mHiddenAction.setDuration(Duration);
-        v.clearAnimation();
-        v.setAnimation(mHiddenAction);
+
         mHiddenAction.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                hiddenActionStartState.add(v.getId());
             }
 
             @Override
@@ -120,6 +136,8 @@ public class AnimationUtil {
 
             }
         });
+        v.clearAnimation();
+        v.setAnimation(mHiddenAction);
         return true;
     }
 
@@ -131,15 +149,31 @@ public class AnimationUtil {
      * @return 返回值为是否执行成功, true为执行成功, false为执行不成功
      */
     public boolean endMoveToViewLocation(View v, long Duration) {
-        if (v.getVisibility() == View.VISIBLE)
-            return false;
+        if (hiddenActionStartState.contains(v.getId())) return false;
+        hiddenActionStartState.add(v.getId());
         v.setVisibility(View.VISIBLE);
-        TranslateAnimation mShowAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 1.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF,
-                0.0f, Animation.RELATIVE_TO_SELF, 0.0f);
-        mShowAction.setDuration(Duration);
+        TranslateAnimation anim = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 1.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, 0.0f);
+        anim.setDuration(Duration);
+        anim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                hiddenActionStartState.remove(v.getId());
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
         v.clearAnimation();
-        v.setAnimation(mShowAction);
+        v.setAnimation(anim);
         return true;
     }
 
@@ -200,14 +234,4 @@ public class AnimationUtil {
     public boolean isIsmHiddenActionStart() {
         return ismHiddenActionStart;
     }
-
-    /**
-     * 判断某组件是否正在播放动画
-     *
-     * @param view view
-     */
-    public boolean isAnimating(View view) {
-        return hiddenActionStartState.contains(view.getId());
-    }
-
 }

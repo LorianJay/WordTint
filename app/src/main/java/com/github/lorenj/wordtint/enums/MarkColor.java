@@ -11,55 +11,120 @@ public enum MarkColor {
         public int getMapColorID() {
             return R.color.theme_color;
         }
-    }, RED {
+
+        @Override
+        public int order() {
+            return 0;
+        }
+    },
+    RED {
         @Override
         public int getMapColorID() {
             return android.R.color.holo_red_dark;
         }
-    }, ORANGE {
+
+        @Override
+        public int order() {
+            return 1;
+        }
+    },
+    ORANGE {
         @Override
         public int getMapColorID() {
             return android.R.color.holo_orange_dark;
         }
-    }, YELLOW {
+
+        @Override
+        public int order() {
+            return 2;
+        }
+    },
+    YELLOW {
         @Override
         public int getMapColorID() {
             return R.color.holo_yellow_dark;
         }
-    }, BLUE {
+
+        @Override
+        public int order() {
+            return 3;
+        }
+    },
+    BLUE {
         @Override
         public int getMapColorID() {
             return android.R.color.holo_blue_dark;
         }
-    }, CYAN {
+
+        @Override
+        public int order() {
+            return 4;
+        }
+    },
+    CYAN {
         @Override
         public int getMapColorID() {
             return R.color.holo_cyan_dark;
         }
-    }, PURPLE {
+
+        @Override
+        public int order() {
+            return 5;
+        }
+    },
+    PURPLE {
         @Override
         public int getMapColorID() {
             return android.R.color.holo_purple;
         }
-    }, PINK {
+
+        @Override
+        public int order() {
+            return 6;
+        }
+    },
+    PINK {
         @Override
         public int getMapColorID() {
             return R.color.holo_pink_dark;
         }
-    }, GRAY {
+
+        @Override
+        public int order() {
+            return 7;
+        }
+    },
+    GRAY {
         @Override
         public int getMapColorID() {
             return R.color.dark_gray;
         }
-    }, BLACK {
+
+        @Override
+        public int order() {
+            return 8;
+        }
+    },
+    BLACK {
         @Override
         public int getMapColorID() {
             return android.R.color.black;
         }
-    }, BROWN {
+
+        @Override
+        public int order() {
+            return 9;
+        }
+    },
+    BROWN {
         @Override
         public int getMapColorID() {
             return R.color.halo_brown_dark;
+        }
+
+        @Override
+        public int order() {
+            return 10;
         }
     };
 
@@ -69,6 +134,8 @@ public enum MarkColor {
      * @return @{@link R.id} 返回颜色值的引用.
      */
     public abstract int getMapColorID();
+
+    public abstract int order();
 
     public static MarkColor valueOfName(String name) {
         if (name == null) return null;

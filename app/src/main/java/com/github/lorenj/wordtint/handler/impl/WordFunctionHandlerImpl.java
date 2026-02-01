@@ -7,7 +7,6 @@ import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
-import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
@@ -16,6 +15,7 @@ import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
+import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +40,10 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
      * 用户背诵偏好信息
      */
     private final UserRecitePreference userRecitePreference;
+    /**
+     * 功能区的状态标记
+     */
+    private final WordFunctionHandlerState wordFunctionHandlerState;
     /**
      * 数据库对象
      */
@@ -74,21 +77,13 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
      * 现在正在背诵的区间 start:19 end:29 -> [20,30]
      */
     private int start = 0, end = 0;
-    /**
-     * 当前变色龙的颜色
-     */
-    private MarkColor currentChameleon = MarkColor.GREEN;
-
-    /**
-     * 默认的单词功能为空
-     */
-    private WordFunctionState wordFunctionState = WordFunctionState.NONE;
 
     public WordFunctionHandlerImpl(Context context,
                                    UserRecitePreference userRecitePreference) {
         super(context);
         this.context = context;
         this.userRecitePreference = userRecitePreference;
+        this.wordFunctionHandlerState = new WordFunctionHandlerState();
         initHandler();
         this.start = 0;
         this.end = allWordIdList.size() - 1;
@@ -168,33 +163,8 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
     }
 
     @Override
-    public Set<MarkColor> getCurrentWordMarkColor() {
-        return Collections.unmodifiableSet(getCurrentFocusWord().getMarkColorList());
-    }
-
-    @Override
-    public boolean addMarkColorToCurrentWord(MarkColor markColor) {
-        return getCurrentFocusWord().getMarkColorList().add(markColor);
-    }
-
-    @Override
-    public boolean removeMarkColorToCurrentWord(MarkColor markColor) {
-        return getCurrentFocusWord().getMarkColorList().remove(markColor);
-    }
-
-    @Override
-    public MarkColor getChameleon() {
-        return this.currentChameleon;
-    }
-
-    @Override
-    public void setChameleon(MarkColor chameleonColor) {
-        this.currentChameleon = chameleonColor;
-    }
-
-    @Override
     public void shuffle() {
-        this.wordFunctionState = WordFunctionState.SHUFFLE;
+        getWordFunctionHandlerState().setWordFunctionState(WordFunctionState.SHUFFLE);
         this.dummyWordIdList = new ArrayList<>(allWordIdList.size());
         for (int i = 0; i < allWordIdList.size(); i++) {
             if (testWordIsCurrentChameleonWithIndex(i)) {
@@ -214,7 +184,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
 
     @Override
     public void shuffleRange(int start, int end) {
-        this.wordFunctionState = WordFunctionState.RANGE;
+        getWordFunctionHandlerState().setWordFunctionState(WordFunctionState.RANGE);
         this.dummyWordIdList = new ArrayList<>(end - start + 1);
         // 要找到对应颜色的区间
         int realIndex = findColorCursor(start);
@@ -239,25 +209,20 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
     @Override
     public void restoreWordList() {
         this.allWordIdList = this.dummyWordIdList;
-        this.wordFunctionState = WordFunctionState.NONE;
+        getWordFunctionHandlerState().setWordFunctionState(WordFunctionState.NONE);
         this.start = 0;
         this.end = allWordIdList.size() - 1;
         this.currentIndex = dummyIndex;
     }
 
     @Override
-    public WordFunctionState getWordFunctionState() {
-        return this.wordFunctionState;
+    public WordFunctionHandlerState getWordFunctionHandlerState() {
+        return this.wordFunctionHandlerState;
     }
 
     @Override
     public void setCurrentReciteMode(ReciteMode reciteMode) {
         this.userRecitePreference.setReciteMode(reciteMode);
-    }
-
-    @Override
-    public ReciteMode getCurrentReciteMode() {
-        return this.userRecitePreference.getReciteMode();
     }
 
     @Override
@@ -358,6 +323,8 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
         if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_RECORD) {
         }
         // 6.设置当前的背诵模式
+        wordFunctionHandlerState.setCurrentReciteMode(userRecitePreference.getReciteMode());
+        wordFunctionHandlerState.setWordFunctionState(WordFunctionState.NONE);
         // 5.快速定位(单词反查的初始化)
         quickPosition = new HashMap<>(allWordIdList.size());
         for (int i = 0; i < allWordIdList.size(); i++) {
@@ -374,7 +341,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
      * 现在要找到颜色为红色的,第3个单词,那就不能是简单的[3],而应该遍历整个列表
      *
      * @param currentIndex 用户期待的颜色索引<br>
-     *                     用户期待的颜色就是{@link WordFunctionHandler#getChameleon()}方法的返回值
+     *                     用户期待的颜色就是{@link WordFunctionHandlerState#getChameleon()}方法的返回值
      * @return 返回用户输入的颜色索引所对应的数组元素索引
      */
     private int findColorCursor(int currentIndex) {
@@ -396,7 +363,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
     private boolean testWordIsCurrentChameleonWithIndex(int index) {
         return Optional.ofNullable(dict.get(allWordIdList.get(index)))
                 .map(FunctionWordVO::getMarkColorList)
-                .map(set -> set.contains(currentChameleon))
+                .map(set -> set.contains(getWordFunctionHandlerState().getChameleon().getValue()))
                 .orElse(false);
     }
 

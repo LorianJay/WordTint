@@ -59,6 +59,7 @@ import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
+import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
@@ -112,6 +113,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private long exitLastTime = 0;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private ImageButton currentSelectFlagButton;
+    private FlowingBorderView functionChameleonBorder;
 
     /**
      * 用户的背词风格
@@ -158,6 +160,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 数据库
      */
     private APPDatabase appDatabase;
+
+    /**
+     * 全局的对话框,用于弹出提示信息
+     */
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,11 +222,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 单词分析功能
             this.wordAnalysisHandler = new WordAnalysisHandlerImpl(this);
             this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(this);
-
             // 设置recycleView的各个adapter
             this.starResultAdapter = new StarResultAdapter(this, 2L);
             this.starCategoryAdapter = new StarCategoryAdapter(this);
-            this.reciteMarkToastAdapter = new ReciteMarkToastAdapter(this);
+            this.reciteMarkToastAdapter = new ReciteMarkToastAdapter(this, wordFunctionHandler);
+            this.reciteMarkArea.setItemAnimator(null);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
             starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
@@ -230,6 +237,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 this.starList.setAdapter(starCategoryAdapter);
                 this.reciteMarkArea.setAdapter(reciteMarkToastAdapter);
                 touchHelper.attachToRecyclerView(starList);
+                // view-model的监听事件,必须在UI线程
+                wordFunctionHandler.getWordFunctionHandlerState()
+                        .getChameleon()
+                        .observe(this, markColor -> {
+                            refreshChameleonUI();
+                            reciteWord(wordFunctionHandler.getCurrentFocusWord());
+
+                        });
                 reciteWord(wordFunctionHandler.getCurrentFocusWord());
                 updateChangeModePopWindowState();
                 loadingDialog.dismiss();
@@ -344,10 +359,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        Toast toast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         int clickViewId = v.getId();
         // 控制区域
-        if (clickViewId == R.id.ib_toolbar_back) {
+        if (clickViewId == R.id.ib_main_recite_back) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getText(R.string.back_home_inquire))
                     .setCancelable(false)
@@ -361,15 +375,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     .show();
         }
         if (clickViewId == R.id.iv_recite_control_fold) {
-            if (AnimationUtil.getInstance().isAnimating(functionAreaHorizontalScrollView)) return;
-            if (moreFunctionOpen) {
-                AnimationUtil.getInstance().moveToViewBottom(functionAreaHorizontalScrollView, 500);
+            if (moreFunctionOpen &&
+                    AnimationUtil.getInstance().moveToViewBottom(functionAreaHorizontalScrollView, 450)) {
                 controlFunctionAreaFold.setImageResource(R.drawable.ic_fold);
-            } else {
-                AnimationUtil.getInstance().bottomMoveToViewLocation(functionAreaHorizontalScrollView, 500);
+                moreFunctionOpen = !moreFunctionOpen;
+            } else if (!moreFunctionOpen &&
+                    AnimationUtil.getInstance().bottomMoveToViewLocation(functionAreaHorizontalScrollView, 450)) {
+                moreFunctionOpen = !moreFunctionOpen;
                 controlFunctionAreaFold.setImageResource(R.drawable.ic_unfold);
             }
-            moreFunctionOpen = !moreFunctionOpen;
         }
         if (clickViewId == R.id.tv_recite_control_next) {
             // todo 背诵记录的问题应该在这里解决
@@ -381,7 +395,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.fragment_word_credit_play_word) {
             reciteWord(wordFunctionHandler.getCurrentFocusWord());
             // 如果当前是听音频模式,需要手动播放音频
-            if (wordFunctionHandler.getCurrentReciteMode() == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
+            if (wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode()
+                    == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
                 playWordAudio(wordFunctionHandler.getCurrentFocusWord());
             }
         }
@@ -390,35 +405,25 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         // 功能区域
         if (clickViewId == R.id.ll_recite_function_mark) {
-            if (AnimationUtil.getInstance().isAnimating(functionMarkArea)) return;
-            if (markAreaFold) {
-                AnimationUtil.getInstance().moveToViewEnd(functionMarkArea, 500);
-            } else {
-                AnimationUtil.getInstance().endMoveToViewLocation(functionMarkArea, 500);
-            }
-            markAreaFold = !markAreaFold;
-            refreshMarkAreaUI(markAreaFold);
+            wordFunctionHandler.getWordFunctionHandlerState()
+                    .setFunctionAreaFold(!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold());
+            refreshMarkAreaUI();
         }
         if (clickViewId == R.id.ll_recite_function_chameleon) {
-            if (AnimationUtil.getInstance().isAnimating(functionMarkArea)) return;
             // 如果当前处于按色打乱模式则无法使用变色龙功能,使用区间重背功能可以使用变色龙功能
-            if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.SHUFFLE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionState().getInfo(), Toast.LENGTH_SHORT);
+            if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
+                    == WordFunctionState.SHUFFLE) {
+                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                        .getWordFunctionState()
+                        .getInfo(), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 500);
                 toast.show();
                 return;
             }
-            // 不要管太多,当点击变色龙模式的时候就展开旗帜区域就可以了
-            if (!markAreaFold) {
-                AnimationUtil.getInstance().endMoveToViewLocation(functionMarkArea, 500);
-                markAreaFold = !markAreaFold;
-                refreshMarkAreaUI(markAreaFold);
-            }
-            toast.cancel();
-            toast = Toast.makeText(this, R.string.choose_mark_color, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 500);
-            toast.show();
-            changingChameleon = true;
+            wordFunctionHandler.getWordFunctionHandlerState().setSelectChameleon(!wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon());
+            wordFunctionHandler.getWordFunctionHandlerState().setFunctionAreaFold(!wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon());
+            refreshMarkAreaUI();
+            refreshChameleonUI();
         }
         if (clickViewId == R.id.ll_recite_function_switch) {
             enableSelectFunction = !enableSelectFunction;
@@ -478,17 +483,24 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
         if (clickViewId == R.id.ll_recite_function_shuffle) {
             // 如果当前不是普通状态和按色打乱状态,代表当前在执行别的状态,需要先锁定按色打乱的功能
-            if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.RANGE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionState().getInfo(), Toast.LENGTH_LONG);
+            if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
+                    == WordFunctionState.RANGE) {
+                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                        .getWordFunctionState()
+                        .getInfo(), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 500);
                 toast.show();
                 return;
             }
-            if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.NONE) {
+            if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
+                    == WordFunctionState.NONE) {
                 this.functionChameleonImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.functionSectionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.functionQuickPositionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
-                this.functionShuffleImageView.getDrawable().setTint(getResources().getColor(wordFunctionHandler.getChameleon().getMapColorID(), null));
+                this.functionShuffleImageView.getDrawable().setTint(getResources().getColor(wordFunctionHandler.getWordFunctionHandlerState()
+                        .getChameleon()
+                        .getValue()
+                        .getMapColorID(), null));
                 wordFunctionHandler.shuffle();
                 reciteWord(wordFunctionHandler.gotoWordWithIndex(0));
             } else {
@@ -503,13 +515,17 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
         // 区间随机
         if (clickViewId == R.id.ll_recite_function_section) {
-            if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.SHUFFLE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionState().getInfo(), Toast.LENGTH_LONG);
+            if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
+                    == WordFunctionState.SHUFFLE) {
+                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                        .getWordFunctionState()
+                        .getInfo(), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 500);
                 toast.show();
                 return;
             }
-            if (wordFunctionHandler.getWordFunctionState() == WordFunctionState.NONE) {
+            if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
+                    == WordFunctionState.NONE) {
                 View rangeRandomWordInputView = getLayoutInflater().inflate(R.layout.fragment_word_credit_dialog_section, null);
                 EditText minValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_min_value);
                 EditText maxValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_max_value);
@@ -565,8 +581,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         // 快速定位
         if (clickViewId == R.id.ll_recite_function_position) {
             // 如果不是普通模式,则禁止使用快速定位功能
-            if (wordFunctionHandler.getWordFunctionState() != WordFunctionState.NONE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionState().getInfo(), Toast.LENGTH_LONG);
+            if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
+                    != WordFunctionState.NONE) {
+                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                        .getWordFunctionState()
+                        .getInfo(), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 500);
                 toast.show();
                 return;
@@ -676,7 +695,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             wordFunctionHandler.setHidePreposition(!wordFunctionHandler.isHidePreposition());
             updateChangeModePopWindowState();
         }
-
+/*
         if (clickViewId == R.id.fragment_word_credit_button_flag_green) {
             if (changingChameleon) {
                 changingChameleon = false;
@@ -687,12 +706,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 currentIndex.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
                 return;
             }
+
             if (wordFunctionHandler.removeMarkColorToCurrentWord(MarkColor.GREEN)) {
                 findViewById(R.id.fragment_word_credit_view_flag_green).setAlpha(0.0f);
             } else if (wordFunctionHandler.addMarkColorToCurrentWord(MarkColor.GREEN)) {
                 findViewById(R.id.fragment_word_credit_view_flag_green).setAlpha(1.0f);
             }
-        }
+
+ */
     }
 
     @Override
@@ -719,7 +740,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     // 展开右侧的旗帜列表
                     if (!markAreaFold) {
                         if (AnimationUtil.getInstance().endMoveToViewLocation(functionMarkArea, 500)) {
-                            refreshMarkAreaUI(false);
+                            refreshMarkAreaUI();
                             markAreaFold = !markAreaFold;
                         }
                     }
@@ -765,7 +786,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.windowChineseEnglish.setBackground(null);
         this.windowOnlyRecite.setBackground(null);
         this.windowHidePhrase.setBackground(null);
-        ReciteMode currentReciteMode = wordFunctionHandler.getCurrentReciteMode();
+        ReciteMode currentReciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode();
         if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING) {
             this.windowEnglishChineseAudio.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
@@ -835,7 +856,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             String prepositionPhrase = currentWord.getValue().get(WordStructure.PHRASE);
             if (userRecitePreference.isHidePreposition())
                 currentWord.getValue().remove(WordStructure.PHRASE);
-            ReciteMode currentReciteMode = wordFunctionHandler.getCurrentReciteMode();
+            ReciteMode currentReciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode();
             if (currentReciteMode == ReciteMode.LISTENING) {
                 visibleWordAllMessage(currentWord);
                 playWordAudio(currentWord);
@@ -863,14 +884,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
             currentIndex.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
             lightHint.setText(String.format("%s/%s", wordFunctionHandler.getInnerIndex() + 1, wordFunctionHandler.functionWordSize()));
-            // 刷新旗帜
-            refreshMarkArea(currentWord);
+            refreshMarkAreaUI();
         });
     }
 
-    private void refreshMarkArea(FunctionWordVO functionWordVO) {
-        reciteMarkToastAdapter.replaceAll(functionWordVO.getMarkColorList());
-    }
 /*
 
 
@@ -910,11 +927,29 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
     /**
      * 刷新标记区域的UI
-     *
-     * @param fold true->展开 false->折叠
      */
-    private void refreshMarkAreaUI(boolean fold) {
+    private void refreshMarkAreaUI() {
+        reciteMarkToastAdapter.notifyItemRangeChanged(0, MarkColor.values().length, null);
+    }
 
+    private void refreshChameleonUI() {
+        if (wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon()) {
+            if (toast != null) toast.cancel();
+            functionChameleonBorder.setVisibility(View.VISIBLE);
+            functionChameleonBorder.start();
+            functionChameleonImageView.animate().scaleX(0.9f).scaleY(0.9f).setDuration(200).start();
+            toast = Toast.makeText(this, R.string.choose_mark_color, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 500);
+            toast.show();
+        } else {
+            if (toast != null) toast.cancel();
+            functionChameleonBorder.setVisibility(View.GONE);
+            functionChameleonBorder.stop();
+        }
+        MarkColor markColor = Optional.ofNullable(wordFunctionHandler.getWordFunctionHandlerState().getChameleon().getValue())
+                .orElse(MarkColor.GREEN);
+        this.controlPreviousWord.getBackground().setTint(getResources().getColor(markColor.getMapColorID(), null));
+        this.controlNextWord.getBackground().setTint(getResources().getColor(markColor.getMapColorID(), null));
     }
 
     /**
@@ -988,6 +1023,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionMarkImageView = findViewById(R.id.iv_recite_function_mark);
         this.functionChameleon = findViewById(R.id.ll_recite_function_chameleon);
         this.functionChameleonImageView = findViewById(R.id.im_recite_function_chameleon);
+        this.functionChameleonBorder = findViewById(R.id.flb_recite_function_chameleon);
         this.functionSwitch = findViewById(R.id.ll_recite_function_switch);
         this.functionSwitchImageView = findViewById(R.id.im_recite_function_switch);
         this.functionLock = findViewById(R.id.ll_recite_function_lock);
