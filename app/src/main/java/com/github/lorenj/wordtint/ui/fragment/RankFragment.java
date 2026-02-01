@@ -121,7 +121,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
                 currentFlagWord = wordAnalysisHandler.queryFlagRankByFlagColor(currentMarkColor);
             } else if (itemId == R.id.fragment_rank_supplement) {
                 currentFlagWord = wordSupplementReviewHandler.querySupplementByFlagColor(currentMarkColor);
-                userRecitePreference.setReview(true);
+                //userRecitePreference.setReview(true);
             }
 
             Bundle bundle = new Bundle();

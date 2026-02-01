@@ -93,7 +93,7 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
     public void batchSelectSection(MarkColor selectMarkColor) {
         for (WordBookSectionEntityVO wordBookSectionEntityVO : wordBookSectionEntityList) {
             if (wordBookSectionEntityVO.tagColor == selectMarkColor) {
-                bookViewModel.selectSection(wordBookSectionEntityVO.wordBookSectionEntity.id);
+                bookViewModel.selectSection(wordBookSectionEntityVO.wordBookSectionEntity);
                 wordBookSectionEntityVO.selection = !wordBookSectionEntityVO.selection;
             }
         }
@@ -121,7 +121,7 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
             int position = getAdapterPosition();
             // 传递选中的id数据
             WordBookSectionEntityVO selectWordBookSectionEntityVO = wordBookSectionEntityList.get(position);
-            bookViewModel.selectSection(selectWordBookSectionEntityVO.wordBookSectionEntity.id);
+            bookViewModel.selectSection(selectWordBookSectionEntityVO.wordBookSectionEntity);
             selectWordBookSectionEntityVO.selection = !selectWordBookSectionEntityVO.selection;
             notifyItemChanged(position, Item.CLICK_SECTION);
         }

@@ -2,7 +2,6 @@ package com.github.lorenj.wordtint.ui.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -20,15 +18,14 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
 import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.ui.adapter.listener.MoveAndSwipedListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
-import com.github.lorenj.wordtint.R;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 
@@ -38,7 +35,7 @@ import java.util.function.Consumer;
  * @author cnsukidayo
  * @date 2023/1/7 17:35
  */
-public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class StarCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         implements MoveAndSwipedListener, RecyclerViewAdapterItemChange<WordCategoryDTO> {
 
     private final Context context;
@@ -47,7 +44,7 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
     // 用于处理单词收藏功能的Handler
     private CategoryFunctionHandler startFunctionHandler;
 
-    public StartSingleCategoryAdapter(Context context) {
+    public StarCategoryAdapter(Context context) {
         this.context = context;
     }
 
@@ -64,24 +61,24 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
             SingleSingleViewHolder singleSingleViewHolder = (SingleSingleViewHolder) holder;
             singleSingleViewHolder.scroller.scrollTo(0, 0);
             singleSingleViewHolder.underNowStartAllWord.setVisibility(View.GONE);
-            singleSingleViewHolder.title.setText(startFunctionHandler.calculationTitle(position));
-            singleSingleViewHolder.describe.setText(startFunctionHandler.calculationDescribe(position));
+            //singleSingleViewHolder.title.setText(startFunctionHandler.calculationTitle(position));
+            //singleSingleViewHolder.describe.setText(startFunctionHandler.calculationDescribe(position));
         }
     }
 
     @Override
     public int getItemCount() {
-        return startFunctionHandler.categoryListSize();
+        return startFunctionHandler.starListSize();
     }
 
     public void onItemMove(int fromPosition, int toPosition) {
-        startFunctionHandler.moveCategory(fromPosition, toPosition);
+        //startFunctionHandler.moveStar(fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
     }
 
     @Override
     public void onItemDismiss(int position) {
-        startFunctionHandler.removeCategory(position);
+        //startFunctionHandler.removeStar(position);
         notifyItemRemoved(position);
     }
 
@@ -96,8 +93,8 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public void addItem(WordCategoryDTO wordCategoryDTO) {
-        startFunctionHandler.addNewCategory(wordCategoryDTO);
-        notifyItemInserted(startFunctionHandler.categoryListSize() - 1);
+        //startFunctionHandler.createNewStar(wordCategoryDTO);
+        notifyItemInserted(startFunctionHandler.starListSize() - 1);
     }
 
     @Override
@@ -159,7 +156,7 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
         @Override
         public void onItemClear() {
             itemView.setAlpha(1.0f);
-            startFunctionHandler.updateWordCategoryList();
+            startFunctionHandler.batchUpdateCurrentStar();
         }
 
         @Override
@@ -177,7 +174,7 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
             int clickViewId = v.getId();
             if (clickViewId == R.id.fragment_word_credit_start_delete) {
                 // 删除当前Item
-                startFunctionHandler.removeCategory(getAdapterPosition());
+                //startFunctionHandler.removeStar(getAdapterPosition());
                 notifyItemRemoved(getAdapterPosition());
             } else if (clickViewId == R.id.fragment_word_credit_start_edit) {
                 // 编辑收藏夹信息
@@ -191,9 +188,9 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
                             WordCategoryDetailVO wordCategoryDetailVO = new WordCategoryDetailVO();
                             wordCategoryDetailVO.setTitle(categoryTile.getText().toString());
                             wordCategoryDetailVO.setDescribeInfo(categoryDescribe.getText().toString());
-                            startFunctionHandler.updateWordCategoryDto(getAdapterPosition(), wordCategoryDetailVO);
-                            title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
-                            describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
+                            //startFunctionHandler.updateWordStar(getAdapterPosition(), wordCategoryDetailVO);
+                            //title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
+                            //describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
                         })
                         .setNegativeButton("取消", (dialog, which) -> {
                         })
@@ -210,7 +207,9 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
                 }
                 isOpen = !isOpen;
             } else if (clickViewId == R.id.fragment_word_credit_start_add_word) {
-                Optional.ofNullable(startFunctionHandler.getCurrentViewWord()).ifPresentOrElse(wordCategoryWordDTO -> {
+                /*
+                Optional.ofNullable(startFunctionHandler.getCurrentViewWord())
+                        .ifPresentOrElse(wordCategoryWordDTO -> {
                     startSingleCategoryWordAdapter.addItem(wordCategoryWordDTO);
                     title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
                     describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
@@ -220,6 +219,8 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
                     errorAddTint.setGravity(Gravity.CENTER, 0, 500);
                     errorAddTint.show();
                 });
+
+                 */
             }
         }
 
@@ -235,8 +236,8 @@ public class StartSingleCategoryAdapter extends RecyclerView.Adapter<RecyclerVie
 
         @Override
         public void updateCategoryMessage() {
-            title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
-            describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
+            //title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
+            //describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
         }
     }
 

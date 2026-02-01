@@ -27,12 +27,13 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.entity.dto.DataPage;
 import com.github.lorenj.wordtint.entity.dto.SearchWordParam;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryParam;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
 import com.github.lorenj.wordtint.entity.dto.WordStructureDTO;
@@ -43,13 +44,11 @@ import com.github.lorenj.wordtint.handler.impl.AbstractCategoryFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.WordSearchHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
-import com.github.lorenj.wordtint.ui.adapter.StarChineseAnswerRecyclerViewAdapter;
-import com.github.lorenj.wordtint.ui.adapter.StartSingleCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.StarCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
-import com.github.lorenj.wordtint.ui.adapter.wordsearch.ChineseAnswerHandler;
+import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
-import com.github.lorenj.wordtint.utils.JsonUtils;
-import com.github.lorenj.wordtint.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,20 +75,25 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
     private WebView chineseAnswer;
     private RecyclerView chineseAnswerDrawer, starSingleCategory;
     // 新型中文显示处理器
-    private ChineseAnswerHandler chineseAnswerHandler;
+    private ResultWebViewHandler resultWebViewHandler;
     // 收藏夹列表单词显示适配器
-    private StarChineseAnswerRecyclerViewAdapter chineseAnswerAdapterDrawer;
-    private StartSingleCategoryAdapter startSingleCategoryAdapter;
+    private StarResultAdapter chineseAnswerAdapterDrawer;
+    private StarCategoryAdapter starCategoryAdapter;
     private Handler updateUIHandler;
     private LinearLayout analysisWord, openStarDrawer;
     private TextView sourceWord, sourceWordDrawer;
     private TextView drawerPhraseHint, drawerPhraseAnswer, addNewCategory;
     // 收藏界抽屉布局
     private DrawerLayout startDrawer;
-    private final CategoryFunctionHandler categoryFunctionHandler = new AbstractCategoryFunctionHandler() {
+    private final CategoryFunctionHandler categoryFunctionHandler = new AbstractCategoryFunctionHandler(null) {
         @Override
-        public WordCategoryWordDTO getCurrentViewWord() {
-            return currentViewWord;
+        public Map<Integer, FunctionWordVO> getDict() {
+            return null;
+        }
+
+        @Override
+        public Integer getCurrentFocusWordId() {
+            return null;
         }
     };
     // 对于本类来说,如果当前的格式是经典模式,则代表当前展示的功能是查词功能,否则当前是联想模式,不包含查词的功能
@@ -236,7 +240,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         updateUIHandler = new Handler();
         startDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         // 隐藏单词的附加显示内容、隐藏收藏界面的答案信息
-        chineseAnswerHandler = new ChineseAnswerHandler(null,null);
+        resultWebViewHandler = new ResultWebViewHandler(null,null);
         sourceWord.setText("");
         sourceWordDrawer.setText("");
         drawerPhraseHint.setVisibility(View.GONE);
@@ -249,29 +253,23 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
 
         StaticFactory.getExecutorService().submit(() -> {
             Map<Long, WordDTOLocal> allWordDict = StaticFactory.getAllWordDict();
-            categoryFunctionHandler.setCurrentLanguageId(2L);
-            categoryFunctionHandler.addWordQueryCache(allWordDict);
             wordSearchHandler = new WordSearchHandlerImpl(getContext(), allWordDict);
-            this.startSingleCategoryAdapter = new StartSingleCategoryAdapter(getContext());
+            this.starCategoryAdapter = new StarCategoryAdapter(getContext());
             // 初始化单词列表的adapter
             this.selectWordListAdapter = new SelectWordListAdapter(getContext());
             // 设置选中单词的回调事件
             this.selectWordListAdapter.setRecycleViewItemClickCallBack(this);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
-            ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(startSingleCategoryAdapter));
-            startSingleCategoryAdapter.setStartDragListener(touchHelper::startDrag);
-            startSingleCategoryAdapter.setStartFunctionHandler(categoryFunctionHandler);
+            ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
+            starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
+            starCategoryAdapter.setStartFunctionHandler(categoryFunctionHandler);
             // 设置收藏夹列表中中文意思显示的adapter
-            this.chineseAnswerAdapterDrawer = new StarChineseAnswerRecyclerViewAdapter(getContext(), 2L);
+            this.chineseAnswerAdapterDrawer = new StarResultAdapter(getContext(), 2L);
             // 读取用户收藏夹信息
-            try {
-                categoryFunctionHandler.batchAddCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            //categoryFunctionHandler.batchCreateCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
             updateUIHandler.post(() -> {
                 this.chineseAnswerDrawer.setAdapter(chineseAnswerAdapterDrawer);
-                this.starSingleCategory.setAdapter(startSingleCategoryAdapter);
+                this.starSingleCategory.setAdapter(starCategoryAdapter);
                 // 设置单词选择列表的adapter
                 this.selectWordList.setAdapter(selectWordListAdapter);
                 touchHelper.attachToRecyclerView(starSingleCategory);
@@ -317,9 +315,9 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> sourceWordDrawer
                         .setText(wordDTOS));
-        chineseAnswerHandler.showWordChineseMessage(wordDTOLocal);
+        //resultWebViewHandler.displayWordResult(wordDTOLocal);
         // 设置收藏夹中文翻译
-        chineseAnswerAdapterDrawer.addItem(wordDTOLocal);
+        //chineseAnswerAdapterDrawer.addItem(wordDTOLocal);
         // 播放声音
         mediaPlayer.reset();
         try {

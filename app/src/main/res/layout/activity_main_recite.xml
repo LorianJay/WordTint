@@ -2,20 +2,20 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_word_credit_start_drawer"
+    android:id="@+id/dr_main_recite_star"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/learn_back_ground"
     tools:openDrawer="">
-
+    <!--主界面-->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragment_word_credit_parent"
+        android:id="@+id/cl_main_recite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">
 
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/toolbar_main_recite"
+            android:id="@+id/abl_main_recite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/learn_back_ground"
@@ -26,8 +26,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize">
 
-                <ImageButton
-                    android:id="@+id/ib_toolbar_back"
+                <ImageView
+                    android:id="@+id/ib_main_recite_back"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_alignParentStart="true"
@@ -45,9 +45,9 @@
             </RelativeLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
-
+        <!--英文显示区域-->
         <TextView
-            android:id="@+id/text_view_source_word"
+            android:id="@+id/tv_recite_origin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -57,22 +57,18 @@
             android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/toolbar_main_recite" />
-
+            app:layout_constraintTop_toBottomOf="@id/abl_main_recite" />
+        <!--答案显示区域-->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/fragment_word_credit_more_function_horizontal_scroll_view"
-            app:layout_constraintTop_toBottomOf="@id/text_view_source_word">
+            app:layout_constraintBottom_toTopOf="@+id/hs_main_recite_function_area"
+            app:layout_constraintTop_toBottomOf="@id/tv_recite_origin">
 
             <WebView
-                android:id="@+id/fragment_word_credit_chinese_answer"
+                android:id="@+id/wv_recite_result"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="-5dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="0dp"
                 android:scrollbars="none" />
 
             <androidx.core.widget.NestedScrollView
@@ -82,97 +78,47 @@
                 android:layout_alignParentEnd="true">
 
                 <RelativeLayout
-                    android:id="@+id/fragment_word_credit_change_flag_area"
+                    android:id="@+id/rl_recite_mark_area"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp">
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rc_recite_mark_area"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                 </RelativeLayout>
-
-                <!--<androidx.constraintlayout.widget.ConstraintLayout-->
-                <!--    android:id="@+id/fragment_word_credit_flag_constraint_layout"-->
-                <!--    android:layout_width="wrap_content"-->
-                <!--    android:layout_height="match_parent"-->
-                <!--    android:orientation="horizontal">-->
-                <!--    -->
-                <!--    <LinearLayout-->
-                <!--        android:id="@+id/fragment_word_credit_view_flag_area"-->
-                <!--        android:layout_width="wrap_content"-->
-                <!--        android:layout_height="match_parent"-->
-                <!--        android:orientation="vertical"-->
-                <!--        app:layout_constraintStart_toStartOf="parent">-->
-
-                <!--        <View-->
-                <!--            android:id="@+id/fragment_word_credit_view_flag_green"-->
-                <!--            android:layout_width="5dp"-->
-                <!--            android:layout_height="30dp"-->
-                <!--            android:layout_marginTop="10dp"-->
-                <!--            android:layout_marginBottom="10dp"-->
-                <!--            android:background="@color/theme_color" />-->
-                <!--        -->
-                <!--    </LinearLayout>-->
-
-                <!--    <LinearLayout-->
-                <!--        android:id="@+id/fragment_word_credit_change_flag_area"-->
-                <!--        android:layout_width="wrap_content"-->
-                <!--        android:layout_height="match_parent"-->
-                <!--        android:orientation="vertical"-->
-                <!--        app:layout_constraintEnd_toEndOf="parent"-->
-                <!--        app:layout_constraintTop_toTopOf="parent">-->
-                <!--        &lt;!&ndash;这里旗帜颜色的顺序一定要和FlagColor枚举类中定义的颜色顺序一致,否则会出错!&ndash;&gt;-->
-                <!--        <ImageButton-->
-                <!--            android:id="@+id/fragment_word_credit_button_flag_green"-->
-                <!--            android:layout_width="50dp"-->
-                <!--            android:layout_height="50dp"-->
-                <!--            android:layout_gravity="center_vertical"-->
-                <!--            android:background="@drawable/style_image_padding"-->
-                <!--            android:foreground="@drawable/item_gray_select"-->
-                <!--            android:gravity="center"-->
-                <!--            android:scaleType="fitCenter"-->
-                <!--            android:src="@drawable/flag_close"-->
-                <!--            app:tint="@color/theme_color" />-->
-                <!--        -->
-                <!--    </LinearLayout>-->
-                <!--    -->
-                <!--    -->
-                <!--    -->
-                <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
-
             </androidx.core.widget.NestedScrollView>
 
-
         </RelativeLayout>
-
+        <!--功能区-->
         <HorizontalScrollView
-            android:id="@+id/fragment_word_credit_more_function_horizontal_scroll_view"
+            android:id="@+id/hs_main_recite_function_area"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:scrollbars="none"
-            app:layout_constraintBottom_toTopOf="@+id/fragment_word_credit_bottom_constraint_layout">
+            app:layout_constraintBottom_toTopOf="@+id/cl_recite_control_area">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
+                <!--标记按钮-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_flag"
+                    android:id="@+id/ll_recite_function_mark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
-
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_click_flag"
+                        android:id="@+id/iv_recite_function_mark"
                         android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
@@ -188,20 +134,19 @@
                         android:textColor="@color/gray_black"
                         android:textSize="14sp" />
 
-
                 </LinearLayout>
-
+                <!--变色-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_chameleon_mode"
+                    android:id="@+id/ll_recite_function_chameleon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_chameleon"
+                        android:id="@+id/im_recite_function_chameleon"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
@@ -219,18 +164,18 @@
                         android:textSize="14sp" />
 
                 </LinearLayout>
-
+                <!--滑动切换-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_swing_switch"
+                    android:id="@+id/ll_recite_function_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_swing_switch"
+                        android:id="@+id/im_recite_function_switch"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
@@ -248,25 +193,25 @@
                         android:textSize="14sp" />
 
                 </LinearLayout>
-
+                <!--锁定提示-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_lock_answer"
+                    android:id="@+id/ll_recite_function_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_lock_answer"
+                        android:id="@+id/im_recite_function_lock"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_lock_answer"
+                        android:src="@drawable/ic_lock_light"
                         app:tint="@android:color/holo_red_dark" />
 
                     <TextView
@@ -278,24 +223,24 @@
                         android:textSize="14sp" />
 
                 </LinearLayout>
-
+                <!--蓝牙开启-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_blue_tooth"
+                    android:id="@+id/ll_recite_function_blue_tooth"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_blue_tooth"
+                        android:id="@+id/im_recite_function_blue_tooth"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
-                        android:src="@android:drawable/stat_sys_data_bluetooth"
+                        android:src="@drawable/ic_blue_tooth"
                         app:tint="@android:color/holo_blue_dark" />
 
                     <TextView
@@ -303,20 +248,18 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/blue_open"
-
                         android:textColor="@color/gray_black"
                         android:textSize="14sp" />
 
                 </LinearLayout>
-
-
+                <!--跳转单词-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_jump_next"
+                    android:id="@+id/ll_recite_function_goto"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
@@ -327,7 +270,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_jump_next" />
+                        android:src="@drawable/ic_goto_next" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -339,14 +282,14 @@
 
 
                 </LinearLayout>
-
+                <!--收藏夹-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_start"
+                    android:id="@+id/ll_recite_function_star"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
@@ -369,19 +312,19 @@
 
 
                 </LinearLayout>
-
+                <!--按色打乱-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_shuffle"
+                    android:id="@+id/ll_recite_function_shuffle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_shuffle"
+                        android:id="@+id/im_recite_function_shuffle"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
@@ -400,19 +343,19 @@
 
 
                 </LinearLayout>
-
+                <!--区间重背-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_section"
+                    android:id="@+id/ll_recite_function_section"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_section"
+                        android:id="@+id/iv_recite_function_section"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
@@ -431,64 +374,15 @@
 
 
                 </LinearLayout>
-
+                <!--保存进度-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_projector"
+                    android:id="@+id/ll_recite_function_saving"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_gravity="center">
-
-                        <ImageView
-                            android:id="@+id/fragment_word_credit_imageview_projector"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/style_image_padding"
-                            android:gravity="center"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_projector" />
-
-                        <TextView
-                            android:id="@+id/fragment_word_credit_projector_hint"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginStart="20dp"
-                            android:elevation="1dp"
-                            android:text=""
-                            android:textColor="@android:color/holo_red_dark"
-                            android:textSize="15sp" />
-                    </RelativeLayout>
-
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:minWidth="55dp"
-                        android:text="@string/projector"
-                        android:textColor="@color/gray_black"
-                        android:textSize="14sp" />
-
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_save_progress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
-                    android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
-                    android:orientation="vertical">
-
 
                     <ImageView
                         android:layout_width="40dp"
@@ -509,15 +403,14 @@
 
 
                 </LinearLayout>
-
-
+                <!--模式更改-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_change_mode"
+                    android:id="@+id/ll_recite_function_mode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
@@ -540,19 +433,19 @@
 
 
                 </LinearLayout>
-
+                <!--快速定位-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_quick_position"
+                    android:id="@+id/ll_recite_function_position"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
                     <ImageView
-                        android:id="@+id/fragment_word_credit_imageview_quick_position"
+                        android:id="@+id/iv_recite_function_position"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
@@ -571,14 +464,14 @@
 
 
                 </LinearLayout>
-
+                <!--单词速查-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_search_word"
+                    android:id="@+id/ll_recite_function_search"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
 
@@ -601,17 +494,15 @@
 
 
                 </LinearLayout>
-
-
+                <!--单词分析-->
                 <LinearLayout
-                    android:id="@+id/fragment_word_credit_click_analysis_word"
+                    android:id="@+id/ll_recite_function_analysis"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
-
 
                     <ImageView
                         android:layout_width="40dp"
@@ -630,17 +521,14 @@
                         android:textColor="@color/gray_black"
                         android:textSize="14sp" />
 
-
                 </LinearLayout>
-
 
             </LinearLayout>
 
-
         </HorizontalScrollView>
-
+        <!--小灯泡-->
         <LinearLayout
-            android:id="@+id/fragment_word_linear_layout_get_answer"
+            android:id="@+id/ll_main_recite_light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
@@ -651,7 +539,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/fragment_word_card_view_get_answer"
+                android:id="@+id/cv_main_recite_light"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -667,6 +555,7 @@
                     android:layout_gravity="center_vertical"
                     android:foreground="@drawable/item_gray_select"
                     android:gravity="center"
+                    android:importantForAccessibility="no"
                     android:paddingStart="5dp"
                     android:paddingTop="5dp"
                     android:paddingEnd="5dp"
@@ -677,18 +566,18 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/fragment_word_credit_chameleon_word_count"
+                android:id="@+id/ll_main_recite_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="13"
+                android:text="@string/default_txt"
                 android:textColor="@android:color/holo_red_dark"
                 android:textSize="15sp" />
 
         </LinearLayout>
-
+        <!--底部控制区域-->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_word_credit_bottom_constraint_layout"
+            android:id="@+id/cl_recite_control_area"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@color/white"
@@ -697,13 +586,12 @@
             android:paddingEnd="10dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageButton
-                android:id="@+id/fragment_word_credit_pop_more_function"
+            <ImageView
+                android:id="@+id/iv_recite_control_fold"
                 android:layout_width="40dp"
                 android:layout_height="50dp"
                 android:layout_alignParentStart="true"
-                android:background="@drawable/style_image_padding"
-                android:foreground="@drawable/item_gray_select_radius_18dp"
+                android:background="?attr/selectableItemBackground"
                 android:gravity="center"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_unfold"
@@ -712,16 +600,13 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/fragment_word_credit_previous_word"
+                android:id="@+id/tv_recite_control_previous"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_gravity="center_vertical"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
-                android:background="@drawable/text_border_radius_background"
-                android:foreground="@drawable/text_border_radius_foreground"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/bg_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:maxLines="1"
                 android:paddingStart="10dp"
@@ -729,13 +614,11 @@
                 android:text="@string/previous"
                 android:textColor="@color/theme_color"
                 android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_word_credit_play_word"
-                app:layout_constraintStart_toEndOf="@+id/fragment_word_credit_pop_more_function"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toStartOf="@+id/iv_recite_control_play"
+                app:layout_constraintStart_toEndOf="@+id/iv_recite_control_fold" />
 
-            <ImageButton
-                android:id="@+id/fragment_word_credit_play_word"
+            <ImageView
+                android:id="@+id/iv_recite_control_play"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentStart="true"
@@ -743,28 +626,32 @@
                 android:background="@drawable/style_image_padding"
                 android:foreground="@drawable/item_gray_select_radius_18dp"
                 android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitCenter"
-                android:src="@android:drawable/ic_media_play"
+                android:src="@drawable/ic_play"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_word_credit_next_word"
-                app:layout_constraintStart_toEndOf="@+id/fragment_word_credit_previous_word"
+                app:layout_constraintEnd_toStartOf="@+id/tv_recite_control_next"
+                app:layout_constraintStart_toEndOf="@+id/tv_recite_control_previous"
                 app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/theme_color" />
 
             <TextView
-                android:id="@+id/fragment_word_credit_current_index"
+                android:id="@+id/tv_recite_control_index"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-12dp"
                 android:elevation="1dp"
-                android:text="12"
+                android:text="@string/default_txt"
                 android:textColor="@android:color/holo_red_dark"
                 android:textSize="15sp"
-                app:layout_constraintStart_toEndOf="@id/fragment_word_credit_play_word"
+                app:layout_constraintStart_toEndOf="@id/iv_recite_control_play"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/fragment_word_credit_next_word"
+                android:id="@+id/tv_recite_control_next"
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
@@ -772,134 +659,35 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="5dp"
-                android:background="@drawable/text_border_radius_background"
-                android:foreground="@drawable/text_border_radius_foreground"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/bg_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:maxLines="1"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
                 android:text="@string/next"
                 android:textColor="@color/theme_color"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_word_credit_play_word"
+                app:layout_constraintStart_toEndOf="@+id/iv_recite_control_play"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
             <TextView
-                android:id="@+id/fragment_word_credit_word_count"
+                android:id="@+id/tv_recite_control_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-12dp"
                 android:layout_marginTop="-5dp"
                 android:elevation="1dp"
-                android:text="13"
+                android:text="@string/default_txt"
                 android:textColor="@android:color/holo_red_dark"
                 android:textSize="15sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
-            <!--<TextView-->
-            <!--    android:id="@+id/fragment_word_container_get_answer"-->
-            <!--    android:layout_width="wrap_content"-->
-            <!--    android:layout_height="match_parent"-->
-            <!--    android:clickable="true"-->
-            <!--    android:foreground="@drawable/item_gray_select_radius_18dp"-->
-            <!--    android:gravity="center"-->
-            <!--    android:text="@string/get_answer"-->
-            <!--    android:textColor="@color/theme_color"-->
-            <!--    android:textSize="20sp"-->
-            <!--    app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--    app:layout_constraintEnd_toEndOf="parent"-->
-            <!--    app:layout_constraintTop_toTopOf="parent" />-->
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragment_word_credit_projector_parent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/fragment_word_credit_projector_countdown_top"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginStart="7dp"
-            android:layout_marginTop="50dp"
-            android:layout_marginEnd="7dp"
-            android:foreground="@drawable/text_border_radius_foreground"
-            android:foregroundTint="@color/gray"
-            android:gravity="center"
-            android:paddingBottom="3dp"
-            android:text="11:40"
-            android:textColor="@color/gray"
-            android:textSize="35sp"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/fragment_word_credit_projector_countdown_bottom"
-
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginStart="7dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginBottom="50dp"
-            android:foreground="@drawable/text_border_radius_foreground"
-            android:foregroundTint="@color/gray"
-            android:gravity="center"
-            android:paddingBottom="3dp"
-            android:text="11:40"
-            android:textColor="@color/gray"
-            android:textSize="35sp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <TextView
-            android:id="@+id/fragment_word_credit_projector_countdown_interrupt"
-            android:layout_width="wrap_content"
-            android:layout_height="70dp"
-            android:layout_marginStart="7dp"
-            android:layout_marginEnd="7dp"
-            android:foreground="@drawable/text_border_radius_foreground"
-            android:foregroundTint="@color/gray"
-            android:gravity="center"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp"
-            android:text="@string/interrupt"
-            android:textColor="@color/gray"
-            android:textSize="35sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/fragment_word_credit_projector_countdown_exit"
-            android:layout_width="wrap_content"
-            android:layout_height="70dp"
-            android:layout_marginStart="7dp"
-            android:layout_marginEnd="7dp"
-            android:foreground="@drawable/text_border_radius_foreground"
-            android:foregroundTint="@color/gray"
-            android:gravity="center"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp"
-            android:text="@string/exit"
-            android:textColor="@color/gray"
-            android:textSize="35sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+    <!--侧边抽屉-->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -915,16 +703,57 @@
             android:fitsSystemWindows="true">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
                 app:layout_collapseMode="pin">
 
-                <include
-                    layout="@layout/fragment_word_credit_start_header_english"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="70dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@color/white"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_recite_star_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:text="@string/crediting_word"
+                        android:textColor="@color/black"
+                        android:textSize="22sp" />
+
+                    <TextView
+                        android:gravity="center"
+                        android:id="@+id/tv_recite_star_current_word"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_below="@+id/tv_recite_star_title"
+                        android:layout_alignParentBottom="true"
+                        android:autoSizeTextType="uniform"
+                        android:text="@string/default_txt"
+                        android:textColor="@color/black"
+                        android:textSize="22sp" />
+
+                    <ImageView
+                        android:id="@+id/im_recite_star_refresh"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:paddingStart="5dp"
+                        android:paddingTop="5dp"
+                        android:paddingEnd="5dp"
+                        android:paddingBottom="5dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_refresh"
+                        app:tint="@color/theme_color" />
+
+                </RelativeLayout>
             </androidx.appcompat.widget.Toolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -935,10 +764,10 @@
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <androidx.core.widget.NestedScrollView
-                android:id="@+id/fragment_word_credit_nested_start"
+                android:id="@+id/nsv_recite_star"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintBottom_toTopOf="@id/fragment_word_credit_start_add"
+                app:layout_constraintBottom_toTopOf="@id/tv_recite_star_create"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
@@ -960,43 +789,32 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
-                            <RelativeLayout
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rc_recite_star_result"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                            <TextView
+                                android:id="@+id/tv_recite_star_phrase_hint"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp">
+                                android:gravity="center"
+                                android:text="@string/phrase"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
 
-                                <androidx.recyclerview.widget.RecyclerView
-                                    android:id="@+id/fragment_word_credit_drawer_chinese_answer"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content" />
-                            </RelativeLayout>
-
-                            <LinearLayout
+                            <TextView
+                                android:id="@+id/tv_recite_star_phrase_value"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:background="@drawable/bg_rounded_ripple_solid"
+                                android:backgroundTint="@color/theme_color"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
+                                android:text="@string/default_txt"
+                                android:textColor="@color/black"
+                                android:textSize="20sp" />
 
-                                <TextView
-                                    android:id="@+id/fragment_word_credit_drawer_phrase_hint"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:text="@string/phrase"
-                                    android:textColor="@color/black"
-                                    android:textSize="20sp" />
-
-                                <TextView
-                                    android:id="@+id/fragment_word_credit_drawer_phrase_answer"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/fragment_word_credit_radius_answer"
-                                    android:paddingStart="5dp"
-                                    android:paddingEnd="5dp"
-                                    android:text="test"
-                                    android:textColor="@color/black"
-                                    android:textSize="20sp" />
-
-                            </LinearLayout>
                         </LinearLayout>
                     </HorizontalScrollView>
 
@@ -1006,7 +824,8 @@
                         android:layout_marginStart="7dp"
                         android:layout_marginTop="3dp"
                         android:layout_marginEnd="7dp"
-                        android:background="@drawable/fragment_word_credit_drawer_radius_line" />
+                        android:background="@drawable/background_radius_line"
+                        android:backgroundTint="@android:color/holo_orange_light"/>
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -1014,7 +833,7 @@
                         android:layout_marginTop="5dp">
                         <!--这里实际上是三层嵌套,逻辑比较复杂-->
                         <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/fragment_word_credit_start_category_recycler"
+                            android:id="@+id/rc_recite_star_list"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     </RelativeLayout>
@@ -1023,15 +842,14 @@
 
 
             <TextView
-                android:id="@+id/fragment_word_credit_start_add"
+                android:id="@+id/tv_recite_star_create"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginStart="7dp"
                 android:layout_marginEnd="7dp"
                 android:layout_marginBottom="2dp"
-                android:background="@drawable/text_border_radius_background"
-                android:foreground="@drawable/text_border_radius_foreground"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/bg_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="@string/add_new_category"

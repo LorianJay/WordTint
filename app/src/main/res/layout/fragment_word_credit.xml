@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/learn_back_ground"
     tools:context=".ui.fragment.WordCreditFragment"
-    tools:openDrawer="">
+    tools:openDrawer="end">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fragment_word_credit_parent"
@@ -422,7 +422,7 @@
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_lock_answer"
+                        android:src="@drawable/ic_lock_light"
                         app:tint="@android:color/holo_red_dark" />
 
                     <TextView
@@ -1152,7 +1152,7 @@
                         android:layout_marginStart="7dp"
                         android:layout_marginTop="3dp"
                         android:layout_marginEnd="7dp"
-                        android:background="@drawable/fragment_word_credit_drawer_radius_line" />
+                        android:background="@drawable/background_radius_line" />
 
                     <RelativeLayout
                         android:layout_width="wrap_content"

@@ -1,7 +1,8 @@
 package com.github.lorenj.wordtint.handler;
 
-import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
+import com.github.lorenj.wordtint.database.entity.WordStarEntity;
+import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 
 
 /**
@@ -10,57 +11,51 @@ import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
  * @author cnsukidayo
  * @date 2023/1/9 16:45
  */
-public interface CategoryWordFunctionHandler extends WordFunctionContextHandler {
+public interface CategoryWordFunctionHandler {
 
     /**
      * 得到某个具体分类(收藏夹)中单词的数量
      *
      * @return 返回int类型
      */
-    int currentCategorySize(int categoryPosition);
+    int getStarWordCount(WordStarEntity wordStarEntity);
 
     /**
      * 将某个单词添加到某个分类中
      *
-     * @param categoryPosition    分类的位置
-     * @param wordCategoryWordDTO 待添加的单词
+     * @param wordStarEntity       目标收藏夹
+     * @param wordStarWordIdEntity 待添加的单词
      * @return 返回是否添加成功
      */
-    boolean addWordToCategory(int categoryPosition, WordCategoryWordDTO wordCategoryWordDTO);
+    boolean addWordToStar(WordStarWordIdEntity wordStarWordIdEntity);
 
     /**
      * 将某个单词从某个分类中移除
      *
-     * @param categoryPosition 分类ID
-     * @param position         单词在category中的位置
+     * @param wordStarWordIdEntity 收藏夹内的单词实体
      */
-    void removeWordFromCategory(int categoryPosition, int position);
+    void removeWordFromStar(WordStarWordIdEntity wordStarWordIdEntity);
 
     /**
      * 从某个分类中获取某个单词
      *
-     * @param categoryPosition 分类在列表中的位置
-     * @param position         单词在category中的位置
+     * @param wordStarWordIdEntity 单词id
      * @return 返回Word引用
      */
-    WordDTOLocal getWordFromCategory(int categoryPosition, int position);
+    FunctionWordVO getWordDetailByWordId(WordStarWordIdEntity wordStarWordIdEntity);
 
     /**
-     * 这个方法实际上是一种状态的刷新
+     * 批量更新某一个收藏夹内的单词<br>
      * 因为收藏夹内单词的位置位置不断地变化,为避免频繁更新所以使用该方法统一发送请求更新收藏夹单词顺序<br>
-     * 本方法不负责维护单词的Order值;而是直接更新;如果需要维护某收藏夹中单词的Order值则通过{@link CategoryWordFunctionHandler#moveCategoryWord(int, int, int)}方法来维护
-     *
-     * @param categoryPosition 收藏夹的位置
      */
-    void updateWordCategoryWordOrder(int categoryPosition);
+    void batchUpdateStarInnerWordList(WordStarEntity wordStarEntity);
 
     /**
      * 交换收藏夹中两个单词的位置
      *
-     * @param categoryPosition 收藏夹的位置
      * @param fromPosition     源单词的位置
      * @param toPosition       目标单词的位置
      */
-    void moveCategoryWord(int categoryPosition, int fromPosition, int toPosition);
+    void moveStarInnerWord(WordStarWordIdEntity fromPosition, WordStarWordIdEntity toPosition);
 
 }

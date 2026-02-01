@@ -14,6 +14,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         implements RecyclerViewAdapterItemChange<MarkColor> {
 
     private final Context context;
-    private List<MarkColor> markColorList;
+    private final List<MarkColor> markColorList = new ArrayList<>(2);
 
     public ReciteMarkToastAdapter(Context context) {
         this.context = context;
@@ -49,7 +50,7 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemCount() {
-        return markColorList == null ? 0 : markColorList.size();
+        return markColorList.size();
     }
 
     @Override

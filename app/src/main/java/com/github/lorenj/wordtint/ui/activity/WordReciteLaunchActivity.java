@@ -33,6 +33,7 @@ import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class WordReciteLaunchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -54,6 +55,9 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
      * 背诵偏好
      */
     private UserRecitePreference userRecitePreference;
+    /**
+     * 背诵偏好
+     */
     public static String USER_RECITE_PREFERENCE = "USER_RECITE_PREFERENCE";
 
     @Override
@@ -74,7 +78,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
                 Intent intent = new Intent(this, MainReciteActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(USER_RECITE_PREFERENCE, userRecitePreference);
-                intent.putExtras(getIntent());
+                intent.putExtras(bundle);
                 startActivity(intent);
             } else {
 
@@ -151,17 +155,20 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         toast.setGravity(Gravity.CENTER, 0, 0);
         // 批量查询所有的背诵偏好
         StaticFactory.getExecutorService().execute(() -> {
+            Bundle bundle = getIntent().getExtras();
+            // 设置选中的背诵列表
+            List<Integer> allSectionIdList = Optional.ofNullable(bundle)
+                    .map((Function<Bundle, List<Integer>>) args -> args.getIntegerArrayList(BookListFragment.SELECT_SECTION_LIST))
+                    .orElse(new ArrayList<>());
+            // todo 如果是历史记录
             userRecitePreference = new UserRecitePreference(
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_MODE),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_ORDER),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_FILTER),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_STYLE),
                     false,
-                    false
-            );
-
+                    allSectionIdList);
             // 设置选词量
-            Bundle bundle = getIntent().getExtras();
             int selectWordCount = Optional.ofNullable(bundle)
                     .map(p -> p.getInt(BookListFragment.SELECT_WORD_COUNT))
                     .orElse(0);

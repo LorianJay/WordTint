@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
 import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
 import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
@@ -34,10 +35,12 @@ import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BookListFragment extends Fragment implements View.OnClickListener, NavigationItemSelectListener {
@@ -67,9 +70,13 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
     private BookViewModel bookViewModel;
 
     /**
-     * 所有子划分
+     * 所有子章节
      */
-    public static final String CHILD_DIVIDE_SET = "CHILD_DIVIDE_SET";
+    public static final String SELECT_SECTION_LIST = "SELECT_SECTION_LIST";
+    /**
+     * 选中的单词数量
+     */
+    public static final String SELECT_WORD_COUNT = "SELECT_WORD_COUNT";
     /**
      * 历史单词
      */
@@ -78,10 +85,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      * 复习单词
      */
     public static final String REVIEW_WORD_List = "REVIEW_WORD_List";
-    /**
-     * 选中的单词数量
-     */
-    public static final String SELECT_WORD_COUNT = "SELECT_WORD_COUNT";
+
     /**
      * 所有的书本以及其对应的信息
      */
@@ -111,21 +115,30 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
         if (itemId == R.id.ib_book_list_start_learn) {
             if (!isLoading) {
                 loadingBar.setVisibility(View.VISIBLE);
+                isLoading = true;
                 StaticFactory.getExecutorService().submit(() -> {
                     // 拷贝Bean
                     Bundle bundle = new Bundle();
                     // 是否跳过偏好设置
                     userSettingRepository = UserSettingRepository.getInstance(APPDatabase.getInstance(getContext()).userSettingDao());
                     Boolean skipPreference = userSettingRepository.getUserSettingValue(UserSettingKeyEnums.SKIP_PREFERENCE);
-                    // 首先将id转为String类型的List
-                    //bundle.putSerializable(BookListFragment.CHILD_DIVIDE_SET, divideSet);
+                    Map<Integer, WordBookSectionEntity> allSelectSection = Optional.ofNullable(bookViewModel.getSelectedSectionList().getValue())
+                            .orElse(new HashMap<>());
+                    // 章节的id必须按照book-order排序
+                    List<Integer> allSelectSectionOrder = allSelectSection.values()
+                            .stream()
+                            .sorted(Comparator
+                                    .comparingInt(WordBookSectionEntity::getBookId)
+                                    .thenComparingInt(WordBookSectionEntity::getOrder))
+                            .map(wordBookSectionEntity -> wordBookSectionEntity.id)
+                            .collect(Collectors.toList());
+                    bundle.putIntegerArrayList(BookListFragment.SELECT_SECTION_LIST,
+                            new ArrayList<>(allSelectSectionOrder));
                     // 统计当前的选词量
                     int selectWordCount = 0;
-                    Set<Integer> allSelectSection = Optional.ofNullable(bookViewModel.getSelectedSectionList().getValue())
-                            .orElse(new HashSet<>());
                     for (WordBookWithSectionVO wordBookWithSectionVO : wordBookWithSectionVOList) {
                         for (WordBookSectionEntityVO wordBookSectionEntityVO : wordBookWithSectionVO.wordBookSectionEntityVOList) {
-                            if (allSelectSection.contains(wordBookSectionEntityVO.wordBookSectionEntity.id)) {
+                            if (allSelectSection.containsKey(wordBookSectionEntityVO.wordBookSectionEntity.id)) {
                                 selectWordCount += wordBookSectionEntityVO.elementCount;
                             }
                         }
@@ -142,6 +155,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                             startActivity(intent);
                         }
                         loadingBar.setVisibility(View.INVISIBLE);
+                        isLoading = false;
                     });
                 });
             }

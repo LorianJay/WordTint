@@ -6,7 +6,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.utils.FileUtils;
 import com.github.lorenj.wordtint.utils.RegularUtils;
 import com.jayway.jsonpath.DocumentContext;
@@ -21,15 +21,15 @@ import java.util.List;
  * @author cnsukidayo
  * @date 2024/7/20 14:02
  */
-public class ChineseAnswerHandler {
+public class ResultWebViewHandler {
     private final Context context;
-    private final WebView chineseAnswer;
+    private final WebView resultWebView;
     private final String template;
 
-    public ChineseAnswerHandler(Context context, WebView chineseAnswer) {
+    public ResultWebViewHandler(Context context, WebView resultWebView) {
         this.context = context;
-        this.chineseAnswer = chineseAnswer;
-        WebSettings webSettings = this.chineseAnswer.getSettings();
+        this.resultWebView = resultWebView;
+        WebSettings webSettings = this.resultWebView.getSettings();
         // 支持javascript
         webSettings.setJavaScriptEnabled(true);
         // 设置可以支持缩放
@@ -42,8 +42,8 @@ public class ChineseAnswerHandler {
         }
     }
 
-    public void showWordChineseMessage(WordDTOLocal wordDTOLocal) {
-        String jsonMessage = StaticFactory.getGson().toJson(wordDTOLocal);
+    public void displayWordResult(FunctionWordVO functionWordVO) {
+        String jsonMessage = StaticFactory.getGson().toJson(functionWordVO);
         DocumentContext documentContext = JsonPath.parse(jsonMessage);
         List<String> htmlRegexList = RegularUtils.match(template, "\\{\\{.+\\}\\}");
         String renderHtml = template;
@@ -58,12 +58,12 @@ public class ChineseAnswerHandler {
             }
             renderHtml = renderHtml.replace(htmlRegex, readValue);
         }
-        chineseAnswer.loadData(renderHtml, "text/html", StandardCharsets.UTF_8.name());
-        this.chineseAnswer.setVisibility(View.VISIBLE);
+        resultWebView.loadData(renderHtml, "text/html", StandardCharsets.UTF_8.name());
+        this.resultWebView.setVisibility(View.VISIBLE);
     }
 
     public void gone() {
-        this.chineseAnswer.setVisibility(View.GONE);
+        this.resultWebView.setVisibility(View.GONE);
     }
 
 }

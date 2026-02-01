@@ -1,11 +1,13 @@
 package com.github.lorenj.wordtint.database.vo;
 
 import com.github.lorenj.wordtint.enums.ReciteFilter;
-import com.github.lorenj.wordtint.enums.ReciteStyle;
-import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.enums.ReciteMode;
+import com.github.lorenj.wordtint.enums.ReciteOrder;
+import com.github.lorenj.wordtint.enums.ReciteOrigin;
+import com.github.lorenj.wordtint.enums.ReciteStyle;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 背诵偏好
@@ -22,10 +24,14 @@ public class UserRecitePreference implements Serializable {
     private ReciteFilter reciteFilter = ReciteFilter.WORD;
     // 背诵格式
     private ReciteStyle reciteStyle = ReciteStyle.CLASSIC;
+    // 片段来源
+    private ReciteOrigin reciteOrigin = ReciteOrigin.RECITE_LIST;
+    // 所有选中的章节
+    private List<Integer> allSectionIdList;
     // 是否跳过
     private boolean ignore = false;
-    // 是否是回顾复习
-    private boolean review = false;
+    // 是否隐藏介词短语
+    private boolean hidePreposition = false;
 
     public UserRecitePreference() {
     }
@@ -35,13 +41,13 @@ public class UserRecitePreference implements Serializable {
                                 ReciteFilter reciteFilter,
                                 ReciteStyle reciteStyle,
                                 boolean ignore,
-                                boolean review) {
+                                List<Integer> allSectionIdList) {
         this.reciteMode = reciteMode;
         this.reciteOrder = reciteOrder;
         this.reciteFilter = reciteFilter;
         this.reciteStyle = reciteStyle;
         this.ignore = ignore;
-        this.review = review;
+        this.allSectionIdList = allSectionIdList;
     }
 
     public ReciteMode getReciteMode() {
@@ -84,11 +90,27 @@ public class UserRecitePreference implements Serializable {
         this.ignore = ignore;
     }
 
-    public boolean isReview() {
-        return review;
+    public ReciteOrigin getReciteOrigin() {
+        return reciteOrigin;
     }
 
-    public void setReview(boolean review) {
-        this.review = review;
+    public void setReciteOrigin(ReciteOrigin reciteOrigin) {
+        this.reciteOrigin = reciteOrigin;
+    }
+
+    public List<Integer> getAllSectionIdList() {
+        return allSectionIdList;
+    }
+
+    public void setAllSectionIdList(List<Integer> allSectionIdList) {
+        this.allSectionIdList = allSectionIdList;
+    }
+
+    public boolean isHidePreposition() {
+        return hidePreposition;
+    }
+
+    public void setHidePreposition(boolean hidePreposition) {
+        this.hidePreposition = hidePreposition;
     }
 }

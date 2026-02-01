@@ -20,7 +20,7 @@ public class AnimationUtil {
     private static AnimationUtil mInstance;
     private final Set<Integer> hiddenActionStartState = Collections.synchronizedSet(new HashSet<Integer>());
 
-    public static AnimationUtil with() {
+    public static AnimationUtil getInstance() {
         if (mInstance == null) {
             synchronized (AnimationUtil.class) {
                 if (mInstance == null) {
@@ -199,6 +199,15 @@ public class AnimationUtil {
 
     public boolean isIsmHiddenActionStart() {
         return ismHiddenActionStart;
+    }
+
+    /**
+     * 判断某组件是否正在播放动画
+     *
+     * @param view view
+     */
+    public boolean isAnimating(View view) {
+        return hiddenActionStartState.contains(view.getId());
     }
 
 }

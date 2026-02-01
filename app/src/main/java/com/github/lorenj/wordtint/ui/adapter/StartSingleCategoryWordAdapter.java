@@ -10,19 +10,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.enums.structure.EnglishStructure;
 import com.github.lorenj.wordtint.handler.CategoryWordFunctionHandler;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.ui.adapter.listener.MoveAndSwipedListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
-import com.github.lorenj.wordtint.R;
-
-import java.util.Optional;
 
 
 /**
@@ -54,6 +49,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull SingleCategoryWordViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        /*
         // 将第一根线设置为别的颜色
         if (position == 0) {
             holder.separator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_blue_light, null));
@@ -66,14 +62,14 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
         }
         // 重置改变，防止由于复用而导致的显示问题
         holder.scroller.scrollTo(0, 0);
-        WordDTOLocal wordDTOLocal = categoryWordFunctionHandler.getWordFromCategory(functionContentCallBack.getCurrentWordCategoryPosition(), position);
+        WordDTOLocal wordDTOLocal = categoryWordFunctionHandler.getWordDetailByWordId(functionContentCallBack.getCurrentWordCategoryPosition(), position);
         Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.WORD_ORIGIN))
                 .ifPresent(holder.wordOrigin::setText);
         // 最后一个嵌套,单词中文意思的嵌套
         holder.chineseAnswerRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-        holder.starChineseAnswerRecyclerViewAdapter = new StarChineseAnswerRecyclerViewAdapter(context, 2L);
-        holder.chineseAnswerRecyclerView.setAdapter(holder.starChineseAnswerRecyclerViewAdapter);
-        holder.starChineseAnswerRecyclerViewAdapter.addItem(categoryWordFunctionHandler.getWordFromCategory(functionContentCallBack.getCurrentWordCategoryPosition(), position));
+        holder.starResultAdapter = new StarResultAdapter(context, 2L);
+        holder.chineseAnswerRecyclerView.setAdapter(holder.starResultAdapter);
+        //holder.starResultAdapter.addItem(categoryWordFunctionHandler.getWordDetailByWordId(functionContentCallBack.getCurrentWordCategoryPosition(), position));
         String phraseTranslation = Optional.ofNullable(wordDTOLocal.getValue().get(EnglishStructure.PHRASE_TRANSLATION))
                 .orElse("");
         // 设置介词短语
@@ -89,6 +85,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
                             holder.phraseHint.setVisibility(View.GONE);
                             holder.phraseAnswer.setVisibility(View.GONE);
                         });
+         */
     }
 
     @Override
@@ -98,11 +95,12 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
 
     @Override
     public int getItemCount() {
-        return categoryWordFunctionHandler.currentCategorySize(functionContentCallBack.getCurrentWordCategoryPosition());
+        //return categoryWordFunctionHandler.getStarWordCount(functionContentCallBack.getCurrentWordCategoryPosition());
+        return 0;
     }
 
     public void onItemMove(int fromPosition, int toPosition) {
-        categoryWordFunctionHandler.moveCategoryWord(functionContentCallBack.getCurrentWordCategoryPosition(), fromPosition, toPosition);
+        //categoryWordFunctionHandler.moveStarInnerWord(functionContentCallBack.getCurrentWordCategoryPosition(), fromPosition, toPosition);
         functionContentCallBack.updateCategoryMessage();
         notifyItemMoved(fromPosition, toPosition);
         notifyItemChanged(fromPosition, Boolean.FALSE);
@@ -123,8 +121,8 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
 
     @Override
     public void addItem(WordCategoryWordDTO wordCategoryWordDTO) {
-        categoryWordFunctionHandler.addWordToCategory(functionContentCallBack.getCurrentWordCategoryPosition(), wordCategoryWordDTO);
-        notifyItemChanged(categoryWordFunctionHandler.currentCategorySize(functionContentCallBack.getCurrentWordCategoryPosition()) - 1);
+        //categoryWordFunctionHandler.addWordToStar(functionContentCallBack.getCurrentWordCategoryPosition(), wordCategoryWordDTO);
+        //notifyItemChanged(categoryWordFunctionHandler.getStarWordCount(functionContentCallBack.getCurrentWordCategoryPosition()) - 1);
     }
 
     @Override
@@ -139,7 +137,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
         private final TextView delete, wordOrigin, phraseAnswer, phraseHint;
         private final ImageButton move;
         private final RecyclerView chineseAnswerRecyclerView;
-        private StarChineseAnswerRecyclerViewAdapter starChineseAnswerRecyclerViewAdapter;
+        private StarResultAdapter starResultAdapter;
 
         public SingleCategoryWordViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -167,7 +165,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
             itemView.setAlpha(1.0f);
             itemMoving = false;
             // 批量更新本次移动的情况
-            categoryWordFunctionHandler.updateWordCategoryWordOrder(functionContentCallBack.getCurrentWordCategoryPosition());
+            //categoryWordFunctionHandler.batchUpdateStarInnerWordList(functionContentCallBack.getCurrentWordCategoryPosition());
         }
 
         @Override
@@ -186,7 +184,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
         public void onClick(View v) {
             int clickViewId = v.getId();
             if (clickViewId == R.id.fragment_word_credit_start_word_delete) {
-                categoryWordFunctionHandler.removeWordFromCategory(functionContentCallBack.getCurrentWordCategoryPosition(), getAdapterPosition());
+                //categoryWordFunctionHandler.removeWordFromStar(functionContentCallBack.getCurrentWordCategoryPosition(), getAdapterPosition());
                 functionContentCallBack.updateCategoryMessage();
                 // 更新第0个元素的内容,把蓝色线条画上
                 notifyItemChanged(0);

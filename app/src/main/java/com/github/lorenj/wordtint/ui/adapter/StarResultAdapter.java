@@ -11,25 +11,25 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.structure.BaseStructure;
 import com.github.lorenj.wordtint.enums.structure.EnglishStructure;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
-import com.github.lorenj.wordtint.R;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class StarChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-        implements RecyclerViewAdapterItemChange<WordDTOLocal> {
+public class StarResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+        implements RecyclerViewAdapterItemChange<FunctionWordVO> {
 
     private final Context context;
-    private WordDTOLocal currentWord;
+    private FunctionWordVO currentFocusWord;
 
     private final Map<Integer, BaseStructure> metaInfoFilterMap;
 
-    public StarChineseAnswerRecyclerViewAdapter(Context context, Long languageId) {
+    public StarResultAdapter(Context context, Long languageId) {
         this.context = context;
         metaInfoFilterMap = StaticFactory.getWordMetaInfoFilter().getMetaInfoFilterMap(languageId);
     }
@@ -47,7 +47,7 @@ public class StarChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<R
             // position对应wordStructureId
             BaseStructure baseStructure = Optional.ofNullable(metaInfoFilterMap.get(position)).orElse(EnglishStructure.DEFAULT);
             starChineseAnswerViewHolder.meaningCategoryHint.setText(context.getResources().getString(baseStructure.getTitleHint()));
-            String value = currentWord.getValue().get(baseStructure);
+            String value = currentFocusWord.getValue().get(baseStructure);
             if (!TextUtils.isEmpty(value)) {
                 starChineseAnswerViewHolder.meaningCategoryAnswer.setText(value);
                 starChineseAnswerViewHolder.meaningCategoryHint.setVisibility(View.VISIBLE);
@@ -61,19 +61,15 @@ public class StarChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<R
 
     @Override
     public int getItemCount() {
-        return currentWord == null ? 0 : metaInfoFilterMap.size();
+        return currentFocusWord == null ? 0 : metaInfoFilterMap.size();
     }
 
     @Override
-    public void addItem(WordDTOLocal item) {
-        currentWord = item;
+    public void addItem(FunctionWordVO functionWordVO) {
+        this.currentFocusWord = functionWordVO;
         notifyItemRangeChanged(0, getItemCount());
     }
 
-    @Override
-    public void removeItem(WordDTOLocal item) {
-
-    }
 
 
     public static class StarChineseAnswerViewHolder extends RecyclerView.ViewHolder {

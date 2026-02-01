@@ -1,25 +1,22 @@
 package com.github.lorenj.wordtint.handler.impl;
 
+import android.content.Context;
 import android.text.TextUtils;
 
-import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.enums.structure.EnglishStructure;
+import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordStarEntity;
+import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
+import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
+import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
-import com.github.lorenj.wordtint.utils.FileUtils;
-import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -28,221 +25,182 @@ import java.util.stream.Collectors;
  * @date 2023/2/9 16:26
  */
 public abstract class AbstractCategoryFunctionHandler implements CategoryFunctionHandler {
-
+    /**
+     * 上下文
+     */
+    private final Context context;
+    /**
+     * 数据库对象
+     */
+    private final APPDatabase appDatabase;
     /**
      * 用于存储单词分类的列表
      */
-    private final List<WordCategoryDetailVO> wordCategoryDetailVOList = new ArrayList<>(15);
-    /**
-     * 当前用户收藏的所有单词列表;第一个Map的Key单词的Id
-     * 第二个Map的key是单词的结构id,value就是该结构下面的所有信息
-     */
-    protected final Map<Long, WordDTOLocal> queryCache = new HashMap<>(30);
+    private Map<Integer, WordStarWithWordIdEntity> allStarList = new HashMap<>();
 
-    /**
-     * 本次使用的语种
-     */
-    private Long languageId;
-
-    @Override
-    public void batchAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList) {
-        this.wordCategoryDetailVOList.addAll(wordCategoryDetailVOList);
+    public AbstractCategoryFunctionHandler(Context context) {
+        this.context = context;
+        this.appDatabase = APPDatabase.getInstance(context);
+        initHandler();
     }
 
     @Override
-    public void replaceAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList) {
-        this.wordCategoryDetailVOList.clear();
-        this.wordCategoryDetailVOList.addAll(wordCategoryDetailVOList);
+    public FunctionWordVO getCurrentFocusWord() {
+        Integer currentSelectWordId = getCurrentFocusWordId();
+        return currentSelectWordId == null ? null :
+                getDict().get(currentSelectWordId);
     }
 
     @Override
-    public void addNewCategory(WordCategoryDTO wordCategoryDTO) {
-        wordCategoryDTO.setId((long) wordCategoryDetailVOList.size());
-        wordCategoryDTO.setCategoryOrder(wordCategoryDetailVOList.size());
-        WordCategoryDetailVO wordCategoryDetailVO = new WordCategoryDetailVO();
-        wordCategoryDetailVO.setId(wordCategoryDTO.getId());
-        wordCategoryDetailVO.setTitle(wordCategoryDTO.getTitle());
-        wordCategoryDetailVO.setDescribeInfo(wordCategoryDTO.getDescribeInfo());
-        wordCategoryDetailVO.setCategoryOrder(wordCategoryDTO.getCategoryOrder());
-        wordCategoryDetailVO.setWordCategoryWordList(new ArrayList<>());
-        wordCategoryDetailVOList.add(wordCategoryDetailVO);
-        persist();
-    }
-
-    @Override
-    public void updateWordCategoryDto(int position, WordCategoryDTO wordCategoryDTO) {
-        WordCategoryDetailVO wordCategoryDetailVO = getWordCategoryByPosition(position);
-        wordCategoryDetailVO.setTitle(wordCategoryDTO.getTitle());
-        wordCategoryDetailVO.setDescribeInfo(wordCategoryDTO.getDescribeInfo());
-        persist();
-    }
-
-    @Override
-    public void updateWordCategoryList() {
-        // 移动结束后需要根据List的顺序来设置order值
-        persist();
-    }
-
-    @Override
-    public void removeCategory(int position) {
-        wordCategoryDetailVOList.remove(position);
-        // 重排序当前的收藏夹
-        persist();
-    }
-
-    @Override
-    public int categoryListSize() {
-        return wordCategoryDetailVOList.size();
-    }
-
-    @Override
-    public WordCategoryDetailVO getWordCategoryByPosition(int position) {
-        return wordCategoryDetailVOList.get(position);
-    }
-
-    @Override
-    public String calculationTitle(int position) {
-        return TextUtils.isEmpty(wordCategoryDetailVOList.get(position).getTitle()) ?
-                calculation(position, EnglishStructure.WORD_ORIGIN.getWordStructureId()) :
-                wordCategoryDetailVOList.get(position).getTitle();
-    }
-
-    @Override
-    public String calculationDescribe(int position) {
-        return TextUtils.isEmpty(wordCategoryDetailVOList.get(position).getDescribeInfo()) ?
-                calculation(position, EnglishStructure.UK_PHONETIC.getWordStructureId()) :
-                wordCategoryDetailVOList.get(position).getDescribeInfo();
-    }
-
-    @Override
-    public WordDTOLocal getCurrentStructureWordMap() {
-        WordCategoryWordDTO wordCategoryWordDTO = getCurrentViewWord();
-        if (wordCategoryWordDTO == null) {
-            return null;
+    public void createNewStar(WordStarEntity wordStarEntity) {
+        if (wordStarEntity.order == -1) {
+            wordStarEntity.order = allStarList.size() + 1;
         }
-        return queryCache.get(wordCategoryWordDTO.getWordId());
+        appDatabase.wordStarDao().insert(wordStarEntity);
     }
 
     @Override
-    public void moveCategory(int fromPosition, int toPosition) {
-        Collections.swap(wordCategoryDetailVOList, fromPosition, toPosition);
+    public void reloadStar() {
+        // 加载所有的收藏夹
+        this.allStarList = appDatabase.wordStarDao()
+                .findAllStarAndWordId()
+                .stream()
+                .collect(Collectors.toMap(
+                        wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarEntity.id,
+                        wordStarWithWordIdEntity -> wordStarWithWordIdEntity));
     }
 
     @Override
-    public int currentCategorySize(int categoryPosition) {
-        return getWordCategoryByPosition(categoryPosition).getWordCategoryWordList().size();
+    public void updateWordStar(WordStarEntity wordStarEntity) {
+        appDatabase.wordStarDao().update(wordStarEntity);
+        Optional.ofNullable(allStarList.get(wordStarEntity.id))
+                .ifPresent(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.setWordStarEntity(wordStarEntity));
     }
 
     @Override
-    public boolean addWordToCategory(int categoryPosition, WordCategoryWordDTO addWordCategoryWordDTO) {
+    public void batchUpdateCurrentStar() {
+        List<WordStarEntity> allWordStarList = this.allStarList.values()
+                .stream()
+                .map(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarEntity)
+                .sorted(Comparator.comparingInt(o -> o.order))
+                .collect(Collectors.toList());
+        for (int i = 0; i < allWordStarList.size(); i++) {
+            allWordStarList.get(i).order = i;
+        }
+        appDatabase.wordStarDao().batchUpdate(allWordStarList);
+    }
+
+    @Override
+    public void removeStar(WordStarEntity wordStarEntity) {
+        this.allStarList.remove(wordStarEntity.id);
+        batchUpdateCurrentStar();
+    }
+
+    @Override
+    public int starListSize() {
+        return allStarList.size();
+    }
+
+    @Override
+    public String calculationTitle(WordStarEntity wordStarEntity) {
+        return TextUtils.isEmpty(wordStarEntity.title) ?
+                calculation(wordStarEntity) :
+                wordStarEntity.title;
+    }
+
+    @Override
+    public String calculationDescribe(WordStarEntity wordStarEntity) {
+        return TextUtils.isEmpty(wordStarEntity.describeInfo) ?
+                calculation(wordStarEntity) :
+                wordStarEntity.describeInfo;
+    }
+
+    @Override
+    public void moveStar(WordStarEntity fromPosition, WordStarEntity toPosition) {
+        // 这个方法不需要持久化,因为频繁地移动会调用该方法
+    }
+
+    @Override
+    public int getStarWordCount(WordStarEntity wordStarEntity) {
+        return Optional.ofNullable(allStarList.get(wordStarEntity.id))
+                .orElse(new WordStarWithWordIdEntity())
+                .wordStarWordIdEntityList
+                .size();
+    }
+
+    @Override
+    public boolean addWordToStar(WordStarWordIdEntity wordStarWordIdEntity) {
         // 得到当前收藏夹
-        WordCategoryDetailVO wordCategoryDetailVO = getWordCategoryByPosition(categoryPosition);
-        List<WordCategoryWordDTO> wordCategoryWordList = wordCategoryDetailVO.getWordCategoryWordList();
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = allStarList.get(wordStarWordIdEntity.starId);
+        if (wordStarWithWordIdEntity == null) return false;
+        if (wordStarWithWordIdEntity.getWordStarWordIdEntityList() == null)
+            wordStarWithWordIdEntity.setWordStarWordIdEntityList(new ArrayList<>());
+        List<WordStarWordIdEntity> wordStarWordIdEntityList = wordStarWithWordIdEntity.getWordStarWordIdEntityList();
         // 当前收藏夹不能已经存在当前单词
-        for (WordCategoryWordDTO wordCategoryWordDTO : wordCategoryWordList) {
-            if (wordCategoryWordDTO.getWordId().equals(addWordCategoryWordDTO.getWordId())) {
+        for (WordStarWordIdEntity wordStarWordId : wordStarWordIdEntityList) {
+            if (wordStarWordId.wordId == wordStarWordIdEntity.wordId) {
                 return false;
             }
         }
-        addWordCategoryWordDTO.setWordOrder(wordCategoryWordList.size());
-        addWordCategoryWordDTO.setWordCategoryId(wordCategoryDetailVO.getId());
-        wordCategoryWordList.add(addWordCategoryWordDTO);
-        persist();
+        wordStarWordIdEntityList.add(wordStarWordIdEntity);
+        wordStarWordIdEntity.order = wordStarWordIdEntityList.size();
+        appDatabase.wordStarWordIdDao().insert(wordStarWordIdEntity);
         return true;
     }
 
     @Override
-    public void removeWordFromCategory(int categoryPosition, int position) {
-        WordCategoryDetailVO wordCategoryDetailVO = getWordCategoryByPosition(categoryPosition);
-        // 重排序收藏夹内的单词顺序
-        wordCategoryDetailVO.getWordCategoryWordList().sort((o1, o2) -> o1.getWordOrder() - o2.getWordOrder());
-        wordCategoryDetailVO.getWordCategoryWordList().forEach(new Consumer<WordCategoryWordDTO>() {
-
-            int order = 0;
-
-            @Override
-            public void accept(WordCategoryWordDTO wordCategoryWordDTO) {
-                wordCategoryWordDTO.setWordOrder(order++);
-            }
-        });
-        persist();
+    public void removeWordFromStar(WordStarWordIdEntity wordStarWordIdEntity) {
+        // 得到当前收藏夹
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = allStarList.get(wordStarWordIdEntity.starId);
+        if (wordStarWithWordIdEntity == null) return;
+        wordStarWithWordIdEntity.wordStarWordIdEntityList = wordStarWithWordIdEntity.getWordStarWordIdEntityList()
+                .stream()
+                .filter(wordStarWordIdEntityTest -> wordStarWordIdEntityTest.id != wordStarWordIdEntity.id)
+                .collect(Collectors.toList());
+        batchUpdateStarInnerWordList(wordStarWithWordIdEntity.wordStarEntity);
     }
 
     @Override
-    public WordDTOLocal getWordFromCategory(int categoryID, int position) {
-        return queryCache.get(getWordCategoryByPosition(categoryID).getWordCategoryWordList()
-                .get(position)
-                .getWordId());
+    public FunctionWordVO getWordDetailByWordId(WordStarWordIdEntity wordStarWordIdEntity) {
+        return getDict().get(wordStarWordIdEntity.wordId);
     }
 
     @Override
-    public void addWordQueryCache(Map<Long, WordDTOLocal> dict) {
-        queryCache.putAll(dict);
-    }
-
-    @Override
-    public void updateWordCategoryWordOrder(int categoryPosition) {
-        List<WordCategoryWordDTO> wordCategoryWordList = wordCategoryDetailVOList.get(categoryPosition).getWordCategoryWordList();
-        // 移动结束后需要根据List的顺序来设置order值
-        // 这里是更新收藏夹内的单词顺序,不是收藏夹顺序
-        int order = 0;
-        for (WordCategoryWordDTO wordCategoryWordDTO : wordCategoryWordList) {
-            wordCategoryWordDTO.setWordOrder(order++);
+    public void batchUpdateStarInnerWordList(WordStarEntity wordStarEntity) {
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = allStarList.get(wordStarEntity.id);
+        if (wordStarWithWordIdEntity == null) return;
+        List<WordStarWordIdEntity> wordStarWordIdEntityList = wordStarWithWordIdEntity.getWordStarWordIdEntityList();
+        for (int i = 0; i < wordStarWordIdEntityList.size(); i++) {
+            wordStarWordIdEntityList.get(i).order = i + 1;
         }
-        persist();
+        appDatabase.wordStarWordIdDao().batchUpdate(wordStarWordIdEntityList);
     }
 
     @Override
-    public void moveCategoryWord(int categoryPosition, int fromPosition, int toPosition) {
-        Collections.swap(wordCategoryDetailVOList.get(categoryPosition).getWordCategoryWordList(), fromPosition, toPosition);
+    public void moveStarInnerWord(WordStarWordIdEntity fromPosition, WordStarWordIdEntity toPosition) {
     }
 
-    @Override
-    public void setCurrentLanguageId(Long languageId) {
-        this.languageId = languageId;
-    }
-
-    @Override
-    public Long getCurrentLanguageId() {
-        return this.languageId;
+    private void initHandler() {
+        this.reloadStar();
     }
 
     /**
-     * 计算标题和计算描述信息的方法复用
+     * 计算名称
      *
-     * @param position        单词分类对象在列表中对应的位置
-     * @param wordStructureId 要对那个结构字段进行计算(传入结构字段的id)
-     * @return 返回计算出的描述信息, 返回值不为null
-     * @see AbstractCategoryFunctionHandler#calculationDescribe(int)
-     * @see AbstractCategoryFunctionHandler#calculationTitle(int)
+     * @param wordStarEntity 单词实体
+     * @return 返回收藏夹名称
      */
-    private String calculation(int position, Long wordStructureId) {
-        WordCategoryDetailVO wordCategoryDetailVO = getWordCategoryByPosition(position);
-        return wordCategoryDetailVO.getWordCategoryWordList()
+    private String calculation(WordStarEntity wordStarEntity) {
+        return Optional.ofNullable(allStarList.get(wordStarEntity.id))
+                .orElse(new WordStarWithWordIdEntity())
+                .wordStarWordIdEntityList
                 .stream()
                 .limit(3)
-                .map(wordCategoryWordDTO -> queryCache.get(wordCategoryWordDTO.getWordId()).getOrigin())
+                .map(wordStarWordIdEntity -> Optional.ofNullable(getDict().get(wordStarWordIdEntity.wordId))
+                        .orElse(new FunctionWordVO())
+                        .getValue()
+                        .get(WordStructure.WORD_ORIGIN))
                 .collect(Collectors.joining("、"));
-    }
-
-    /**
-     * 持久化收藏夹信息
-     */
-    private void persist() {
-        StaticFactory.getExecutorService().submit(() -> {
-            // 重新排序wordCategoryDetailVOList
-            int order = 0;
-            for (WordCategoryDetailVO wordCategoryDetailVO : wordCategoryDetailVOList) {
-                wordCategoryDetailVO.setCategoryOrder(order++);
-            }
-            Gson gson = StaticFactory.getGson();
-            String persist = gson.toJson(wordCategoryDetailVOList);
-            try {
-                FileUtils.writeWithExternalExist(WordContextPath.WORD_STAR.getPath(), persist);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
 }

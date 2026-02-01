@@ -1,11 +1,9 @@
 package com.github.lorenj.wordtint.handler;
 
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
+import com.github.lorenj.wordtint.database.entity.WordStarEntity;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 
-import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -13,104 +11,96 @@ import java.util.List;
  * @date 2023/1/8 19:48
  */
 public interface CategoryFunctionHandler extends CategoryWordFunctionHandler {
+
     /**
-     * 得到当前停留的单词(得到当前正在背诵的单词)<br>
+     * 获取单词字典<br>
+     * 该方法需要由子类实现
+     *
+     * @return 返回单词的字典
+     */
+    Map<Integer, FunctionWordVO> getDict();
+
+    /**
+     * 得到当前停留的单词(得到当前正在背诵的单词/或者当前选择的单词的id/当前搜索到的单词的id)<br>
      * 该方法返回的单词是用户可能想要将其收藏到某个收藏夹内的单词.
+     *
+     * @return 返回当前选中的单词的id
+     */
+    Integer getCurrentFocusWordId();
+
+    /**
+     * 得到当前停留的单词(得到当前选中的单词)<br>
+     * 该方法返回的单词是用户可能想要将其收藏到某个收藏夹内的单词<br>
+     * 所以有可能是正在背诵的单词/也有可能是当前搜索到的单词
      *
      * @return 返回当前正在背诵的单词引用
      */
-    WordCategoryWordDTO getCurrentViewWord();
+    FunctionWordVO getCurrentFocusWord();
 
     /**
      * 添加一个单词分类
      *
-     * @param wordCategoryDTO 单词类别实例对象
+     * @param wordStarEntity 单词类别实例对象
      */
-    void addNewCategory(WordCategoryDTO wordCategoryDTO);
+    void createNewStar(WordStarEntity wordStarEntity);
 
     /**
-     * 批量添加单词收藏夹
-     *
-     * @param wordCategoryDetailVOList 单词分类列表
+     * 重新加载收藏夹
      */
-    void batchAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList);
+    void reloadStar();
 
     /**
-     * 批量替换单词收藏夹
+     * 更新单词收藏夹信息
      *
-     * @param wordCategoryDetailVOList 单词分类列表
+     * @param wordStarEntity 单词收藏夹信息
      */
-    void replaceAddCategory(List<WordCategoryDetailVO> wordCategoryDetailVOList);
-
-    /**
-     * 得到当前停留的单词(得到当前正在背诵的单词)<br>
-     * 该方法返回的单词是用户可能想要将其收藏到某个收藏夹内的单词.<br>
-     * 并转换成以单词结构id为Key的集合
-     *
-     * @return 返回当前正在背诵的单词引用
-     */
-    WordDTOLocal getCurrentStructureWordMap();
-
-    /**
-     * 更新单词收藏夹信息WordCategoryDTO
-     *
-     * @param position        收藏夹的position
-     * @param wordCategoryDTO 单词收藏夹信息
-     */
-    void updateWordCategoryDto(int position, WordCategoryDTO wordCategoryDTO);
+    void updateWordStar(WordStarEntity wordStarEntity);
 
     /**
      * 这个方法实际上是一种状态的刷新<br>
      * 因为收藏夹位置不断地变化,为避免频繁更新所以使用该方法统一发送请求更新收藏夹顺序列表
      */
-    void updateWordCategoryList();
+    void batchUpdateCurrentStar();
 
     /**
-     * 删除一个单词分类
+     * 删除一个收藏夹
      *
-     * @param position 单词分类对象在列表中对应的位置
+     * @param wordStarEntity 收藏夹对象
      */
-    void removeCategory(int position);
+    void removeStar(WordStarEntity wordStarEntity);
 
     /**
      * 得到当前分类列表的长度
      *
      * @return 返回int值
      */
-    int categoryListSize();
+    int starListSize();
 
     /**
-     * 根据单词分类在列表中的位置得到对应的WordCategory
+     * 根据规则计算出某个WordStarEntity的标题信息.<br>
+     * 该方法的返回值会随着对应的WordStarEntity内容改变而改变.
      *
-     * @param position 单词分类对象在列表中对应的位置
-     * @return 返回WordCategory引用
-     */
-    WordCategoryDetailVO getWordCategoryByPosition(int position);
-
-    /**
-     * 根据规则计算出某个WordCategory的标题信息.<br>
-     * 该方法的返回值会随着对应的WordCategory内容改变而改变.
-     *
-     * @param position 计算哪个收藏夹;单词分类对象在列表中对应的位置
+     * @param wordStarEntity 计算哪个收藏夹;单词分类对象在列表中对应的位置
      * @return 返回计算出的标题
      */
-    String calculationTitle(int position);
+    String calculationTitle(WordStarEntity wordStarEntity);
 
     /**
-     * 根据规则计算出某个WordCategory的描述信息.<br>
-     * 该方法的返回值会随着对应的WordCategory内容改变而改变.
+     * 根据规则计算出某个WordStarEntity的描述信息.<br>
+     * 该方法的返回值会随着对应的WordStarEntity内容改变而改变.
      *
-     * @param position 计算哪个收藏夹;单词分类对象在列表中对应的位置
+     * @param wordStarEntity 计算哪个收藏夹;单词分类对象在列表中对应的位置
      * @return 返回计算出的描述信息
      */
-    String calculationDescribe(int position);
+    String calculationDescribe(WordStarEntity wordStarEntity);
 
     /**
-     * 交换收藏夹列表中的两个收藏夹位置
+     * 交换收藏夹列表中的两个收藏夹位置<br>
+     * 该方法不应该执行持久化
      *
      * @param fromPosition 源收藏夹位置
      * @param toPosition   目标收藏夹位置
      */
-    void moveCategory(int fromPosition, int toPosition);
+    void moveStar(WordStarEntity fromPosition, WordStarEntity toPosition);
 
 }

@@ -1,87 +1,68 @@
 package com.github.lorenj.wordtint.handler;
 
-import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
-import com.github.lorenj.wordtint.entity.local.FunctionWordDTOLocal;
-import com.github.lorenj.wordtint.entity.local.ProjectorDTOLocal;
-import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.enums.ReciteMode;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
+import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 
-import java.util.List;
 import java.util.Set;
 
 public interface WordFunctionHandler extends CategoryFunctionHandler {
     /**
+     * 得到单词列表长度
+     *
+     * @return 返回长度
+     */
+    int functionWordSize();
+
+    /**
+     * 得到当前的内部的index<br>
+     * 区别{@link WordFunctionHandler#getChameleonOrder()}
+     *
+     * @return 返回index
+     */
+    int getInnerIndex();
+
+    /**
      * 根据单词在列表中的位序获取单词,该方法的返回值会受到Chameleon的改变而改变.
      *
-     * @param order 单词在列表中的位序,注意order的顺序是从0开始的.
+     * @param index 单词在列表中的位序,注意order的顺序是从0开始的.
      * @return 返回单词的引用(单词的信息是一个集合)
      */
-    WordDTOLocal getWordByIndex(int index);
-
-    /**
-     * 获取当前指针指向的单词<br>
-     * 该方法和{@link CategoryFunctionHandler#getCurrentViewWord()}方法的含义有相似之处
-     * 因为该方法即可以作为收藏夹收藏单词时的依据,又可以作为当下要为用户展示的单词依据
-     *
-     * @return 返回单词引用
-     */
-    WordCategoryWordDTO getCurrentViewWord();
-
-    /**
-     * 获取当前指针指向的单词<br>
-     * 并转换成以单词结构id为Key的集合
-     *
-     * @return 返回单词引用
-     */
-    WordDTOLocal getCurrentStructureWordMap();
+    FunctionWordVO getWordByIndex(int index);
 
     /**
      * 跳转到上一个单词,调用该方法会将指针指向传入的索引位置
      *
      * @return 返回单词引用
      */
-    WordDTOLocal jumpPreviousWord();
+    FunctionWordVO gotoPreviousWord();
 
     /**
      * 跳转到下一个单词,调用该方法会将指针指向传入的索引位置
      *
      * @return 返回单词引用
      */
-    WordDTOLocal jumpNextWord();
+    FunctionWordVO gotoNextWord();
 
     /**
      * 跳转到某个单词,调用该方法会将指针指向传入的索引位置<br>
-     * 该方法会考虑单词标记
+     * 该方法会考虑单词标记<br>
+     * 当前方法是跳转,而 {@link WordFunctionHandler#getWordByIndex(int)} 仅仅是得到单词的信息
      *
      * @param index 跳转的目标位序
      * @return 返回单词引用
      */
-    WordDTOLocal jumpToWord(int index);
+    FunctionWordVO gotoWordWithIndex(int index);
 
     /**
      * 强制跳转到索引指向的单词,不会考虑单词标记
      *
      * @param index 单词索引
      * @return 返回单词引用
-     * @see WordFunctionHandler#jumpToWord(int)
+     * @see WordFunctionHandler#gotoWordWithIndex(int)
      */
-    WordDTOLocal jumpToWordWithOutFlag(int index);
-
-    /**
-     * 得到当前指针指向的索引
-     *
-     * @return 返回index
-     */
-    int getCurrentIndex();
-
-    /**
-     * 得到单词列表长度
-     *
-     * @return 返回长度
-     */
-    int size();
+    FunctionWordVO forceGotoWordWithOutMarkColor(int index);
 
     /**
      * 获得当前指针指向的单词的标记列表<br>
@@ -91,27 +72,27 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * 如果想要修改当前单词的标记,请使用:addFlagToCurrentWord(FlagColor)方法和removeFlagToCurrentWord(FlagColor)方法
      *
      * @return 返回当前单词所有的标记颜色集合
-     * @see WordFunctionHandler#addFlagToCurrentWord(MarkColor)
-     * @see WordFunctionHandler#removeFlagToCurrentWord(MarkColor)
+     * @see WordFunctionHandler#addMarkColorToCurrentWord(MarkColor)
+     * @see WordFunctionHandler#removeMarkColorToCurrentWord(MarkColor)
      */
-    Set<MarkColor> getCurrentWordFlagColor();
+    Set<MarkColor> getCurrentWordMarkColor();
 
     /**
      * 为当前单词添加一个标记
      *
-     * @param tobeAddFlag 待添加的标记颜色
+     * @param markColor 待添加的标记颜色
      * @return {@code true} if this set did not already contain the specified
      * element
      */
-    boolean addFlagToCurrentWord(MarkColor tobeAddFlag);
+    boolean addMarkColorToCurrentWord(MarkColor markColor);
 
     /**
      * 为当前单词删除一个标记d
      *
-     * @param tobeAddFlag 待删除的标记颜色
+     * @param markColor 待删除的标记颜色
      * @return {@code true} if this set contained the specified element
      */
-    boolean removeFlagToCurrentWord(MarkColor tobeAddFlag);
+    boolean removeMarkColorToCurrentWord(MarkColor markColor);
 
     /**
      * 得到当前的变色龙状态,默认状态为FlagColor.GREEN
@@ -136,6 +117,15 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     void shuffle();
 
     /**
+     * 根据左右区间打乱列表,注意这里的左右区间是闭区间.<br>
+     * 一旦打乱则当前单词功能的状态会切换为{@link WordFunctionState#RANGE}
+     *
+     * @param start 左区间的值,下标从0开始
+     * @param end   右区间的值,该值不应该超过列表的{@link WordFunctionHandler#functionWordSize()}-1
+     */
+    void shuffleRange(int start, int end);
+
+    /**
      * 还原单词列表为初始列表,该方法可以还原由 {@link WordFunctionHandler#shuffle()}方法和<br>
      * {@link WordFunctionHandler#shuffleRange(int, int)}方法改变的单词列表顺序.
      */
@@ -149,37 +139,35 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
     WordFunctionState getWordFunctionState();
 
     /**
-     * 根据左右区间打乱列表,注意这里的左右区间是闭区间.<br>
-     * 一旦打乱则当前单词功能的状态会切换为{@link WordFunctionState#RANGE}
+     * 设置当前的背诵模式
      *
-     * @param start 左区间的值,下标从0开始
-     * @param end   右区间的值,该值不应该超过列表的{@link WordFunctionHandler#size()}-1
-     */
-    void shuffleRange(int start, int end);
-
-    /**
      * @param reciteMode
      */
-    void setCurrentCreditState(ReciteMode reciteMode);
+    void setCurrentReciteMode(ReciteMode reciteMode);
+
+    /**
+     * 得到当前的背诵模式
+     *
+     * @return 非空
+     */
+    ReciteMode getCurrentReciteMode();
 
     /**
      * 隐藏介词
      */
-    void setHidePronoun(boolean hide);
+    void setHidePreposition(boolean hide);
 
     /**
      * 是否隐藏介词
      *
      * @return 是否隐藏介词
      */
-    boolean isHidePronoun();
-
-    ReciteMode getCurrentCreditState();
+    boolean isHidePreposition();
 
     /**
-     * 得到当前的单词列表
+     * 保存背诵进度
      */
-    List<FunctionWordDTOLocal> getAllFunctionWordList();
+    void saveProgress();
 
     /**
      * 得到当前变色龙的单词的数量
@@ -194,20 +182,6 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * @return 返回单词顺序
      */
     int getChameleonOrder();
-
-    /**
-     * 开始放映机
-     *
-     * @param projectorDTOLocal 放映参数
-     */
-    void startProjector(ProjectorDTOLocal projectorDTOLocal);
-
-    /**
-     * 计算剩余毫秒数
-     *
-     * @return 返回计时剩余毫秒数
-     */
-    ProjectorDTOLocal calculateCountdown();
 
     /**
      * 根据单词查找该单词在列表中的索引位置
