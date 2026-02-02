@@ -1,8 +1,10 @@
 package com.github.lorenj.wordtint.handler;
 
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
+import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -10,7 +12,7 @@ import java.util.Map;
  * @author cnsukidayo
  * @date 2023/1/8 19:48
  */
-public interface CategoryFunctionHandler extends CategoryWordFunctionHandler {
+public interface StarFunctionHandler extends StarSectionFunctionHandler {
 
     /**
      * 获取单词字典<br>
@@ -49,12 +51,14 @@ public interface CategoryFunctionHandler extends CategoryWordFunctionHandler {
      */
     void reloadStar();
 
+    List<WordStarWithWordIdEntity> getAllStarList();
+
     /**
      * 更新单词收藏夹信息
      *
      * @param wordStarEntity 单词收藏夹信息
      */
-    void updateWordStar(WordStarEntity wordStarEntity);
+    void updateStar(WordStarWithWordIdEntity wordStarWithWordIdEntity);
 
     /**
      * 这个方法实际上是一种状态的刷新<br>
@@ -67,14 +71,7 @@ public interface CategoryFunctionHandler extends CategoryWordFunctionHandler {
      *
      * @param wordStarEntity 收藏夹对象
      */
-    void removeStar(WordStarEntity wordStarEntity);
-
-    /**
-     * 得到当前分类列表的长度
-     *
-     * @return 返回int值
-     */
-    int starListSize();
+    void removeStar(WordStarWithWordIdEntity wordStarWithWordIdEntity);
 
     /**
      * 根据规则计算出某个WordStarEntity的标题信息.<br>
@@ -101,6 +98,6 @@ public interface CategoryFunctionHandler extends CategoryWordFunctionHandler {
      * @param fromPosition 源收藏夹位置
      * @param toPosition   目标收藏夹位置
      */
-    void moveStar(WordStarEntity fromPosition, WordStarEntity toPosition);
+    void moveStar(WordStarWithWordIdEntity fromStar, WordStarWithWordIdEntity toStar);
 
 }

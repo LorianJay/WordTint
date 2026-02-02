@@ -12,7 +12,7 @@ import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.WordStructure;
-import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
+import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
 import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
  * 每个单词都是有棕色的,棕色是不可变的颜色,也就是说用户不可以取消单词的棕色标记.<br>
  * 变色龙的每一种状态都是可以进入的,不管当前单词列表中是否有该颜色对应的单词<br>
  */
-public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
-        implements WordFunctionHandler, CategoryFunctionHandler {
+public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
+        implements WordFunctionHandler, StarFunctionHandler {
     /**
      * 上下文
      */

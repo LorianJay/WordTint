@@ -39,8 +39,8 @@ import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
 import com.github.lorenj.wordtint.entity.dto.WordStructureDTO;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.enums.structure.EnglishStructure;
-import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
-import com.github.lorenj.wordtint.handler.impl.AbstractCategoryFunctionHandler;
+import com.github.lorenj.wordtint.handler.StarFunctionHandler;
+import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.WordSearchHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
@@ -85,7 +85,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
     private TextView drawerPhraseHint, drawerPhraseAnswer, addNewCategory;
     // 收藏界抽屉布局
     private DrawerLayout startDrawer;
-    private final CategoryFunctionHandler categoryFunctionHandler = new AbstractCategoryFunctionHandler(null) {
+    private final StarFunctionHandler starFunctionHandler = new AbstractStarFunctionHandler(null) {
         @Override
         public Map<Integer, FunctionWordVO> getDict() {
             return null;
@@ -153,9 +153,9 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         } else if (itemId == R.id.fragment_search_word_click_analysis_word) {
 
         } else if (itemId == R.id.drawer_start_add_category) {
-            View addNewCategory = getLayoutInflater().inflate(R.layout.fragment_word_credit_start_edit_new_dialog, null);
-            EditText categoryTile = addNewCategory.findViewById(R.id.fragment_word_credit_start_new_title);
-            EditText categoryDescribe = addNewCategory.findViewById(R.id.fragment_word_credit_start_new_describe);
+            View addNewCategory = getLayoutInflater().inflate(R.layout.dialog_recite_new_star, null);
+            EditText categoryTile = addNewCategory.findViewById(R.id.et_new_star_title);
+            EditText categoryDescribe = addNewCategory.findViewById(R.id.et_new_star_describe);
             new AlertDialog.Builder(getContext())
                     .setView(addNewCategory)
                     .setCancelable(true)
@@ -254,7 +254,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         StaticFactory.getExecutorService().submit(() -> {
             Map<Long, WordDTOLocal> allWordDict = StaticFactory.getAllWordDict();
             wordSearchHandler = new WordSearchHandlerImpl(getContext(), allWordDict);
-            this.starCategoryAdapter = new StarCategoryAdapter(getContext());
+            this.starCategoryAdapter = new StarCategoryAdapter(getContext(),starFunctionHandler);
             // 初始化单词列表的adapter
             this.selectWordListAdapter = new SelectWordListAdapter(getContext());
             // 设置选中单词的回调事件
@@ -262,7 +262,6 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
             starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
-            starCategoryAdapter.setStartFunctionHandler(categoryFunctionHandler);
             // 设置收藏夹列表中中文意思显示的adapter
             this.chineseAnswerAdapterDrawer = new StarResultAdapter(getContext(), 2L);
             // 读取用户收藏夹信息

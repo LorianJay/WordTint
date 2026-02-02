@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Entity(tableName = "word_star")
 public class WordStarEntity implements Serializable {
     @PrimaryKey(autoGenerate = true)
-    public int id = -1;
+    public int id ;
 
     @ColumnInfo(name = "title")
     public String title;
@@ -19,4 +19,5 @@ public class WordStarEntity implements Serializable {
 
     @ColumnInfo(name = "order")
     public int order;
+
 }

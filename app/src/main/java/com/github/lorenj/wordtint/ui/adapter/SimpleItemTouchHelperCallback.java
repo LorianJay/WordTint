@@ -10,7 +10,7 @@ import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
 
 public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
-    private MoveAndSwipedListener mAdapter;
+    private final MoveAndSwipedListener mAdapter;
 
     public SimpleItemTouchHelperCallback(MoveAndSwipedListener listener) {
         mAdapter = listener;
@@ -61,7 +61,6 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
         return true;
     }
 
-
     @Override
     public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
         // 当某个viewHolder被点击选中时调用该方法
@@ -82,5 +81,17 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
         }
     }
 
+    @Override
+    public int interpolateOutOfBoundsScroll(@NonNull RecyclerView recyclerView,
+                                            int viewSize, int viewSizeOutOfBounds,
+                                            int totalSize, long msSinceStartScroll) {
+        final int standardSpeed = super.interpolateOutOfBoundsScroll(recyclerView, viewSize, viewSizeOutOfBounds, totalSize, msSinceStartScroll);
+        // 滑动速度
+        int minSpeed = 10;
+        if (Math.abs(standardSpeed) < minSpeed && viewSizeOutOfBounds != 0) {
+            return standardSpeed > 0 ? minSpeed : -minSpeed;
+        }
+        return standardSpeed;
+    }
 
 }

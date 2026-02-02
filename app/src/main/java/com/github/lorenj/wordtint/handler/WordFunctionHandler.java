@@ -4,7 +4,7 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
-public interface WordFunctionHandler extends CategoryFunctionHandler {
+public interface WordFunctionHandler extends StarFunctionHandler {
     /**
      * 得到单词列表长度
      *

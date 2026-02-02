@@ -2,6 +2,7 @@ package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.Query;
 import androidx.room.Update;
 
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
@@ -16,6 +17,9 @@ import java.util.List;
 public interface WordStarWordIdDao {
     @Insert
     void insert(WordStarWordIdEntity wordStarWordIdEntity);
+
+    @Query("DELETE FROM word_star_word_id WHERE star_id = :starId")
+    void deleteWordIdByStarId(int starId);
 
     @Update
     void batchUpdate(List<WordStarWordIdEntity> wordStarWordIdEntityList);

@@ -11,7 +11,7 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
  * @author cnsukidayo
  * @date 2023/1/9 16:45
  */
-public interface CategoryWordFunctionHandler {
+public interface StarSectionFunctionHandler {
 
     /**
      * 得到某个具体分类(收藏夹)中单词的数量

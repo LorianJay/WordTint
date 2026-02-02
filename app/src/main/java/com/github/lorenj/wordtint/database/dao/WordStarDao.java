@@ -1,6 +1,7 @@
 package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
@@ -18,10 +19,13 @@ import java.util.List;
 @Dao
 public interface WordStarDao {
     @Insert
-    void insert(WordStarEntity wordStarEntity);
+    long insert(WordStarEntity wordStarEntity);
 
     @Update
     int update(WordStarEntity wordStarEntity);
+
+    @Delete
+    void delete(WordStarEntity wordStarEntity);
 
     @Update
     void batchUpdate(List<WordStarEntity> wordStarEntityList);

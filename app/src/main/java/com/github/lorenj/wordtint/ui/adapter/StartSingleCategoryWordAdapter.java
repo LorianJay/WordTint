@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
-import com.github.lorenj.wordtint.handler.CategoryWordFunctionHandler;
+import com.github.lorenj.wordtint.handler.StarSectionFunctionHandler;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.ui.adapter.listener.MoveAndSwipedListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
@@ -32,7 +32,7 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
     private final Context context;
     private FunctionContentCallBack functionContentCallBack;
     // 用于处理单词收藏功能的Handler
-    private CategoryWordFunctionHandler categoryWordFunctionHandler;
+    private StarSectionFunctionHandler starSectionFunctionHandler;
     // 当前是否正在移动单词的标识
     private volatile boolean itemMoving = false;
 
@@ -111,8 +111,8 @@ public class StartSingleCategoryWordAdapter extends RecyclerView.Adapter<StartSi
     public void onItemDismiss(int position) {
     }
 
-    public void setCategoryWordFunctionHandler(CategoryWordFunctionHandler categoryWordFunctionHandler) {
-        this.categoryWordFunctionHandler = categoryWordFunctionHandler;
+    public void setCategoryWordFunctionHandler(StarSectionFunctionHandler starSectionFunctionHandler) {
+        this.starSectionFunctionHandler = starSectionFunctionHandler;
     }
 
     public void setFunctionListener(FunctionContentCallBack functionContentCallBack) {

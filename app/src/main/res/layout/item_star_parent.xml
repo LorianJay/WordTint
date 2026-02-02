@@ -4,28 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="3dp"
-    android:background="@drawable/fragment_word_credit_start_single_category_background"
+    android:foreground="@drawable/text_border_radius_foreground"
+    android:foregroundTint="@color/dark_gray"
     android:orientation="vertical">
 
     <com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout
-        android:id="@+id/fragment_word_credit_start_single_category_scroller"
+        android:id="@+id/sll_item_star_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/fragment_word_credit_start_open_list"
+            android:id="@+id/ll_item_star"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
-            android:background="@drawable/fragment_word_credit_start_single_category_background_open_list"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:background="@drawable/text_border_radius_background"
             android:clickable="true"
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/fragment_word_credit_start_list_state"
+                android:id="@+id/iv_item_star_fold"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center_vertical"
@@ -44,23 +44,23 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/fragment_word_credit_start_single_category_title"
+                    android:id="@+id/tv_item_star_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="test"
+                    android:text="@string/default_txt"
                     android:textColor="@color/black"
                     android:textSize="22sp" />
 
                 <TextView
-                    android:id="@+id/fragment_word_credit_start_single_category_detail"
+                    android:id="@+id/tv_item_star_describe"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="test"
+                    android:text="@string/default_txt"
                     android:textColor="@color/gray_black"
                     android:textSize="18sp" />
 
@@ -68,7 +68,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/fragment_word_credit_start_single_category_menu"
+            android:id="@+id/ll_item_star_swipe_menu"
             android:layout_width="250dp"
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/fragment_word_credit_start_category_stroke"
@@ -76,7 +76,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/fragment_word_credit_start_edit"
+                android:id="@+id/ll_item_star_swipe_edit"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -88,7 +88,7 @@
                 android:textSize="18sp" />
 
             <TextView
-                android:id="@+id/fragment_word_credit_start_add_word"
+                android:id="@+id/ll_item_star_swipe_add"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -100,7 +100,7 @@
                 android:textSize="18sp" />
 
             <TextView
-                android:id="@+id/fragment_word_credit_start_delete"
+                android:id="@+id/ll_item_star_swipe_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -113,7 +113,7 @@
                 android:textSize="18sp" />
 
             <ImageButton
-                android:id="@+id/fragment_word_credit_start_move"
+                android:id="@+id/ll_item_star_swipe_move"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
@@ -134,7 +134,7 @@
         android:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_word_credit_start_single_category_word_recycler_view"
+            android:id="@+id/ll_item_star_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"

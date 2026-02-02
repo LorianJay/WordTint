@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/learn_back_ground"
-    tools:openDrawer="">
+    tools:openDrawer="end">
     <!--主界面-->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_main_recite"
@@ -772,82 +772,42 @@
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-            <androidx.core.widget.NestedScrollView
-                android:id="@+id/nsv_recite_star"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toTopOf="@id/tv_recite_star_create"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <LinearLayout
+                <WebView
+                    android:id="@+id/wv_star_recite_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none" />
+
+                <View
+                    android:id="@+id/v_star_recite"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:layout_below="@+id/wv_star_recite_result"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="7dp"
+                    android:background="@drawable/background_radius_line"
+                    android:backgroundTint="@android:color/holo_orange_light" />
+
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:minHeight="600dp"
-                    android:orientation="vertical">
-
-                    <HorizontalScrollView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="7dp"
-                        android:layout_marginEnd="7dp"
-                        android:scrollbars="none">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/rc_recite_star_result"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-
-                            <TextView
-                                android:id="@+id/tv_recite_star_phrase_hint"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="@string/phrase"
-                                android:textColor="@color/black"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:id="@+id/tv_recite_star_phrase_value"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_rounded_ripple_solid"
-                                android:backgroundTint="@color/theme_color"
-                                android:paddingStart="5dp"
-                                android:paddingEnd="5dp"
-                                android:text="@string/default_txt"
-                                android:textColor="@color/black"
-                                android:textSize="20sp" />
-
-                        </LinearLayout>
-                    </HorizontalScrollView>
-
-                    <View
+                    android:layout_below="@+id/v_star_recite"
+                    android:layout_marginTop="5dp">
+                    <!--这里实际上是三层嵌套,逻辑比较复杂-->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rc_recite_star_list"
                         android:layout_width="match_parent"
-                        android:layout_height="3dp"
-                        android:layout_marginStart="7dp"
-                        android:layout_marginTop="3dp"
-                        android:layout_marginEnd="7dp"
-                        android:background="@drawable/background_radius_line"
-                        android:backgroundTint="@android:color/holo_orange_light" />
+                        android:layout_height="wrap_content" />
+                </RelativeLayout>
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp">
-                        <!--这里实际上是三层嵌套,逻辑比较复杂-->
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rc_recite_star_list"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </RelativeLayout>
-                </LinearLayout>
-            </androidx.core.widget.NestedScrollView>
+            </RelativeLayout>
 
 
             <TextView

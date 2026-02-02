@@ -45,11 +45,10 @@ import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
+import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
@@ -61,7 +60,6 @@ import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.StarCategoryAdapter;
-import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
@@ -85,9 +83,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private boolean moreFunctionOpen = true, markAreaFold, changingChameleon;
     private WordFunctionHandler wordFunctionHandler;
     private DrawerLayout starDrawer;
-    private RecyclerView starChineseResult, starList, reciteMarkArea;
-    private ResultWebViewHandler resultWebViewHandler;
-    private StarResultAdapter starResultAdapter;
+    private RecyclerView starList, reciteMarkArea;
+    private ResultWebViewHandler resultWebViewHandler, starResultWebViewHandler;
     private StarCategoryAdapter starCategoryAdapter;
     private ReciteMarkToastAdapter reciteMarkToastAdapter;
     // 单词音频播放器
@@ -100,7 +97,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private HorizontalScrollView functionAreaHorizontalScrollView;
     private TextView originWord, controlNextWord, controlPreviousWord;
     private TextView currentIndex, wordCount, lightHint;
-    private TextView starCurrentWord, starPhraseHint, starPhraseValue, starCreateCategory;
+    private TextView starCurrentWord, starCreateCategory;
     private AlertDialog loadingDialog = null;
     private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionLock, functionBlueTooth;
     private LinearLayout viewFlagArea, functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
@@ -182,10 +179,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 .show();
         // 显示中文的处理器
         this.resultWebViewHandler = new ResultWebViewHandler(this, findViewById(R.id.wv_recite_result));
+        this.starResultWebViewHandler = new ResultWebViewHandler(this, findViewById(R.id.wv_star_recite_result));
         // 锁定startDrawable的关闭
         starDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         // 必须在这里设置LayoutManager
-        this.starChineseResult.setLayoutManager(new LinearLayoutManager(this));
         this.starList.setLayoutManager(new LinearLayoutManager(this));
         this.reciteMarkArea.setLayoutManager(new LinearLayoutManager(this));
         // 读取状态
@@ -224,17 +221,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             this.wordAnalysisHandler = new WordAnalysisHandlerImpl(this);
             this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(this);
             // 设置recycleView的各个adapter
-            this.starResultAdapter = new StarResultAdapter(this, 2L);
-            this.starCategoryAdapter = new StarCategoryAdapter(this);
+            this.starCategoryAdapter = new StarCategoryAdapter(this, wordFunctionHandler);
             this.reciteMarkToastAdapter = new ReciteMarkToastAdapter(this, wordFunctionHandler);
             this.reciteMarkArea.setItemAnimator(null);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
             starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
-            starCategoryAdapter.setStartFunctionHandler(wordFunctionHandler);
             // 更新UI
             updateUIHandler.post(() -> {
-                this.starChineseResult.setAdapter(starResultAdapter);
                 this.starList.setAdapter(starCategoryAdapter);
                 this.reciteMarkArea.setAdapter(reciteMarkToastAdapter);
                 touchHelper.attachToRecyclerView(starList);
@@ -658,35 +652,38 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         if (clickViewId == R.id.tv_recite_star_create) {
             // 添加一个新的收藏夹
-            View addNewCategory = getLayoutInflater().inflate(R.layout.fragment_word_credit_start_edit_new_dialog, null);
-            EditText categoryTile = addNewCategory.findViewById(R.id.fragment_word_credit_start_new_title);
-            EditText categoryDescribe = addNewCategory.findViewById(R.id.fragment_word_credit_start_new_describe);
+            View addNewCategory = getLayoutInflater().inflate(R.layout.dialog_recite_new_star, null);
+            EditText categoryTile = addNewCategory.findViewById(R.id.et_new_star_title);
+            EditText categoryDescribe = addNewCategory.findViewById(R.id.et_new_star_describe);
             new AlertDialog.Builder(this)
                     .setView(addNewCategory)
                     .setCancelable(true)
-                    .setPositiveButton("确定", (dialog, which) -> {
-                        WordCategoryDTO wordCategoryDTO = new WordCategoryDetailVO();
-                        wordCategoryDTO.setTitle(categoryTile.getText().toString());
-                        wordCategoryDTO.setTitle(categoryDescribe.getText().toString());
-                        updateUIHandler.post(() -> starCategoryAdapter.addItem(wordCategoryDTO));
+                    .setPositiveButton(getString(R.string.confirm), (dialog, which) -> {
+                        WordStarEntity wordStarEntity = new WordStarEntity();
+                        wordStarEntity.title = categoryTile.getText().toString();
+                        wordStarEntity.describeInfo = categoryDescribe.getText().toString();
+                        StaticFactory.getExecutorService().execute(() -> {
+                            wordFunctionHandler.createNewStar(wordStarEntity);
+                            updateUIHandler.post(() -> starCategoryAdapter.notifyItemInserted(wordFunctionHandler.getAllStarList().size() - 1));
+                        });
                     })
-                    .setNegativeButton("取消", (dialog, which) -> {
+                    .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     })
                     .show();
         }
         if (clickViewId == R.id.im_recite_star_refresh) {
             // 刷新收藏夹信息 todo 应该要返回的时候自动刷新
-            StaticFactory.getExecutorService().submit(() -> {
-                this.starCategoryAdapter = new StarCategoryAdapter(this);
-                ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
-                starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
-                starCategoryAdapter.setStartFunctionHandler(wordFunctionHandler);
-                //wordFunctionHandler.replaceAddCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
-                updateUIHandler.post(() -> {
-                    starList.setAdapter(starCategoryAdapter);
-                    touchHelper.attachToRecyclerView(starList);
-                });
-            });
+            //StaticFactory.getExecutorService().submit(() -> {
+            //    this.starCategoryAdapter = new StarCategoryAdapter(this);
+            //    ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
+            //    starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
+            //    starCategoryAdapter.setStartFunctionHandler(wordFunctionHandler);
+            //    //wordFunctionHandler.replaceAddCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
+            //    updateUIHandler.post(() -> {
+            //        starList.setAdapter(starCategoryAdapter);
+            //        touchHelper.attachToRecyclerView(starList);
+            //    });
+            //});
         }
         // 模式改变
         if (clickViewId == R.id.ll_recite_function_mode) {
@@ -990,24 +987,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 .ifPresent(wordDTOS -> originWord.setText(wordDTOS));
         resultWebViewHandler.displayWordResult(functionWordVO);
         // 设置收藏夹信息
-        //starResultAdapter.addItem(functionWordVO);
+        starResultWebViewHandler.displayWordResult(functionWordVO);
         // 设置右侧展开列表单词的原文
         Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> starCurrentWord
                         .setText(wordDTOS));
-        // 设置短语
-        String phraseTranslation = Optional.ofNullable(functionWordVO.getValue().get(WordStructure.PHRASE))
-                .orElse("");
-        String phraseTxt = functionWordVO.getValue().get(WordStructure.PHRASE);
-        if (phraseTxt != null) {
-            starPhraseValue.setText(getString(R.string.phrase_with_translation, phraseTxt, phraseTranslation));
-            starPhraseHint.setVisibility(View.VISIBLE);
-            starPhraseValue.setVisibility(View.VISIBLE);
-        } else {
-            starPhraseHint.setVisibility(View.GONE);
-            starPhraseValue.setVisibility(View.GONE);
-        }
-
     }
 
     /**
@@ -1088,9 +1072,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.starDrawer = findViewById(R.id.dr_main_recite_star);
         this.starCurrentWord = findViewById(R.id.tv_recite_star_current_word);
         this.starRefresh = findViewById(R.id.im_recite_star_refresh);
-        this.starChineseResult = findViewById(R.id.rc_recite_star_result);
-        this.starPhraseHint = findViewById(R.id.tv_recite_star_phrase_hint);
-        this.starPhraseValue = findViewById(R.id.tv_recite_star_phrase_value);
         this.starList = findViewById(R.id.rc_recite_star_list);
         this.starCreateCategory = findViewById(R.id.tv_recite_star_create);
         // 其它

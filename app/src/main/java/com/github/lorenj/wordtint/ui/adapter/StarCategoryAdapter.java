@@ -2,6 +2,8 @@ package com.github.lorenj.wordtint.ui.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,14 +17,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
+import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryDetailVO;
-import com.github.lorenj.wordtint.handler.CategoryFunctionHandler;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
+import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.ui.adapter.listener.MoveAndSwipedListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
 
@@ -35,74 +37,59 @@ import java.util.function.Consumer;
  * @author cnsukidayo
  * @date 2023/1/7 17:35
  */
-public class StarCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapter.SingleSingleViewHolder>
         implements MoveAndSwipedListener, RecyclerViewAdapterItemChange<WordCategoryDTO> {
 
     private final Context context;
-    // 用于回调startDrag方法的接口,该接口耦合了,定义方式不好.
     private Consumer<RecyclerView.ViewHolder> startDragListener;
-    // 用于处理单词收藏功能的Handler
-    private CategoryFunctionHandler startFunctionHandler;
+    private final StarFunctionHandler startFunctionHandler;
+    private final android.os.Handler updateUIHandler = new Handler(Looper.getMainLooper());
 
-    public StarCategoryAdapter(Context context) {
+    public StarCategoryAdapter(Context context, StarFunctionHandler starFunctionHandler) {
         this.context = context;
+        this.startFunctionHandler = starFunctionHandler;
     }
 
     @NonNull
     @Override
     public SingleSingleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new SingleSingleViewHolder(LayoutInflater.from(context).inflate(R.layout.fragment_word_credit_start_single_category, parent, false));
+        return new SingleSingleViewHolder(LayoutInflater.from(context).inflate(R.layout.item_star_parent, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull SingleSingleViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = startFunctionHandler.getAllStarList().get(position);
         // 重置改变,防止由于复用而导致的显示问题
-        if (holder instanceof SingleSingleViewHolder) {
-            SingleSingleViewHolder singleSingleViewHolder = (SingleSingleViewHolder) holder;
-            singleSingleViewHolder.scroller.scrollTo(0, 0);
-            singleSingleViewHolder.underNowStartAllWord.setVisibility(View.GONE);
-            //singleSingleViewHolder.title.setText(startFunctionHandler.calculationTitle(position));
-            //singleSingleViewHolder.describe.setText(startFunctionHandler.calculationDescribe(position));
-        }
+        holder.scroller.scrollTo(0, 0);
+        holder.title.setText(startFunctionHandler.calculationTitle(wordStarWithWordIdEntity.wordStarEntity));
+        holder.describe.setText(startFunctionHandler.calculationDescribe(wordStarWithWordIdEntity.wordStarEntity));
     }
 
     @Override
     public int getItemCount() {
-        return startFunctionHandler.starListSize();
+        return startFunctionHandler.getAllStarList().size();
     }
 
     public void onItemMove(int fromPosition, int toPosition) {
-        //startFunctionHandler.moveStar(fromPosition, toPosition);
+        WordStarWithWordIdEntity fromStar = startFunctionHandler.getAllStarList().get(fromPosition);
+        WordStarWithWordIdEntity toStar = startFunctionHandler.getAllStarList().get(toPosition);
         notifyItemMoved(fromPosition, toPosition);
+        startFunctionHandler.moveStar(fromStar, toStar);
     }
 
     @Override
     public void onItemDismiss(int position) {
-        //startFunctionHandler.removeStar(position);
-        notifyItemRemoved(position);
+
     }
 
-    public void setStartFunctionHandler(CategoryFunctionHandler startFunctionHandler) {
-        this.startFunctionHandler = startFunctionHandler;
-    }
-
+    /**
+     * 设置拖拽的回调方法
+     */
     public void setStartDragListener(Consumer<RecyclerView.ViewHolder> startDragListener) {
         this.startDragListener = startDragListener;
     }
 
-
-    @Override
-    public void addItem(WordCategoryDTO wordCategoryDTO) {
-        //startFunctionHandler.createNewStar(wordCategoryDTO);
-        notifyItemInserted(startFunctionHandler.starListSize() - 1);
-    }
-
-    @Override
-    public void removeItem(WordCategoryDTO wordCategoryDTO) {
-
-    }
-
-    protected class SingleSingleViewHolder extends RecyclerView.ViewHolder
+    public class SingleSingleViewHolder extends RecyclerView.ViewHolder
             implements StateChangedListener, View.OnTouchListener, View.OnClickListener, StartSingleCategoryWordAdapter.FunctionContentCallBack {
         public View itemView, scroller;
         public TextView title, describe, edit, delete, addWord;
@@ -122,24 +109,24 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public SingleSingleViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
-            this.title = itemView.findViewById(R.id.fragment_word_credit_start_single_category_title);
-            this.describe = itemView.findViewById(R.id.fragment_word_credit_start_single_category_detail);
-            this.scroller = itemView.findViewById(R.id.fragment_word_credit_start_single_category_scroller);
-            this.openList = itemView.findViewById(R.id.fragment_word_credit_start_open_list);
-            this.listState = itemView.findViewById(R.id.fragment_word_credit_start_list_state);
-            this.edit = itemView.findViewById(R.id.fragment_word_credit_start_edit);
-            this.delete = itemView.findViewById(R.id.fragment_word_credit_start_delete);
-            this.move = itemView.findViewById(R.id.fragment_word_credit_start_move);
-            this.addWord = itemView.findViewById(R.id.fragment_word_credit_start_add_word);
-            this.underNowStartAllWord = itemView.findViewById(R.id.fragment_word_credit_start_single_category_word_recycler_view);
+            this.title = itemView.findViewById(R.id.tv_item_star_title);
+            this.describe = itemView.findViewById(R.id.tv_item_star_describe);
+            this.scroller = itemView.findViewById(R.id.sll_item_star_parent);
+            this.openList = itemView.findViewById(R.id.ll_item_star);
+            this.listState = itemView.findViewById(R.id.iv_item_star_fold);
+            this.edit = itemView.findViewById(R.id.ll_item_star_swipe_edit);
+            this.delete = itemView.findViewById(R.id.ll_item_star_swipe_delete);
+            this.move = itemView.findViewById(R.id.ll_item_star_swipe_move);
+            this.addWord = itemView.findViewById(R.id.ll_item_star_swipe_add);
+            this.underNowStartAllWord = itemView.findViewById(R.id.ll_item_star_section);
             // 加载当前分类下的所有单词
-            this.underNowStartAllWord.setLayoutManager(new LinearLayoutManager(context));
-            this.startSingleCategoryWordAdapter = new StartSingleCategoryWordAdapter(context);
-            this.underNowStartAllWord.setAdapter(startSingleCategoryWordAdapter);
-            this.touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(startSingleCategoryWordAdapter));
-            this.touchHelper.attachToRecyclerView(underNowStartAllWord);
-            startSingleCategoryWordAdapter.setCategoryWordFunctionHandler(startFunctionHandler);
-            startSingleCategoryWordAdapter.setFunctionListener(this);
+            //this.underNowStartAllWord.setLayoutManager(new LinearLayoutManager(context));
+            //this.startSingleCategoryWordAdapter = new StartSingleCategoryWordAdapter(context);
+            //this.underNowStartAllWord.setAdapter(startSingleCategoryWordAdapter);
+            //this.touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(startSingleCategoryWordAdapter));
+            //this.touchHelper.attachToRecyclerView(underNowStartAllWord);
+            //startSingleCategoryWordAdapter.setCategoryWordFunctionHandler(startFunctionHandler);
+            //startSingleCategoryWordAdapter.setFunctionListener(this);
 
             this.move.setOnTouchListener(this);
             this.delete.setOnClickListener(this);
@@ -156,14 +143,15 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         @Override
         public void onItemClear() {
             itemView.setAlpha(1.0f);
-            startFunctionHandler.batchUpdateCurrentStar();
+            StaticFactory.getExecutorService().execute(startFunctionHandler::batchUpdateCurrentStar);
         }
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             int clickViewId = v.getId();
-            if (clickViewId == R.id.fragment_word_credit_start_move &&
-                    event.getAction() == MotionEvent.ACTION_DOWN && startDragListener != null) {
+            if (clickViewId == R.id.ll_item_star_swipe_move
+                    && event.getAction() == MotionEvent.ACTION_DOWN
+                    && startDragListener != null) {
                 startDragListener.accept(this);
             }
             return false;
@@ -172,30 +160,33 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         @Override
         public void onClick(View v) {
             int clickViewId = v.getId();
-            if (clickViewId == R.id.fragment_word_credit_start_delete) {
+            WordStarWithWordIdEntity wordStarWithWordIdEntity = startFunctionHandler.getAllStarList().get(getAdapterPosition());
+            if (clickViewId == R.id.ll_item_star_swipe_delete) {
                 // 删除当前Item
-                //startFunctionHandler.removeStar(getAdapterPosition());
-                notifyItemRemoved(getAdapterPosition());
-            } else if (clickViewId == R.id.fragment_word_credit_start_edit) {
+                StaticFactory.getExecutorService().execute(() -> {
+                    startFunctionHandler.removeStar(wordStarWithWordIdEntity);
+                    updateUIHandler.post(() -> notifyItemRemoved(getAdapterPosition()));
+                });
+            } else if (clickViewId == R.id.ll_item_star_swipe_edit) {
                 // 编辑收藏夹信息
-                View editStart = LayoutInflater.from(context).inflate(R.layout.fragment_word_credit_start_edit_new_dialog, null);
-                EditText categoryTile = editStart.findViewById(R.id.fragment_word_credit_start_new_title);
-                EditText categoryDescribe = editStart.findViewById(R.id.fragment_word_credit_start_new_describe);
+                View editStart = LayoutInflater.from(context).inflate(R.layout.dialog_recite_new_star, null);
+                EditText starTitle = editStart.findViewById(R.id.et_new_star_title);
+                EditText starDescribe = editStart.findViewById(R.id.et_new_star_describe);
                 new AlertDialog.Builder(context)
                         .setView(editStart)
                         .setCancelable(true)
-                        .setPositiveButton("确定", (dialog, which) -> {
-                            WordCategoryDetailVO wordCategoryDetailVO = new WordCategoryDetailVO();
-                            wordCategoryDetailVO.setTitle(categoryTile.getText().toString());
-                            wordCategoryDetailVO.setDescribeInfo(categoryDescribe.getText().toString());
-                            //startFunctionHandler.updateWordStar(getAdapterPosition(), wordCategoryDetailVO);
-                            //title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
-                            //describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
+                        .setPositiveButton(context.getString(R.string.confirm), (dialog, which) -> {
+                            wordStarWithWordIdEntity.wordStarEntity.title = starTitle.getText().toString();
+                            wordStarWithWordIdEntity.wordStarEntity.describeInfo = starDescribe.getText().toString();
+                            StaticFactory.getExecutorService().execute(() -> {
+                                startFunctionHandler.updateStar(wordStarWithWordIdEntity);
+                                updateUIHandler.post(() -> notifyItemChanged(getAdapterPosition()));
+                            });
                         })
-                        .setNegativeButton("取消", (dialog, which) -> {
+                        .setNegativeButton(context.getString(R.string.cancel), (dialog, which) -> {
                         })
                         .show();
-            } else if (clickViewId == R.id.fragment_word_credit_start_open_list) {
+            } else if (clickViewId == R.id.ll_item_star) {
                 if (isOpen) {
                     underNowStartAllWord.setVisibility(View.GONE);
                     listState.setRotation(90);
@@ -206,7 +197,7 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     listState.setRotation(180);
                 }
                 isOpen = !isOpen;
-            } else if (clickViewId == R.id.fragment_word_credit_start_add_word) {
+            } else if (clickViewId == R.id.ll_item_star_swipe_add) {
                 /*
                 Optional.ofNullable(startFunctionHandler.getCurrentViewWord())
                         .ifPresentOrElse(wordCategoryWordDTO -> {
