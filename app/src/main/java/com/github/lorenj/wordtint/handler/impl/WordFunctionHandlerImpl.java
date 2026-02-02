@@ -8,7 +8,6 @@ import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
-import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
@@ -221,21 +220,6 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
     }
 
     @Override
-    public void setCurrentReciteMode(ReciteMode reciteMode) {
-        this.userRecitePreference.setReciteMode(reciteMode);
-    }
-
-    @Override
-    public void setHidePreposition(boolean hide) {
-        this.userRecitePreference.setHidePreposition(hide);
-    }
-
-    @Override
-    public boolean isHidePreposition() {
-        return this.userRecitePreference.isHidePreposition();
-    }
-
-    @Override
     public void saveProgress() {
         // todo 保存背诵进度
     }
@@ -324,6 +308,7 @@ public class WordFunctionHandlerImpl extends AbstractCategoryFunctionHandler
         }
         // 6.设置当前的背诵模式
         wordFunctionHandlerState.setCurrentReciteMode(userRecitePreference.getReciteMode());
+        wordFunctionHandlerState.setHidePreposition(userRecitePreference.isHidePreposition());
         wordFunctionHandlerState.setWordFunctionState(WordFunctionState.NONE);
         // 5.快速定位(单词反查的初始化)
         quickPosition = new HashMap<>(allWordIdList.size());

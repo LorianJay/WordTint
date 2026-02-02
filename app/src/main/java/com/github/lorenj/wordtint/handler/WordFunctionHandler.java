@@ -1,7 +1,6 @@
 package com.github.lorenj.wordtint.handler;
 
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
-import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
@@ -88,25 +87,6 @@ public interface WordFunctionHandler extends CategoryFunctionHandler {
      * @return 返回功能区状态实例
      */
     WordFunctionHandlerState getWordFunctionHandlerState();
-
-    /**
-     * 设置当前的背诵模式
-     *
-     * @param reciteMode
-     */
-    void setCurrentReciteMode(ReciteMode reciteMode);
-
-    /**
-     * 隐藏介词
-     */
-    void setHidePreposition(boolean hide);
-
-    /**
-     * 是否隐藏介词
-     *
-     * @return 是否隐藏介词
-     */
-    boolean isHidePreposition();
 
     /**
      * 保存背诵进度

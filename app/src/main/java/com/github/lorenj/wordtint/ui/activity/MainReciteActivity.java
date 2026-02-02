@@ -16,13 +16,16 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -103,7 +106,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private LinearLayout viewFlagArea, functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
     private LinearLayout lightArea;
     private RelativeLayout functionMarkArea;
-    private CardView functionChangeModePopLayout, lightResult;
+    private CardView lightResult;
+    private TableLayout functionChangeModePopLayout;
     private ImageView functionMarkImageView, functionChameleonImageView, functionSwitchImageView, functionLockImageView;
     private ImageView functionBlueToothImageView, functionShuffleImageView, functionSectionImageView, functionQuickPositionImageView, starRefresh;
     private TextView windowListingWrite, windowEnglishChineseAudio, windowEnglishChinese;
@@ -399,7 +403,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             }
         }
         if (clickViewId == R.id.cv_main_recite_light) {
-            visibleWordAllMessage(wordFunctionHandler.getCurrentFocusWord());
+            // 是否要隐藏介词的处理
+            FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
+            String value = currentFocusWord.getValue().get(WordStructure.PHRASE);
+            if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition())
+                currentFocusWord.getValue().remove(WordStructure.PHRASE);
+            visibleWordAllMessage(currentFocusWord);
+            if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition())
+                currentFocusWord.getValue().put(WordStructure.PHRASE, value);
         }
         // 功能区域
         if (clickViewId == R.id.ll_recite_function_mark) {
@@ -458,10 +469,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             inputEditText.setInputType(InputType.TYPE_CLASS_DATETIME);
             new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.goto_word))
-                    .setMessage("输入要跳转到第几个单词,你应当输入1到" + wordFunctionHandler.getChameleonSize() + "之间的值.")
+                    .setMessage(getString(R.string.goto_word_message, wordFunctionHandler.getChameleonSize()))
                     .setView(inputEditText)
                     .setCancelable(false)
-                    .setPositiveButton("确定", (dialog, which) -> {
+                    .setPositiveButton(getString(R.string.confirm), (dialog, which) -> {
                         String value = inputEditText.getText().toString();
                         int i = 0;
                         if (MathUtils.isInt(value)) {
@@ -470,15 +481,18 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                         if (i <= 0
                                 || i > wordFunctionHandler.getChameleonSize()
                                 || !MathUtils.isInt(value)) {
-                            Toast exceptionToast = Toast.makeText(this, "输入错误,请输入1~" + wordFunctionHandler.getChameleonSize() + "之间的值", Toast.LENGTH_SHORT);
-                            exceptionToast.setGravity(Gravity.CENTER, 0, 500);
-                            exceptionToast.show();
+                            if (globalToast != null) globalToast.cancel();
+                            globalToast = Toast.makeText(this,
+                                    getString(R.string.section_error, wordFunctionHandler.getChameleonSize()),
+                                    Toast.LENGTH_SHORT);
+                            globalToast.setGravity(Gravity.CENTER, 0, 500);
+                            globalToast.show();
                         }
                         final int index = i;
                         // 异步跳转单词,可能查找时间较长
                         StaticFactory.getExecutorService().submit(() ->
                                 reciteWord(wordFunctionHandler.gotoWordWithIndex(index - 1)));
-                    }).setNegativeButton("取消", (dialog, which) -> {
+                    }).setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     }).show();
         }
 
@@ -486,9 +500,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 如果当前不是普通状态和按色打乱状态,代表当前在执行别的状态,需要先锁定按色打乱的功能
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     == WordFunctionState.RANGE) {
-                globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
-                        .getWordFunctionState()
-                        .getInfo(), Toast.LENGTH_LONG);
+                if (globalToast != null) globalToast.cancel();
+                globalToast = Toast.makeText(
+                        this,
+                        wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState().getInfo(),
+                        Toast.LENGTH_LONG);
                 globalToast.setGravity(Gravity.CENTER, 0, 500);
                 globalToast.show();
                 return;
@@ -498,26 +514,30 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 this.functionChameleonImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.functionSectionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                 this.functionQuickPositionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
-                this.functionShuffleImageView.getDrawable().setTint(getResources().getColor(wordFunctionHandler.getWordFunctionHandlerState()
-                        .getChameleon()
-                        .getValue()
-                        .getMapColorID(), null));
+                MarkColor markColor = Optional.ofNullable(wordFunctionHandler.getWordFunctionHandlerState()
+                                .getChameleon()
+                                .getValue())
+                        .orElse(MarkColor.GREEN);
+                this.functionShuffleImageView.getDrawable().setTint(getResources().getColor(markColor.getMapColorID(), null));
                 wordFunctionHandler.shuffle();
                 reciteWord(wordFunctionHandler.gotoWordWithIndex(0));
             } else {
                 this.functionChameleonImageView.setForeground(null);
                 this.functionSectionImageView.setForeground(null);
                 this.functionQuickPositionImageView.setForeground(null);
-                this.functionShuffleImageView.getDrawable().setTintList(null);
+                this.functionShuffleImageView.getDrawable().setTint(MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorOnSurface,
+                        Color.BLACK));
                 wordFunctionHandler.restoreWordList();
                 reciteWord(wordFunctionHandler.getCurrentFocusWord());
             }
         }
-
         // 区间随机
         if (clickViewId == R.id.ll_recite_function_section) {
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     == WordFunctionState.SHUFFLE) {
+                if (globalToast != null) globalToast.cancel();
                 globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
                         .getWordFunctionState()
                         .getInfo(), Toast.LENGTH_LONG);
@@ -531,11 +551,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 EditText minValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_min_value);
                 EditText maxValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_max_value);
                 new AlertDialog.Builder(this)
-                        .setTitle("区间随机:")
-                        .setMessage("选择要单独随机的区间:[1," + wordFunctionHandler.getChameleonSize() + "].注意这里是闭区间")
+                        .setTitle(getString(R.string.section_random))
+                        .setMessage(getString(R.string.section_random_message, wordFunctionHandler.getChameleonSize()))
                         .setView(rangeRandomWordInputView)
                         .setCancelable(false)
-                        .setPositiveButton("确定", (dialog, which) -> {
+                        .setPositiveButton(getString(R.string.confirm), (dialog, which) -> {
                             int minRange = 0, maxRange = 0;
                             if (MathUtils.isInt(minValue.getText().toString()) &&
                                     MathUtils.isInt(maxValue.getText().toString())) {
@@ -547,29 +567,33 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                                     || minRange < 0
                                     || maxRange > wordFunctionHandler.getChameleonSize()
                                     || minRange > maxRange) {
-                                Toast errorToast = Toast.makeText(this, "输入错误,请输入1~" + wordFunctionHandler.getChameleonSize() + "之间的值", Toast.LENGTH_LONG);
+                                Toast errorToast = Toast.makeText(this, getString(R.string.section_error, wordFunctionHandler.getChameleonSize()), Toast.LENGTH_LONG);
                                 errorToast.setGravity(Gravity.CENTER, 0, 500);
                                 errorToast.show();
+                                return;
                             }
                             // 确定执行区间随机时执行的内容
                             wordFunctionHandler.shuffleRange(minRange, maxRange);
                             reciteWord(wordFunctionHandler.gotoWordWithIndex(wordFunctionHandler.getCurrentFocusWordId()));
                             this.functionShuffleImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
                             this.functionQuickPositionImageView.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_prohibit_foreground, null));
-                            this.functionSectionImageView.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
+                            this.functionSectionImageView.getDrawable().setTint(ResourcesCompat.getColor(getResources(), R.color.theme_color, null));
                         })
-                        .setNegativeButton("取消", (dialog, which) -> {
+                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                         })
                         .show();
             } else {
                 this.functionShuffleImageView.setForeground(null);
                 this.functionQuickPositionImageView.setForeground(null);
-                this.functionSectionImageView.getDrawable().setTintList(null);
+                this.functionSectionImageView.getDrawable().setTint(MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorOnSurface,
+                        Color.BLACK));
                 this.wordFunctionHandler.restoreWordList();
                 reciteWord(wordFunctionHandler.getCurrentFocusWord());
             }
         }
-        // 保存进度
+        // todo 保存进度
         if (clickViewId == R.id.ll_recite_function_saving) {
             // 保存当前的进度
             StaticFactory.getExecutorService().submit(() -> {
@@ -584,9 +608,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 如果不是普通模式,则禁止使用快速定位功能
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     != WordFunctionState.NONE) {
-                globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
-                        .getWordFunctionState()
-                        .getInfo(), Toast.LENGTH_LONG);
+                if (globalToast != null) globalToast.cancel();
+                globalToast = Toast.makeText(
+                        this,
+                        wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState().getInfo(),
+                        Toast.LENGTH_LONG);
                 globalToast.setGravity(Gravity.CENTER, 0, 500);
                 globalToast.show();
                 return;
@@ -594,17 +620,20 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             final EditText inputEditText = new EditText(this);
             inputEditText.setKeyListener(DigitsKeyListener.getInstance("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "));
             inputEditText.setInputType(InputType.TYPE_CLASS_TEXT);
-            new AlertDialog.Builder(this).setTitle("定位单词")
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.word_position))
+                    .setMessage(getString(R.string.quick_position_message))
                     .setView(inputEditText)
                     .setCancelable(false)
                     .setPositiveButton(getResources().getText(R.string.confirm), (dialog, which) -> {
-                        String origin = inputEditText.getText().toString().trim();
+                        String origin = inputEditText.getText().toString().trim().toLowerCase();
                         int index = wordFunctionHandler.getIndexByWordOrigin(origin);
                         // 单词未找到,则不跳转
                         if (index == -1) {
-                            Toast exceptionToast = Toast.makeText(this, "单词未找到", Toast.LENGTH_SHORT);
-                            exceptionToast.setGravity(Gravity.CENTER, 0, 500);
-                            exceptionToast.show();
+                            if (globalToast != null) globalToast.cancel();
+                            globalToast = Toast.makeText(this, getString(R.string.word_position_error), Toast.LENGTH_SHORT);
+                            globalToast.setGravity(Gravity.CENTER, 0, 500);
+                            globalToast.show();
                             return;
                         }
                         // 异步跳转单词,可能查找时间较长
@@ -661,39 +690,39 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         // 模式改变
         if (clickViewId == R.id.ll_recite_function_mode) {
-            /*
-            PopupWindow changeModePopupWindow = new PopupWindow(popWindowChangeModeLayout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            PopupWindow changeModePopupWindow = new PopupWindow(functionChangeModePopLayout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             changeModePopupWindow.setOutsideTouchable(true);
             changeModePopupWindow.setFocusable(true);
             changeModePopupWindow.setAnimationStyle(R.style.pop_window_anim_style);
-            changeModePopupWindow.setOnDismissListener(() -> ((ViewGroup) getParent()).removeView(popWindowChangeModeLayout));
+            //changeModePopupWindow.setOnDismissListener(() -> ((ViewGroup) getParent()).removeView(popWindowChangeModeLayout));
             // PopWindow展示在某个组件的上方,这里的changeMode代表要展示在那个组件上方,popWindowChangeModeLayout代表要展示哪个组件.
-            popWindowChangeModeLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             int[] location = new int[2];
-            changeMode.getLocationInSurface(location);
-            changeModePopupWindow.showAtLocation(changeMode, Gravity.NO_GRAVITY,
-                    (location[0] + changeMode.getWidth() / 2) - popWindowChangeModeLayout.getMeasuredWidth() / 2,
-                    location[1] - popWindowChangeModeLayout.getMeasuredHeight());
-
-             */
+            functionMode.getLocationOnScreen(location);
+            functionChangeModePopLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            int popupHeight = functionChangeModePopLayout.getMeasuredHeight();
+            changeModePopupWindow.showAtLocation(
+                    functionMode,
+                    Gravity.NO_GRAVITY,
+                    location[0],
+                    location[1] - popupHeight);
         }
         if (clickViewId == R.id.window_mode_listening_write) {
-            wordFunctionHandler.setCurrentReciteMode(ReciteMode.LISTENING);
+            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.LISTENING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_english_chinese_audio) {
-            wordFunctionHandler.setCurrentReciteMode(ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING);
+            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_english_chinese) {
-            wordFunctionHandler.setCurrentReciteMode(ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING);
+            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_chinese_english) {
-            wordFunctionHandler.setCurrentReciteMode(ReciteMode.CHINESE_TRANSLATION_ENGLISH);
+            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CHINESE_TRANSLATION_ENGLISH);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_only_recite) {
-            wordFunctionHandler.setCurrentReciteMode(ReciteMode.CREDIT);
+            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CREDIT);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_hide_phrase) {
-            wordFunctionHandler.setHidePreposition(!wordFunctionHandler.isHidePreposition());
+            wordFunctionHandler.getWordFunctionHandlerState().setHidePreposition(!wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition());
             updateChangeModePopWindowState();
         }
     }
@@ -812,7 +841,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
         }
-        if (wordFunctionHandler.isHidePreposition()) {
+        if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition()) {
             this.windowHidePhrase.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
@@ -870,7 +899,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 resultWebViewHandler.gone();
             } else if (currentReciteMode == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
                 // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
-                wordFunctionHandler.setCurrentReciteMode(ReciteMode.CREDIT);
+                wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CREDIT);
                 currentWord.getValue().remove(WordStructure.PHRASE);
                 visibleWordAllMessage(currentWord);
                 currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
@@ -1038,7 +1067,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionSaveProgress = findViewById(R.id.ll_recite_function_saving);
 
         this.functionMode = findViewById(R.id.ll_recite_function_mode);
-        this.functionChangeModePopLayout = (CardView) getLayoutInflater().inflate(R.layout.window_main_recite_mode, null);
+        this.functionChangeModePopLayout = (TableLayout) getLayoutInflater().inflate(R.layout.window_main_recite_mode, null);
         this.windowListingWrite = functionChangeModePopLayout.findViewById(R.id.window_mode_listening_write);
         this.windowEnglishChineseAudio = functionChangeModePopLayout.findViewById(R.id.window_mode_english_chinese_audio);
         this.windowEnglishChinese = functionChangeModePopLayout.findViewById(R.id.window_mode_english_chinese);

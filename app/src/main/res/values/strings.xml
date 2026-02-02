@@ -253,6 +253,13 @@
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
     <string name="goto_word">跳转单词</string>
+    <string name="goto_word_message">输入要跳转到第几个单词,你应当输入区间:[1,%1$d]之间的值.</string>
+    <string name="section_error">输入错误,请输入区间:[1,%1$d]之间的值</string>
+    <string name="section_random">区间随机</string>
+    <string name="section_random_message">选择要单独随机的区间:[1,%1$d]-注意这里是闭区间</string>
+    <string name="word_position">快速定位</string>
+    <string name="word_position_error">单词未找到</string>
+    <string name="quick_position_message">根据单词英文快速跳转到单词所在位置(忽略大小写)</string>
 
 
 </resources>

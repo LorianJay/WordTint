@@ -19,6 +19,10 @@ public class WordFunctionHandlerState {
     private ReciteMode currentReciteMode;
 
     /**
+     * 是否隐藏介词
+     */
+    private boolean hidePreposition = false;
+    /**
      * 当前单词功能的状态
      */
     private WordFunctionState wordFunctionState;
@@ -163,4 +167,11 @@ public class WordFunctionHandlerState {
         this.currentFocusSwitchPosition = currentFocusSwitchPosition;
     }
 
+    public boolean isHidePreposition() {
+        return hidePreposition;
+    }
+
+    public void setHidePreposition(boolean hidePreposition) {
+        this.hidePreposition = hidePreposition;
+    }
 }
