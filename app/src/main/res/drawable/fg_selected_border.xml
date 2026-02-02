@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/gray">
-    <item android:top="3dp" android:start="10dp" android:end="5dp" android:bottom="3dp">
+    <item android:top="5dp" android:start="5dp" android:end="5dp" android:bottom="5dp">
         <shape>
             <padding
                 android:bottom="5dp"

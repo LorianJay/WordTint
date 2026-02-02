@@ -28,6 +28,9 @@ public class WordFunctionHandlerState {
      */
     private boolean functionAreaFold = false;
 
+    /**
+     * 当前是否正在选择标记颜色
+     */
     private boolean selectChameleon = false;
 
     /**
@@ -35,6 +38,28 @@ public class WordFunctionHandlerState {
      */
     private final MutableLiveData<MarkColor> currentChameleon =
             new MutableLiveData<>(MarkColor.GREEN);
+
+    /**
+     * 当前是否锁定了light的位置
+     */
+    private boolean lockLight = true;
+
+    /**
+     * 是否开启滑动切换
+     */
+    private boolean enableSwitch = false;
+    /**
+     * 当前是否正在滑动切换
+     */
+    private boolean switching = false;
+    /**
+     * 第一次滑动切换时的默认位置
+     */
+    private int previousFocusSwitchPosition = 4;
+    /**
+     * 当前正聚焦的选择位置
+     */
+    private int currentFocusSwitchPosition = previousFocusSwitchPosition;
 
     /**
      * 得到当前的背诵模式
@@ -94,5 +119,48 @@ public class WordFunctionHandlerState {
         this.currentChameleon.setValue(chameleonColor);
     }
 
+    public MutableLiveData<MarkColor> getCurrentChameleon() {
+        return currentChameleon;
+    }
+
+    public boolean isLockLight() {
+        return lockLight;
+    }
+
+    public void setLockLight(boolean lockLight) {
+        this.lockLight = lockLight;
+    }
+
+    public boolean isEnableSwitch() {
+        return enableSwitch;
+    }
+
+    public void setEnableSwitch(boolean enableSwitch) {
+        this.enableSwitch = enableSwitch;
+    }
+
+    public boolean isSwitching() {
+        return switching;
+    }
+
+    public void setSwitching(boolean switching) {
+        this.switching = switching;
+    }
+
+    public int getPreviousFocusSwitchPosition() {
+        return previousFocusSwitchPosition;
+    }
+
+    public void setPreviousFocusSwitchPosition(int previousFocusSwitchPosition) {
+        this.previousFocusSwitchPosition = previousFocusSwitchPosition;
+    }
+
+    public int getCurrentFocusSwitchPosition() {
+        return currentFocusSwitchPosition;
+    }
+
+    public void setCurrentFocusSwitchPosition(int currentFocusSwitchPosition) {
+        this.currentFocusSwitchPosition = currentFocusSwitchPosition;
+    }
 
 }

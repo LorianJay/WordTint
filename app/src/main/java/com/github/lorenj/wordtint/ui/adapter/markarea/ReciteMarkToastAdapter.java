@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
@@ -63,10 +64,22 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToast
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads);
         // 一定是展开状态才可以点击
         for (Object payload : payloads) {
+            MarkColor markColor = MarkColor.values()[position];
             if (payload == Item.CLICK_MARK) {
-                MarkColor markColor = MarkColor.values()[position];
                 holder.viewMark.setVisibility(wordFunctionHandler.getCurrentFocusWord().getMarkColorList().contains(markColor) ?
                         View.VISIBLE : View.INVISIBLE);
+            }
+            if (payload == Item.SWITCH_SELECT) {
+                if (position == wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusSwitchPosition()) {
+                    holder.toastMark.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.fg_selected_border, null));
+                    holder.toastMark.setScaleX(0.9f);
+                    holder.toastMark.setScaleY(0.9f);
+                }
+            }
+            if (payload == Item.SWITCH_DESELECT) {
+                holder.toastMark.setForeground(null);
+                holder.toastMark.setScaleX(1f);
+                holder.toastMark.setScaleY(1f);
             }
         }
     }
@@ -92,7 +105,8 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToast
         @Override
         public void onClick(View v) {
             int itemId = v.getId();
-            if (itemId != R.id.iv_toast_mark) {
+            if (itemId != R.id.iv_toast_mark ||
+                    wordFunctionHandler.getWordFunctionHandlerState().isSwitching()) {
                 return;
             }
             MarkColor markColor = MarkColor.values()[getAdapterPosition()];
@@ -117,7 +131,18 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToast
     }
 
     public enum Item {
-        CLICK_MARK
+        /**
+         * 点击标签
+         */
+        CLICK_MARK,
+        /**
+         * 滑动切换选中
+         */
+        SWITCH_SELECT,
+        /**
+         * 滑动切换未选中
+         */
+        SWITCH_DESELECT;
     }
 
 

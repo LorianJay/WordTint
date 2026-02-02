@@ -69,9 +69,7 @@ import com.google.android.material.color.MaterialColors;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 public class MainReciteActivity extends AppCompatActivity implements View.OnClickListener,
         KeyEvent.Callback,
@@ -124,22 +122,21 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      */
     private WordAnalysisHandler wordAnalysisHandler;
     private WordSupplementReviewHandler wordSupplementReviewHandler;
-    private final Set<MarkColor> recordMarkColor = new HashSet<>(10);
 
     /**
      * 滑动显示答案组件时的坐标<br>
      * 以及是否长按点击了显示答案按钮
      */
-    private float answerDY;
-    /**
-     * 滑动改变答案按钮位置
-     */
-    private float answerChangeDY, answerChangeDX, answerParentLayoutY = 0, answerParentLayoutX = 0;
-    private boolean longClickAnswer = false, enableSelectFunction = false, lockAnswerLocation = true, enableBlueTooth = true;
+    private float switchMarkColorDY;
     /**
      * 切换的度
      */
-    private final float answerDegree = 62.5f;
+    private final float switchMarkDegree = 62.5f;
+    /**
+     * 滑动改变答案按钮位置
+     */
+    private float lightChangeDY, lightChangeDX, lightParentLayoutY = 0, lightParentLayoutX = 0;
+    private boolean enableBlueTooth = true;
     /**
      * 常量
      */
@@ -164,7 +161,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     /**
      * 全局的对话框,用于弹出提示信息
      */
-    private Toast toast;
+    private Toast globalToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -243,7 +240,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                         .observe(this, markColor -> {
                             refreshChameleonUI();
                             reciteWord(wordFunctionHandler.getCurrentFocusWord());
-
                         });
                 reciteWord(wordFunctionHandler.getCurrentFocusWord());
                 updateChangeModePopWindowState();
@@ -261,12 +257,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 return true;
             }
             if (System.currentTimeMillis() - exitLastTime > 2000) {
-                Toast toast = Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 500);
-                toast.show();
+                globalToast = Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT);
+                globalToast.setGravity(Gravity.CENTER, 0, 500);
+                globalToast.show();
                 exitLastTime = System.currentTimeMillis();
             } else {
-                finish();
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
             }
         }
         return true;
@@ -352,8 +350,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     public void onResume() {
         super.onResume();
         updateUIHandler.post(() -> {
-            this.answerParentLayoutY = lightArea.getY();
-            this.answerParentLayoutX = lightArea.getX();
+            this.lightParentLayoutY = lightArea.getY();
+            this.lightParentLayoutX = lightArea.getX();
         });
     }
 
@@ -413,11 +411,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 如果当前处于按色打乱模式则无法使用变色龙功能,使用区间重背功能可以使用变色龙功能
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     == WordFunctionState.SHUFFLE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
                         .getWordFunctionState()
                         .getInfo(), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 500);
-                toast.show();
+                globalToast.setGravity(Gravity.CENTER, 0, 500);
+                globalToast.show();
                 return;
             }
             wordFunctionHandler.getWordFunctionHandlerState().setSelectChameleon(!wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon());
@@ -426,25 +424,27 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             refreshChameleonUI();
         }
         if (clickViewId == R.id.ll_recite_function_switch) {
-            enableSelectFunction = !enableSelectFunction;
-            if (enableSelectFunction) {
+            wordFunctionHandler.getWordFunctionHandlerState().setEnableSwitch(!wordFunctionHandler.getWordFunctionHandlerState().isEnableSwitch());
+            if (wordFunctionHandler.getWordFunctionHandlerState().isEnableSwitch()) {
                 this.functionSwitchImageView.getDrawable().setTint(getResources().getColor(R.color.gold, null));
             } else {
                 this.functionSwitchImageView.getDrawable().setTintList(null);
             }
         }
         if (clickViewId == R.id.ll_recite_function_lock) {
-            lockAnswerLocation = !lockAnswerLocation;
-            if (lockAnswerLocation) {
+            wordFunctionHandler.getWordFunctionHandlerState().setLockLight(!wordFunctionHandler.getWordFunctionHandlerState().isLockLight());
+            if (wordFunctionHandler.getWordFunctionHandlerState().isLockLight()) {
                 this.functionLockImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_red_dark, null));
             } else {
-                lightArea.setX(answerParentLayoutX);
-                lightArea.setY(answerParentLayoutY);
+                // 还原light的原始位置
+                lightArea.setX(lightParentLayoutX);
+                lightArea.setY(lightParentLayoutY);
                 functionLockImageView.getDrawable().setTint(MaterialColors.getColor(this,
                         com.google.android.material.R.attr.colorOnSurface,
                         Color.BLACK));
             }
         }
+        // todo 蓝牙功能
         if (clickViewId == R.id.ll_recite_function_blue_tooth) {
             enableBlueTooth = !enableBlueTooth;
             if (enableBlueTooth) {
@@ -456,7 +456,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_goto) {
             final EditText inputEditText = new EditText(this);
             inputEditText.setInputType(InputType.TYPE_CLASS_DATETIME);
-            new AlertDialog.Builder(this).setTitle("跳转单词")
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.goto_word))
                     .setMessage("输入要跳转到第几个单词,你应当输入1到" + wordFunctionHandler.getChameleonSize() + "之间的值.")
                     .setView(inputEditText)
                     .setCancelable(false)
@@ -485,11 +486,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 如果当前不是普通状态和按色打乱状态,代表当前在执行别的状态,需要先锁定按色打乱的功能
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     == WordFunctionState.RANGE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
                         .getWordFunctionState()
                         .getInfo(), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 500);
-                toast.show();
+                globalToast.setGravity(Gravity.CENTER, 0, 500);
+                globalToast.show();
                 return;
             }
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
@@ -517,11 +518,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_section) {
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     == WordFunctionState.SHUFFLE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
                         .getWordFunctionState()
                         .getInfo(), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 500);
-                toast.show();
+                globalToast.setGravity(Gravity.CENTER, 0, 500);
+                globalToast.show();
                 return;
             }
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
@@ -573,9 +574,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 保存当前的进度
             StaticFactory.getExecutorService().submit(() -> {
             });
-            toast = Toast.makeText(this, R.string.save_success, Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER, 0, 500);
-            toast.show();
+            globalToast = Toast.makeText(this, R.string.save_success, Toast.LENGTH_LONG);
+            globalToast.setGravity(Gravity.CENTER, 0, 500);
+            globalToast.show();
         }
 
         // 快速定位
@@ -583,11 +584,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 如果不是普通模式,则禁止使用快速定位功能
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     != WordFunctionState.NONE) {
-                toast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
+                globalToast = Toast.makeText(this, wordFunctionHandler.getWordFunctionHandlerState()
                         .getWordFunctionState()
                         .getInfo(), Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER, 0, 500);
-                toast.show();
+                globalToast.setGravity(Gravity.CENTER, 0, 500);
+                globalToast.show();
                 return;
             }
             final EditText inputEditText = new EditText(this);
@@ -695,70 +696,66 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             wordFunctionHandler.setHidePreposition(!wordFunctionHandler.isHidePreposition());
             updateChangeModePopWindowState();
         }
-/*
-        if (clickViewId == R.id.fragment_word_credit_button_flag_green) {
-            if (changingChameleon) {
-                changingChameleon = false;
-                wordFunctionHandler.setChameleon(MarkColor.GREEN);
-                this.controlNextWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
-                this.controlPreviousWord.getForeground().setTint(getResources().getColor(R.color.theme_color, null));
-                wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
-                currentIndex.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
-                return;
-            }
-
-            if (wordFunctionHandler.removeMarkColorToCurrentWord(MarkColor.GREEN)) {
-                findViewById(R.id.fragment_word_credit_view_flag_green).setAlpha(0.0f);
-            } else if (wordFunctionHandler.addMarkColorToCurrentWord(MarkColor.GREEN)) {
-                findViewById(R.id.fragment_word_credit_view_flag_green).setAlpha(1.0f);
-            }
-
- */
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int itemId = v.getId();
-        if (itemId == R.id.cv_main_recite_light && !lockAnswerLocation) {
+        if (itemId == R.id.cv_main_recite_light &&
+                !wordFunctionHandler.getWordFunctionHandlerState().isLockLight()) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 // 获得按下时的相对位置
-                answerChangeDY = lightArea.getY() - event.getRawY();
-                answerChangeDX = lightArea.getX() - event.getRawX();
+                lightChangeDY = lightArea.getY() - event.getRawY();
+                lightChangeDX = lightArea.getX() - event.getRawX();
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                float newY = event.getRawY() + answerChangeDY;
-                float newX = event.getRawX() + answerChangeDX;
+                float newY = event.getRawY() + lightChangeDY;
+                float newX = event.getRawX() + lightChangeDX;
                 lightArea.setX(newX);
                 lightArea.setY(newY);
             }
+            // 如果当前的状态不锁定light,则改变light位置的优先级要高于滑动切换,应直接返回
+            return false;
         }
-        if (itemId == R.id.cv_main_recite_light && enableSelectFunction) {
+        if (itemId == R.id.cv_main_recite_light &&
+                wordFunctionHandler.getWordFunctionHandlerState().isEnableSwitch()) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                answerDY = event.getY();
-            } else if (event.getAction() == MotionEvent.ACTION_MOVE && longClickAnswer) {
-                float distinct = event.getY() - answerDY;
-                if (Math.abs(distinct) > 10) {
-                    // 展开右侧的旗帜列表
-                    if (!markAreaFold) {
-                        if (AnimationUtil.getInstance().endMoveToViewLocation(functionMarkArea, 500)) {
-                            refreshMarkAreaUI();
-                            markAreaFold = !markAreaFold;
-                        }
-                    }
-                    int userMove = (int) (distinct / answerDegree) + 4;
-                    if (userMove < 0) {
-                        userMove = 0;
-                    } else if (userMove > 8) {
-                        userMove = 8;
-                    }
-                    // 修改样式
-                    //selectList.forEach(imageButton -> imageButton.setBackground(this.getDrawable(R.drawable.style_image_padding)));
-                    //this.currentSelectFlagButton = selectList.get(userMove);
-                    this.currentSelectFlagButton.setBackground(this.getDrawable(R.drawable.style_image_padding_selective));
+                switchMarkColorDY = event.getY();
+                wordFunctionHandler.getWordFunctionHandlerState().setSelectChameleon(false);
+                refreshChameleonUI();
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE &&
+                    wordFunctionHandler.getWordFunctionHandlerState().isSwitching()) {
+                float distinct = event.getY() - switchMarkColorDY;
+                if (Math.abs(distinct) < 10) return false;
+                if (wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
+                    wordFunctionHandler.getWordFunctionHandlerState().setFunctionAreaFold(false);
+                    refreshMarkAreaUI();
                 }
-            } else if (event.getAction() == MotionEvent.ACTION_UP && longClickAnswer) {
-                longClickAnswer = false;
-                this.currentSelectFlagButton.setBackground(this.getDrawable(R.drawable.style_image_padding));
-                this.currentSelectFlagButton.performClick();
+                int previousFocusSwitchPosition = wordFunctionHandler.getWordFunctionHandlerState().getPreviousFocusSwitchPosition();
+                int currentFocusSwitchPosition = wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusSwitchPosition();
+                int currentSelectSwitchPosition = (int) (distinct / switchMarkDegree) +
+                        previousFocusSwitchPosition;
+                if (currentSelectSwitchPosition < 0) currentSelectSwitchPosition = 0;
+                if (currentSelectSwitchPosition > 9) currentSelectSwitchPosition = 9;
+                wordFunctionHandler.getWordFunctionHandlerState().setCurrentFocusSwitchPosition(currentSelectSwitchPosition);
+                reciteMarkToastAdapter.notifyItemChanged(currentFocusSwitchPosition, ReciteMarkToastAdapter.Item.SWITCH_DESELECT);
+                reciteMarkToastAdapter.notifyItemChanged(currentSelectSwitchPosition, ReciteMarkToastAdapter.Item.SWITCH_SELECT);
+
+            } else if (event.getAction() == MotionEvent.ACTION_UP &&
+                    wordFunctionHandler.getWordFunctionHandlerState().isSwitching()) {
+                float distinct = event.getY() - switchMarkColorDY;
+                if (Math.abs(distinct) < 10) return false;
+                FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
+                int currentFocusSwitchPosition = wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusSwitchPosition();
+                MarkColor markColor = MarkColor.values()[currentFocusSwitchPosition];
+                if (currentFocusWord.getMarkColorList().contains(markColor)) {
+                    currentFocusWord.getMarkColorList().remove(markColor);
+                } else {
+                    currentFocusWord.getMarkColorList().add(markColor);
+                }
+                wordFunctionHandler.getWordFunctionHandlerState().setPreviousFocusSwitchPosition(currentFocusSwitchPosition);
+                reciteMarkToastAdapter.notifyItemChanged(currentFocusSwitchPosition, ReciteMarkToastAdapter.Item.SWITCH_SELECT);
+                wordFunctionHandler.getWordFunctionHandlerState().setFunctionAreaFold(true);
+                refreshMarkAreaUI();
             }
         }
         return false;
@@ -767,8 +764,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     @Override
     public boolean onLongClick(View v) {
         int itemId = v.getId();
-        if (itemId == R.id.cv_main_recite_light && enableSelectFunction) {
-            longClickAnswer = true;
+        if (itemId == R.id.cv_main_recite_light
+                && wordFunctionHandler.getWordFunctionHandlerState().isEnableSwitch()
+                && wordFunctionHandler.getWordFunctionHandlerState().isLockLight()) {
+            wordFunctionHandler.getWordFunctionHandlerState().setSwitching(true);
             // 马达震动提醒用户
             VibrationEffect waveform = VibrationEffect.createWaveform(new long[]{100}, -1);
             vibrator.vibrate(waveform);
@@ -934,15 +933,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
     private void refreshChameleonUI() {
         if (wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon()) {
-            if (toast != null) toast.cancel();
+            if (globalToast != null) globalToast.cancel();
             functionChameleonBorder.setVisibility(View.VISIBLE);
             functionChameleonBorder.start();
             functionChameleonImageView.animate().scaleX(0.9f).scaleY(0.9f).setDuration(200).start();
-            toast = Toast.makeText(this, R.string.choose_mark_color, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 500);
-            toast.show();
+            globalToast = Toast.makeText(this, R.string.choose_mark_color, Toast.LENGTH_SHORT);
+            globalToast.setGravity(Gravity.CENTER, 0, 500);
+            globalToast.show();
         } else {
-            if (toast != null) toast.cancel();
+            if (globalToast != null) globalToast.cancel();
             functionChameleonBorder.setVisibility(View.GONE);
             functionChameleonBorder.stop();
         }

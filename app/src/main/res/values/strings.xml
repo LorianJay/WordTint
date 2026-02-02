@@ -252,6 +252,7 @@
     <string name="back_home_inquire">确认返回主页</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
+    <string name="goto_word">跳转单词</string>
 
 
 </resources>
