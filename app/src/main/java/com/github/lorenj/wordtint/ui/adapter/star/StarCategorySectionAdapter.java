@@ -42,11 +42,15 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
     private FunctionContentCallBack functionContentCallBack;
     private final StarSectionFunctionHandler starSectionFunctionHandler;
     private int starId;
+    /**
+     * 不同收藏夹的单词也要共享缓存<br>
+     * 所以必须在顶层的收藏夹创建
+     */
     private final RecyclerView.RecycledViewPool resultPool;
     /**
      * 当前是否正在移动单词的标识
      */
-    private volatile boolean itemMoving = false;
+    private boolean itemMoving = false;
     private final android.os.Handler updateUIHandler = new Handler(Looper.getMainLooper());
 
     /**
@@ -55,10 +59,11 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
      * @param starId               当前收藏夹片段对应的收藏夹id
      */
     public StarCategorySectionAdapter(Context context,
-                                      StarFunctionHandler startFunctionHandler) {
+                                      StarFunctionHandler startFunctionHandler,
+                                      RecyclerView.RecycledViewPool resultPool) {
         this.context = context;
         this.starSectionFunctionHandler = startFunctionHandler;
-        this.resultPool = new RecyclerView.RecycledViewPool();
+        this.resultPool = resultPool;
     }
 
     /**
@@ -84,22 +89,18 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
         } else {
             holder.separator.setBackgroundColor(context.getResources().getColor(R.color.dark_gray, null));
         }
-        // 如果物体正在移动,则只更新线条颜色;
-        if (itemMoving) return;
-        // 重置改变，防止由于复用而导致的显示问题
-        holder.scroller.scrollTo(0, 0);
+        // 如果物体正在移动,则只更新线条颜色
+        if (!itemMoving) holder.scroller.scrollTo(0, 0);
         // 得到当前的单词
         WordStarWordIdEntity wordStarWordIdEntity = starSectionFunctionHandler.getStarById(starId)
                 .wordStarWordIdEntityList.
                 get(position);
         FunctionWordVO currentSectionWord = starSectionFunctionHandler.getWordDetailByWordId(wordStarWordIdEntity);
-        holder.starResult.setLayoutManager(new LinearLayoutManager(context));
-        holder.starResult.setRecycledViewPool(resultPool);
-        holder.starResultAdapter = new StarResultAdapter(context, currentSectionWord);
-        holder.starResult.setAdapter(holder.starResultAdapter);
+        holder.starResultAdapter.addItem(currentSectionWord);
         holder.wordOrigin.setText(currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN));
         holder.starId = starId;
         holder.starCategorySectionAdapter = this;
+        holder.functionContentCallBack = functionContentCallBack;
     }
 
     @Override
@@ -108,13 +109,10 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
     }
 
     public void onItemMove(int fromPosition, int toPosition) {
-        /*
-        //categoryWordFunctionHandler.moveStarInnerWord(functionContentCallBack.getCurrentWordCategoryPosition(), fromPosition, toPosition);
-        functionContentCallBack.updateCategoryMessage();
+        WordStarWordIdEntity fromWord = starSectionFunctionHandler.getStarById(starId).wordStarWordIdEntityList.get(fromPosition);
+        WordStarWordIdEntity toWord = starSectionFunctionHandler.getStarById(starId).wordStarWordIdEntityList.get(toPosition);
         notifyItemMoved(fromPosition, toPosition);
-        notifyItemChanged(fromPosition, Boolean.FALSE);
-        notifyItemChanged(toPosition, Boolean.FALSE);
-         */
+        starSectionFunctionHandler.moveStarInnerWord(fromWord, toWord);
     }
 
     @Override
@@ -137,6 +135,7 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
         private StarResultAdapter starResultAdapter;
         private StarCategorySectionAdapter starCategorySectionAdapter;
         private int starId;
+        private FunctionContentCallBack functionContentCallBack;
 
         public StarSectionViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -149,6 +148,11 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
             this.separator = itemView.findViewById(R.id.v_star_section_separate);
             this.move.setOnTouchListener(this);
             this.delete.setOnClickListener(this);
+
+            starResult.setLayoutManager(new LinearLayoutManager(context));
+            starResult.setRecycledViewPool(resultPool);
+            starResultAdapter = new StarResultAdapter(context);
+            starResult.setAdapter(starResultAdapter);
         }
 
         @Override
@@ -162,7 +166,10 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
             itemView.setAlpha(1.0f);
             itemMoving = false;
             // 批量更新本次移动的情况
-            //categoryWordFunctionHandler.batchUpdateStarInnerWordList(functionContentCallBack.getCurrentWordCategoryPosition());
+            StaticFactory.getExecutorService().execute(() -> {
+                starSectionFunctionHandler.batchUpdateStarInnerWordList(starSectionFunctionHandler.getStarById(starId).wordStarEntity);
+                functionContentCallBack.updateCategoryMessage();
+            });
         }
 
         @Override
@@ -207,17 +214,9 @@ public class StarCategorySectionAdapter extends RecyclerView.Adapter<StarCategor
         void startDrag(RecyclerView.ViewHolder viewHolder);
 
         /**
-         * 得到当前单词隶属于哪个收藏夹
-         *
-         * @return 返回收藏夹的position
-         */
-        int getCurrentWordCategoryPosition();
-
-        /**
          * 当发生单词移动时更新,如果收藏夹采用默认的命名规则;则该方法会更新收藏夹的名称
          */
         void updateCategoryMessage();
-
     }
 
     private enum Item {

@@ -16,6 +16,7 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,18 +24,11 @@ public class StarResultAdapter extends RecyclerView.Adapter<StarResultAdapter.Re
         implements RecyclerViewAdapterItemChange<FunctionWordVO> {
 
     private final Context context;
-    private final FunctionWordVO currentSectionWord;
-    private final List<WordStructure> wordStructureList;
+    private FunctionWordVO currentSectionWord;
+    private List<WordStructure> wordStructureList = new ArrayList<>();
 
-    public StarResultAdapter(Context context, FunctionWordVO currentSectionWord) {
+    public StarResultAdapter(Context context) {
         this.context = context;
-        this.currentSectionWord = currentSectionWord;
-        this.wordStructureList = currentSectionWord.getValue()
-                .keySet()
-                .stream()
-                .filter(wordStructure -> wordStructure != WordStructure.WORD_ORIGIN)
-                .sorted((o1, o2) -> o1.getOrder() - o2.getOrder())
-                .collect(Collectors.toList());
     }
 
     @NonNull
@@ -54,6 +48,20 @@ public class StarResultAdapter extends RecyclerView.Adapter<StarResultAdapter.Re
         String value = currentSectionWord.getValue().get(currentWordStructure);
         holder.resultValue.setText(value);
         holder.resultKey.setText(currentWordStructure.getKeyHint());
+    }
+
+    @Override
+    public void addItem(FunctionWordVO item) {
+        this.currentSectionWord = item;
+        this.wordStructureList.clear();
+        List<WordStructure> collect = currentSectionWord.getValue()
+                .keySet()
+                .stream()
+                .filter(wordStructure -> wordStructure != WordStructure.WORD_ORIGIN)
+                .sorted((o1, o2) -> o1.getOrder() - o2.getOrder())
+                .collect(Collectors.toList());
+        this.wordStructureList.addAll(collect);
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     @Override

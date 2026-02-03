@@ -191,7 +191,15 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
     }
 
     @Override
-    public void moveStarInnerWord(WordStarWordIdEntity fromPosition, WordStarWordIdEntity toPosition) {
+    public void moveStarInnerWord(WordStarWordIdEntity fromWord, WordStarWordIdEntity toWord) {
+        int starId = fromWord.starId;
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = getStarById(starId);
+        int fromIndex = wordStarWithWordIdEntity.wordStarWordIdEntityList.indexOf(fromWord);
+        int toIndex = wordStarWithWordIdEntity.wordStarWordIdEntityList.indexOf(toWord);
+        Collections.swap(wordStarWithWordIdEntity.wordStarWordIdEntityList, fromIndex, toIndex);
+        int fromOrder = fromWord.order;
+        fromWord.order = toWord.order;
+        toWord.order = fromOrder;
     }
 
     private void initHandler() {

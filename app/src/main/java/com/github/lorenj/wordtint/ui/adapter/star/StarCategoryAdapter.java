@@ -55,11 +55,13 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
      * 二级列表贡献缓存
      */
     private final RecyclerView.RecycledViewPool starSectionPool;
+    private final RecyclerView.RecycledViewPool resultPool;
 
     public StarCategoryAdapter(Context context, StarFunctionHandler starFunctionHandler) {
         this.context = context;
         this.startFunctionHandler = starFunctionHandler;
         this.starSectionPool = new RecyclerView.RecycledViewPool();
+        this.resultPool = new RecyclerView.RecycledViewPool();
     }
 
     @NonNull
@@ -82,6 +84,7 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
         // 刷新收藏夹id
         int currentStarId = startFunctionHandler.getAllStarList().get(position).wordStarEntity.id;
         holder.starCategorySectionAdapter.setStarId(currentStarId);
+        holder.starId = currentStarId;
         holder.starCategorySectionAdapter.notifyItemRangeChanged(0, wordStarWithWordIdEntity.wordStarWordIdEntityList.size());
     }
 
@@ -146,6 +149,7 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
         public RecyclerView starSection;
         public ItemTouchHelper touchHelper;
         public StarCategorySectionAdapter starCategorySectionAdapter;
+        public int starId;
 
         public SingleSingleViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -167,10 +171,12 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
             this.openList.setOnClickListener(this);
             this.addWord.setOnClickListener(this);
 
-            starCategorySectionAdapter = new StarCategorySectionAdapter(context, startFunctionHandler);
+            // 子adapter的设置必须放到这里
+            starCategorySectionAdapter = new StarCategorySectionAdapter(context, startFunctionHandler, resultPool);
             starSection.setLayoutManager(new LinearLayoutManager(context));
             starSection.setRecycledViewPool(starSectionPool);
             starSection.setAdapter(starCategorySectionAdapter);
+            starCategorySectionAdapter.setFunctionListener(this);
 
             touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategorySectionAdapter));
             touchHelper.attachToRecyclerView(starSection);
@@ -261,14 +267,9 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
         }
 
         @Override
-        public int getCurrentWordCategoryPosition() {
-            return getAdapterPosition();
-        }
-
-        @Override
         public void updateCategoryMessage() {
-            //title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
-            //describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
+            title.setText(startFunctionHandler.calculationTitle(startFunctionHandler.getStarById(starId).wordStarEntity));
+            describe.setText(startFunctionHandler.calculationDescribe(startFunctionHandler.getStarById(starId).wordStarEntity));
         }
     }
 
