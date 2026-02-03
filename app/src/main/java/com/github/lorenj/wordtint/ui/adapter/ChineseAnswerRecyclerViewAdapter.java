@@ -59,8 +59,8 @@ public class ChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
 
     public ChineseAnswerRecyclerViewAdapter(Context context) {
         this.context = context;
-        TextView textView = LayoutInflater.from(context).inflate(R.layout.fragment_word_credit_drawer_chinese_answer_element, null)
-                .findViewById(R.id.fragment_word_credit_meaning_category_hint);
+        TextView textView = LayoutInflater.from(context).inflate(R.layout.item_recite_result, null)
+                .findViewById(R.id.tv_recite_result_key);
         textSize = textView.getTextSize();
         textWidthHandler.setTextSize(textSize);
     }
@@ -87,7 +87,7 @@ public class ChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // 根据不同的状态,解析不同的页面
         if (viewType == RecyclerViewState.DRAWER.getViewType()) {
-            return new AnswerViewHolder(LayoutInflater.from(context).inflate(R.layout.fragment_word_credit_drawer_chinese_answer_element, parent, false));
+            return new AnswerViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recite_result, parent, false));
         }
         return new AnswerViewHolder(LayoutInflater.from(context).inflate(R.layout.fragment_word_credit_chinese_answer_element, parent, false));
     }
@@ -169,8 +169,8 @@ public class ChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         public AnswerViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
-            meaningCategoryHint = this.itemView.findViewById(R.id.fragment_word_credit_meaning_category_hint);
-            meaningCategoryAnswer = this.itemView.findViewById(R.id.fragment_word_credit_textview_meaning_category_answer);
+            meaningCategoryHint = this.itemView.findViewById(R.id.tv_recite_result_key);
+            meaningCategoryAnswer = this.itemView.findViewById(R.id.tv_recite_result_value);
         }
     }
 
@@ -182,8 +182,8 @@ public class ChineseAnswerRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         public DrawerAnswerViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
-            meaningCategoryHint = this.itemView.findViewById(R.id.fragment_word_credit_meaning_category_hint);
-            meaningCategoryAnswer = this.itemView.findViewById(R.id.fragment_word_credit_textview_meaning_category_answer);
+            meaningCategoryHint = this.itemView.findViewById(R.id.tv_recite_result_key);
+            meaningCategoryAnswer = this.itemView.findViewById(R.id.tv_recite_result_value);
         }
     }
 

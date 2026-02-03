@@ -14,9 +14,7 @@ import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,7 +37,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
      * key:star_id<br>
      * value:star和其下的所有单词列表
      */
-    private Map<Integer, WordStarWithWordIdEntity> allStarMap = new HashMap<>();
+    //private Map<Integer, WordStarWithWordIdEntity> allStarMap = new HashMap<>();
     /**
      * 存储所有收藏夹的id列表
      */
@@ -65,13 +63,12 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
 
     @Override
     public void createNewStar(WordStarEntity wordStarEntity) {
-        if (wordStarEntity.order == 0) wordStarEntity.order = allStarMap.size() + 1;
+        if (wordStarEntity.order == 0) wordStarEntity.order = allStarList.size() + 1;
         WordStarWithWordIdEntity wordStarWithWordIdEntity = new WordStarWithWordIdEntity();
         wordStarWithWordIdEntity.wordStarEntity = wordStarEntity;
         wordStarWithWordIdEntity.wordStarWordIdEntityList = new ArrayList<>();
         long starId = appDatabase.wordStarDao().insert(wordStarEntity);
         wordStarEntity.id = (int) starId;
-        allStarMap.put(wordStarEntity.id, wordStarWithWordIdEntity);
         allStarList.add(wordStarWithWordIdEntity);
     }
 
@@ -80,11 +77,6 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         // 加载所有的收藏夹
         this.allStarList = appDatabase.wordStarDao()
                 .findAllStarAndWordId();
-        this.allStarMap = this.allStarList
-                .stream()
-                .collect(Collectors.toMap(
-                        wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarEntity.id,
-                        wordStarWithWordIdEntity -> wordStarWithWordIdEntity));
     }
 
     @Override
@@ -94,7 +86,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
 
     @Override
     public void batchUpdateCurrentStar() {
-        List<WordStarEntity> allWordStarList = this.allStarMap.values()
+        List<WordStarEntity> allWordStarList = this.allStarList
                 .stream()
                 .map(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarEntity)
                 .sorted(Comparator.comparingInt(o -> o.order))
@@ -107,7 +99,6 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
 
     @Override
     public void removeStar(WordStarWithWordIdEntity wordStarWithWordIdEntity) {
-        this.allStarMap.remove(wordStarWithWordIdEntity.wordStarEntity.id);
         this.allStarList = this.allStarList.stream()
                 .filter(filter -> filter.wordStarEntity.id != wordStarWithWordIdEntity.wordStarEntity.id)
                 .collect(Collectors.toList());
@@ -140,18 +131,19 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         toStar.wordStarEntity.order = fromOrder;
     }
 
+    // -----下面是收藏夹内收藏的单词列表-----
     @Override
-    public int getStarWordCount(WordStarEntity wordStarEntity) {
-        return Optional.ofNullable(allStarMap.get(wordStarEntity.id))
-                .orElse(new WordStarWithWordIdEntity())
-                .wordStarWordIdEntityList
-                .size();
+    public WordStarWithWordIdEntity getStarById(int starId) {
+        return allStarList.stream()
+                .filter(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarEntity.id == starId)
+                .findFirst()
+                .orElse(new WordStarWithWordIdEntity());
     }
 
     @Override
     public boolean addWordToStar(WordStarWordIdEntity wordStarWordIdEntity) {
         // 得到当前收藏夹
-        WordStarWithWordIdEntity wordStarWithWordIdEntity = allStarMap.get(wordStarWordIdEntity.starId);
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = getStarById(wordStarWordIdEntity.starId);
         if (wordStarWithWordIdEntity == null) return false;
         if (wordStarWithWordIdEntity.getWordStarWordIdEntityList() == null)
             wordStarWithWordIdEntity.setWordStarWordIdEntityList(new ArrayList<>());
@@ -164,20 +156,22 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         }
         wordStarWordIdEntityList.add(wordStarWordIdEntity);
         wordStarWordIdEntity.order = wordStarWordIdEntityList.size();
-        appDatabase.wordStarWordIdDao().insert(wordStarWordIdEntity);
+        long insertId = appDatabase.wordStarWordIdDao().insert(wordStarWordIdEntity);
+        wordStarWordIdEntity.id = (int) insertId;
         return true;
     }
 
     @Override
     public void removeWordFromStar(WordStarWordIdEntity wordStarWordIdEntity) {
         // 得到当前收藏夹
-        WordStarWithWordIdEntity wordStarWithWordIdEntity = allStarMap.get(wordStarWordIdEntity.starId);
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = getStarById(wordStarWordIdEntity.starId);
         if (wordStarWithWordIdEntity == null) return;
         wordStarWithWordIdEntity.wordStarWordIdEntityList = wordStarWithWordIdEntity.getWordStarWordIdEntityList()
                 .stream()
                 .filter(wordStarWordIdEntityTest -> wordStarWordIdEntityTest.id != wordStarWordIdEntity.id)
                 .collect(Collectors.toList());
         batchUpdateStarInnerWordList(wordStarWithWordIdEntity.wordStarEntity);
+        appDatabase.wordStarWordIdDao().delete(wordStarWordIdEntity);
     }
 
     @Override
@@ -187,7 +181,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
 
     @Override
     public void batchUpdateStarInnerWordList(WordStarEntity wordStarEntity) {
-        WordStarWithWordIdEntity wordStarWithWordIdEntity = allStarMap.get(wordStarEntity.id);
+        WordStarWithWordIdEntity wordStarWithWordIdEntity = getStarById(wordStarEntity.id);
         if (wordStarWithWordIdEntity == null) return;
         List<WordStarWordIdEntity> wordStarWordIdEntityList = wordStarWithWordIdEntity.getWordStarWordIdEntityList();
         for (int i = 0; i < wordStarWordIdEntityList.size(); i++) {
@@ -211,7 +205,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
      * @return 返回收藏夹名称
      */
     private String calculation(WordStarEntity wordStarEntity) {
-        return Optional.ofNullable(allStarMap.get(wordStarEntity.id))
+        return Optional.ofNullable(getStarById(wordStarEntity.id))
                 .orElse(new WordStarWithWordIdEntity())
                 .wordStarWordIdEntityList
                 .stream()

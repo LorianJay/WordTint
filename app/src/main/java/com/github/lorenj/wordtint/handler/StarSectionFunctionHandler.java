@@ -2,6 +2,7 @@ package com.github.lorenj.wordtint.handler;
 
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
+import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 
 
@@ -14,11 +15,11 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 public interface StarSectionFunctionHandler {
 
     /**
-     * 得到某个具体分类(收藏夹)中单词的数量
+     * 得到某个具体分类(收藏夹)中的所有单词
      *
-     * @return 返回int类型
+     * @param starId 收藏夹的id
      */
-    int getStarWordCount(WordStarEntity wordStarEntity);
+    WordStarWithWordIdEntity getStarById(int starId);
 
     /**
      * 将某个单词添加到某个分类中
@@ -53,8 +54,8 @@ public interface StarSectionFunctionHandler {
     /**
      * 交换收藏夹中两个单词的位置
      *
-     * @param fromPosition     源单词的位置
-     * @param toPosition       目标单词的位置
+     * @param fromPosition 源单词的位置
+     * @param toPosition   目标单词的位置
      */
     void moveStarInnerWord(WordStarWordIdEntity fromPosition, WordStarWordIdEntity toPosition);
 

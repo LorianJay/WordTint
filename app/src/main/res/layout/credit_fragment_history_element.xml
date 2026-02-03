@@ -6,7 +6,7 @@
     android:background="@color/gray">
 
     <com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout
-        android:id="@+id/fragment_word_credit_start_single_category_word_scroller"
+        android:id="@+id/sll_star_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/gray"
@@ -68,7 +68,7 @@
         </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/fragment_word_credit_start_single_category_word_menu"
+            android:id="@+id/ll_star_section_menu"
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:background="@color/white"

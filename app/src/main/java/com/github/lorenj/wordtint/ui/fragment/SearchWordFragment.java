@@ -44,7 +44,7 @@ import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.WordSearchHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
-import com.github.lorenj.wordtint.ui.adapter.StarCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
@@ -263,7 +263,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
             starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
             // 设置收藏夹列表中中文意思显示的adapter
-            this.chineseAnswerAdapterDrawer = new StarResultAdapter(getContext(), 2L);
+            //this.chineseAnswerAdapterDrawer = new StarResultAdapter(getContext());
             // 读取用户收藏夹信息
             //categoryFunctionHandler.batchCreateCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
             updateUIHandler.post(() -> {

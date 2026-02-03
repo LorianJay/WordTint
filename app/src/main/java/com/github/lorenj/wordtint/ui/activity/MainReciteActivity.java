@@ -59,7 +59,7 @@ import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
 import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
-import com.github.lorenj.wordtint.ui.adapter.StarCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
@@ -899,13 +899,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CREDIT);
                 currentWord.getValue().remove(WordStructure.PHRASE);
                 visibleWordAllMessage(currentWord);
-                currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
+                if (prepositionPhrase != null)
+                    currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
                 originWord.setText("");
             } else if (currentReciteMode == ReciteMode.CREDIT) {
                 visibleWordAllMessage(currentWord);
                 playWordAudio(currentWord);
             }
-            currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
+            if (prepositionPhrase != null)
+                currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
             wordCount.setText(String.valueOf(wordFunctionHandler.getChameleonSize()));
             currentIndex.setText(String.valueOf(wordFunctionHandler.getChameleonOrder()));
             lightHint.setText(String.format("%s/%s", wordFunctionHandler.getInnerIndex() + 1, wordFunctionHandler.functionWordSize()));

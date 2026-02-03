@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/credit_fragment_divide_item_layout"
+    android:id="@+id/ll_recite_result"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:clickable="false">
 
     <TextView
-        android:id="@+id/fragment_word_credit_meaning_category_hint"
+        android:id="@+id/tv_recite_result_key"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"

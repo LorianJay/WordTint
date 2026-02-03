@@ -1,9 +1,10 @@
-package com.github.lorenj.wordtint.ui.adapter;
+package com.github.lorenj.wordtint.ui.adapter.star;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,21 +14,27 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryDTO;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
+import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.listener.MoveAndSwipedListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 
@@ -44,10 +51,15 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
     private Consumer<RecyclerView.ViewHolder> startDragListener;
     private final StarFunctionHandler startFunctionHandler;
     private final android.os.Handler updateUIHandler = new Handler(Looper.getMainLooper());
+    /**
+     * 二级列表贡献缓存
+     */
+    private final RecyclerView.RecycledViewPool starSectionPool;
 
     public StarCategoryAdapter(Context context, StarFunctionHandler starFunctionHandler) {
         this.context = context;
         this.startFunctionHandler = starFunctionHandler;
+        this.starSectionPool = new RecyclerView.RecycledViewPool();
     }
 
     @NonNull
@@ -61,8 +73,36 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
         WordStarWithWordIdEntity wordStarWithWordIdEntity = startFunctionHandler.getAllStarList().get(position);
         // 重置改变,防止由于复用而导致的显示问题
         holder.scroller.scrollTo(0, 0);
+        holder.starSection.setVisibility(View.GONE);
+        holder.listState.setRotation(90);
+        holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.dark_gray, null));
+        holder.fold = true;
         holder.title.setText(startFunctionHandler.calculationTitle(wordStarWithWordIdEntity.wordStarEntity));
         holder.describe.setText(startFunctionHandler.calculationDescribe(wordStarWithWordIdEntity.wordStarEntity));
+        // 刷新收藏夹id
+        int currentStarId = startFunctionHandler.getAllStarList().get(position).wordStarEntity.id;
+        holder.starCategorySectionAdapter.setStarId(currentStarId);
+        holder.starCategorySectionAdapter.notifyItemRangeChanged(0, wordStarWithWordIdEntity.wordStarWordIdEntityList.size());
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull SingleSingleViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads);
+        for (Object payload : payloads) {
+            if (payload == Item.ITEM_CLICK) {
+                int currentStarId = startFunctionHandler.getAllStarList().get(position).wordStarEntity.id;
+                holder.starCategorySectionAdapter.setStarId(currentStarId);
+                if (holder.fold) {
+                    holder.starSection.setVisibility(View.GONE);
+                    holder.listState.setRotation(90);
+                    holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.dark_gray, null));
+                } else {
+                    holder.starSection.setVisibility(View.VISIBLE);
+                    holder.listState.getDrawable().setTint(context.getResources().getColor(android.R.color.holo_blue_dark, null));
+                    holder.listState.setRotation(180);
+                }
+            }
+        }
     }
 
     @Override
@@ -90,21 +130,22 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
     }
 
     public class SingleSingleViewHolder extends RecyclerView.ViewHolder
-            implements StateChangedListener, View.OnTouchListener, View.OnClickListener, StartSingleCategoryWordAdapter.FunctionContentCallBack {
+            implements StateChangedListener, View.OnTouchListener, View.OnClickListener, StarCategorySectionAdapter.FunctionContentCallBack {
         public View itemView, scroller;
         public TextView title, describe, edit, delete, addWord;
         public LinearLayout openList;
         public ImageView listState;
         public ImageButton move;
-        /*
-         如果某个分类展开与否的状态需要由StartFunctionHandler来控制,则托管由StartFunctionHandler来实现该功能.
-         目前而言,暂时不需要外部接入,内部就能够完成,就内部来实现这个功能
+        /**
+         * 是否折叠,这个变量状态不一致不太要紧
          */
-        private boolean isOpen;
-        // 显示当前收藏夹下的所有单词的RecyclerView
-        public RecyclerView underNowStartAllWord;
-        public StartSingleCategoryWordAdapter startSingleCategoryWordAdapter;
+        private boolean fold = true;
+        /**
+         * 收藏夹下的所有单词
+         */
+        public RecyclerView starSection;
         public ItemTouchHelper touchHelper;
+        public StarCategorySectionAdapter starCategorySectionAdapter;
 
         public SingleSingleViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -118,21 +159,22 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
             this.delete = itemView.findViewById(R.id.ll_item_star_swipe_delete);
             this.move = itemView.findViewById(R.id.ll_item_star_swipe_move);
             this.addWord = itemView.findViewById(R.id.ll_item_star_swipe_add);
-            this.underNowStartAllWord = itemView.findViewById(R.id.ll_item_star_section);
-            // 加载当前分类下的所有单词
-            //this.underNowStartAllWord.setLayoutManager(new LinearLayoutManager(context));
-            //this.startSingleCategoryWordAdapter = new StartSingleCategoryWordAdapter(context);
-            //this.underNowStartAllWord.setAdapter(startSingleCategoryWordAdapter);
-            //this.touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(startSingleCategoryWordAdapter));
-            //this.touchHelper.attachToRecyclerView(underNowStartAllWord);
-            //startSingleCategoryWordAdapter.setCategoryWordFunctionHandler(startFunctionHandler);
-            //startSingleCategoryWordAdapter.setFunctionListener(this);
+            this.starSection = itemView.findViewById(R.id.ll_item_star_section);
 
             this.move.setOnTouchListener(this);
             this.delete.setOnClickListener(this);
             this.edit.setOnClickListener(this);
             this.openList.setOnClickListener(this);
             this.addWord.setOnClickListener(this);
+
+            starCategorySectionAdapter = new StarCategorySectionAdapter(context, startFunctionHandler);
+            starSection.setLayoutManager(new LinearLayoutManager(context));
+            starSection.setRecycledViewPool(starSectionPool);
+            starSection.setAdapter(starCategorySectionAdapter);
+
+            touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategorySectionAdapter));
+            touchHelper.attachToRecyclerView(starSection);
+
         }
 
         @Override
@@ -187,36 +229,34 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
                         })
                         .show();
             } else if (clickViewId == R.id.ll_item_star) {
-                if (isOpen) {
-                    underNowStartAllWord.setVisibility(View.GONE);
-                    listState.setRotation(90);
-                    listState.getDrawable().setTint(context.getResources().getColor(R.color.dark_gray, null));
-                } else {
-                    underNowStartAllWord.setVisibility(View.VISIBLE);
-                    listState.getDrawable().setTint(context.getResources().getColor(android.R.color.holo_blue_dark, null));
-                    listState.setRotation(180);
-                }
-                isOpen = !isOpen;
+                fold = !fold;
+                notifyItemChanged(getAdapterPosition(), Item.ITEM_CLICK);
             } else if (clickViewId == R.id.ll_item_star_swipe_add) {
-                /*
-                Optional.ofNullable(startFunctionHandler.getCurrentViewWord())
-                        .ifPresentOrElse(wordCategoryWordDTO -> {
-                    startSingleCategoryWordAdapter.addItem(wordCategoryWordDTO);
-                    title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
-                    describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
-                }, () -> {
+                FunctionWordVO currentFocusWord = startFunctionHandler.getCurrentFocusWord();
+                if (currentFocusWord == null) {
                     // 不能添加单词到分类的提示
                     Toast errorAddTint = Toast.makeText(context, context.getResources().getString(R.string.error_add_hint), Toast.LENGTH_SHORT);
                     errorAddTint.setGravity(Gravity.CENTER, 0, 500);
                     errorAddTint.show();
+                    return;
+                }
+                WordStarWordIdEntity wordStarWordIdEntity = new WordStarWordIdEntity();
+                wordStarWordIdEntity.starId = wordStarWithWordIdEntity.wordStarEntity.id;
+                wordStarWordIdEntity.wordId = currentFocusWord.getWordId();
+                StaticFactory.getExecutorService().execute(() -> {
+                    if (!startFunctionHandler.addWordToStar(wordStarWordIdEntity)) return;
+                    updateUIHandler.post(() -> {
+                        title.setText(startFunctionHandler.calculationTitle(wordStarWithWordIdEntity.wordStarEntity));
+                        describe.setText(startFunctionHandler.calculationDescribe(wordStarWithWordIdEntity.wordStarEntity));
+                        starCategorySectionAdapter.notifyItemInserted(wordStarWithWordIdEntity.wordStarWordIdEntityList.size() - 1);
+                    });
                 });
-
-                 */
             }
         }
 
         @Override
         public void startDrag(RecyclerView.ViewHolder viewHolder) {
+            // viewHolder->ItemTouchHelper->viewHolder
             this.touchHelper.startDrag(viewHolder);
         }
 
@@ -230,6 +270,10 @@ public class StarCategoryAdapter extends RecyclerView.Adapter<StarCategoryAdapte
             //title.setText(startFunctionHandler.calculationTitle(getAdapterPosition()));
             //describe.setText(startFunctionHandler.calculationDescribe(getAdapterPosition()));
         }
+    }
+
+    private enum Item {
+        ITEM_CLICK
     }
 
 }

@@ -1,37 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/credit_fragment_divide_item_layout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_recite_result"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@color/white"
-    android:clickable="false">
+    android:clickable="false"
+    android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/fragment_word_credit_meaning_category_hint"
+        android:id="@+id/tv_recite_result_key"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
+        android:layout_marginEnd="15dp"
         android:layout_marginBottom="4dp"
         android:gravity="center"
-        android:text="@string/adjective"
+        android:text="@string/default_txt"
         android:textColor="@color/black"
         android:textSize="20sp" />
 
     <TextView
-        android:id="@+id/fragment_word_credit_textview_meaning_category_answer"
+        android:id="@+id/tv_recite_result_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
         android:layout_marginTop="3dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="4dp"
-        android:layout_toEndOf="@id/fragment_word_credit_meaning_category_hint"
-        android:background="@drawable/fragment_word_credit_radius_answer"
+        android:background="@drawable/text_border_radius_background"
+        android:backgroundTint="@color/theme_color"
         android:maxLines="1"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:text="test"
+        android:text="@string/default_txt"
         android:textColor="@color/black"
         android:textSize="20sp" />
 
-</RelativeLayout>
+</LinearLayout>

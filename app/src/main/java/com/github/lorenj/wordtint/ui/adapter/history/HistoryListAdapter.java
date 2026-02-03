@@ -112,7 +112,7 @@ public class HistoryListAdapter extends RecyclerView.Adapter<HistoryListAdapter.
             this.elementCount = itemView.findViewById(R.id.tv_item_book_section_count);
             this.historyRelativeLayout = itemView.findViewById(R.id.credit_fragment_history_divide_element);
             this.historyDelete = itemView.findViewById(R.id.fragment_word_history_delete);
-            this.scroller = itemView.findViewById(R.id.fragment_word_credit_start_single_category_word_scroller);
+            this.scroller = itemView.findViewById(R.id.sll_star_section);
 
             this.historyRelativeLayout.setOnClickListener(this);
             this.historyDelete.setOnClickListener(this);

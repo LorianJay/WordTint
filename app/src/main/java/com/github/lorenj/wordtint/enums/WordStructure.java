@@ -1,6 +1,8 @@
 package com.github.lorenj.wordtint.enums;
 
 
+import com.github.lorenj.wordtint.R;
+
 /**
  * 英语单词结构
  *
@@ -12,77 +14,81 @@ public enum WordStructure {
     /**
      * 单词原文
      */
-    WORD_ORIGIN,
-    /**
-     * 美式音标
-     */
-    US_PHONETIC,
-    /**
-     * 英式音标
-     */
-    UK_PHONETIC,
+    WORD_ORIGIN(0, R.string.default_txt),
     /**
      * 形容词
      */
-    ADJ,
+    ADJ(1, R.string.adjective),
     /**
      * 副词
      */
-    ADV,
+    ADV(2, R.string.adverb),
     /**
      * 动词
      */
-    V,
+    V(3, R.string.verb),
     /**
      * 不及物动词
      */
-    VI,
+    VI(4, R.string.intransitive_verb),
     /**
      * 及物动词
      */
-    VT,
+    VT(5, R.string.transitive_verb),
     /**
      * 名词
      */
-    N,
+    N(6, R.string.noun),
     /**
      * 连词
      */
-    CONJ,
+    CONJ(7, R.string.conjunction),
     /**
      * 代词
      */
-    PRON,
+    PRON(8, R.string.pronoun),
     /**
      * 数次
      */
-    NUM,
+    NUM(9, R.string.number),
     /**
      * 冠词
      */
-    ART,
+    ART(10, R.string.article),
     /**
      * 介词
      */
-    PREP,
+    PREP(11, R.string.preposition),
     /**
      * 感叹词
      */
-    INT,
+    INT(12, R.string.int_word),
     /**
      * 助动词
      */
-    AUX,
-    /**
-     * 扩展
-     */
-    EXPAND,
+    AUX(13, R.string.auxiliary),
     /**
      * 介词短语
      */
-    PHRASE,
+    PHRASE(14, R.string.phrase),
     /**
      * 例句
      */
-    SENTENCE;
+    SENTENCE(15, R.string.sentence_translation);
+
+    private final int order;
+    private final int keyHint;
+
+    WordStructure(int order, int keyHint) {
+        this.order = order;
+        this.keyHint = keyHint;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public int getKeyHint() {
+        return keyHint;
+    }
 }
