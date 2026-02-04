@@ -4,6 +4,8 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
+import java.util.List;
+
 public interface WordFunctionHandler extends StarFunctionHandler {
     /**
      * 得到单词列表长度
@@ -84,6 +86,7 @@ public interface WordFunctionHandler extends StarFunctionHandler {
 
     /**
      * 得到当前功能区域的所有涉及状态
+     *
      * @return 返回功能区状态实例
      */
     WordFunctionHandlerState getWordFunctionHandlerState();
@@ -114,5 +117,10 @@ public interface WordFunctionHandler extends StarFunctionHandler {
      * @return 单词索引, 若没找到返回-1
      */
     int getIndexByWordOrigin(String origin);
+
+    /**
+     * 得到仅用于保存背诵记录的单词id列表
+     */
+    List<Integer> getSaveIdList();
 
 }

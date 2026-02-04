@@ -47,6 +47,10 @@ import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
@@ -72,8 +76,11 @@ import com.google.android.material.color.MaterialColors;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class MainReciteActivity extends AppCompatActivity implements View.OnClickListener,
         KeyEvent.Callback,
@@ -195,6 +202,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 .setView(LayoutInflater.from(this).inflate(R.layout.dialog_loading, null))
                 .setCancelable(false)
                 .show();
+        appDatabase = APPDatabase.getInstance(this);
         // 显示中文的处理器
         this.resultWebViewHandler = new ResultWebViewHandler(this, findViewById(R.id.wv_recite_result));
         this.starResultWebViewHandler = new ResultWebViewHandler(this, findViewById(R.id.wv_star_recite_result));
@@ -605,14 +613,52 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 reciteWord(wordFunctionHandler.getCurrentFocusWord());
             }
         }
-        // todo 保存进度
+        // 保存当前的进度
         if (clickViewId == R.id.ll_recite_function_saving) {
-            // 保存当前的进度
             StaticFactory.getExecutorService().submit(() -> {
+                List<Integer> saveIdList = wordFunctionHandler.getSaveIdList();
+                ReciteRecordDao reciteRecordDao = appDatabase.reciteRecordDao();
+                appDatabase.runInTransaction(() -> {
+                    ReciteRecordEntity reciteRecordEntity = new ReciteRecordEntity();
+                    reciteRecordEntity.createTime = System.currentTimeMillis();
+                    reciteRecordEntity.wordCount = saveIdList.size();
+                    reciteRecordEntity.reciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode().name();
+                    reciteRecordEntity.reciteMode = userRecitePreference.getReciteOrder().name();
+                    reciteRecordEntity.reciteMode = userRecitePreference.getReciteFilter().name();
+                    reciteRecordEntity.hidePreposition = wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition();
+                    long reciteRecordId = reciteRecordDao.insertReciteRecord(reciteRecordEntity);
+                    List<ReciteRecordWordEntity> recordWordEntityList = saveIdList.stream()
+                            .map(wordId -> {
+                                ReciteRecordWordEntity recordWordEntity = new ReciteRecordWordEntity();
+                                recordWordEntity.recordId = (int) reciteRecordId;
+                                recordWordEntity.wordId = wordId;
+                                return recordWordEntity;
+                            })
+                            .collect(Collectors.toList());
+                    List<Long> recordWordIdList = reciteRecordDao.batchInsertReciteRecordWord(recordWordEntityList);
+                    List<ReciteRecordWordMarkEntity> wordMarkEntityList = new ArrayList<>();
+                    for (int i = 0; i < saveIdList.size(); i++) {
+                        Long recordWordId = recordWordIdList.get(i);
+                        Integer wordId = saveIdList.get(i);
+                        FunctionWordVO functionWordVO = wordFunctionHandler.getDict().get(wordId);
+                        if (functionWordVO == null) continue;
+                        for (MarkColor markColor : functionWordVO.getMarkColorList()) {
+                            if (markColor == MarkColor.BROWN) continue;
+                            ReciteRecordWordMarkEntity wordMarkEntity = new ReciteRecordWordMarkEntity();
+                            wordMarkEntity.recordWordId = Math.toIntExact(recordWordId);
+                            wordMarkEntity.markColor = markColor.name();
+                            wordMarkEntityList.add(wordMarkEntity);
+                        }
+                    }
+                    reciteRecordDao.batchInsertReciteRecordWordMark(wordMarkEntityList);
+                });
+                updateUIHandler.post(() -> {
+                    if (globalToast != null) globalToast.cancel();
+                    globalToast = Toast.makeText(MainReciteActivity.this, R.string.save_success, Toast.LENGTH_LONG);
+                    globalToast.setGravity(Gravity.CENTER, 0, 500);
+                    globalToast.show();
+                });
             });
-            globalToast = Toast.makeText(this, R.string.save_success, Toast.LENGTH_LONG);
-            globalToast.setGravity(Gravity.CENTER, 0, 500);
-            globalToast.show();
         }
 
         // 快速定位

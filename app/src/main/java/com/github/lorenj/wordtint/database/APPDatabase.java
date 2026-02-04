@@ -7,6 +7,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
 import com.github.lorenj.wordtint.database.dao.UserSettingDao;
 import com.github.lorenj.wordtint.database.dao.WordBookDao;
 import com.github.lorenj.wordtint.database.dao.WordBookSectionDao;
@@ -14,6 +15,9 @@ import com.github.lorenj.wordtint.database.dao.WordOriginDao;
 import com.github.lorenj.wordtint.database.dao.WordSearchDao;
 import com.github.lorenj.wordtint.database.dao.WordStarDao;
 import com.github.lorenj.wordtint.database.dao.WordStarWordIdDao;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 import com.github.lorenj.wordtint.database.entity.UserSettingEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
@@ -33,7 +37,8 @@ import java.util.Optional;
 @Database(entities = {
         WordBookEntity.class, WordBookSectionEntity.class, WordBookSectionWordIdEntity.class,
         UserSettingEntity.class, WordOriginEntity.class, WordStarEntity.class,
-        WordStarWordIdEntity.class, WordSearchEntity.class}, version = 5)
+        WordStarWordIdEntity.class, WordSearchEntity.class, ReciteRecordEntity.class,
+        ReciteRecordWordEntity.class, ReciteRecordWordMarkEntity.class}, version = 5)
 public abstract class APPDatabase extends RoomDatabase {
 
     private static volatile APPDatabase INSTANCE = null;
@@ -51,6 +56,8 @@ public abstract class APPDatabase extends RoomDatabase {
     public abstract WordStarWordIdDao wordStarWordIdDao();
 
     public abstract WordSearchDao wordSearchDao();
+
+    public abstract ReciteRecordDao reciteRecordDao();
 
     public static APPDatabase getInstance(Context context) {
         if (INSTANCE == null) {

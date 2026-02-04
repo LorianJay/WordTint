@@ -51,7 +51,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
      * 所有单词的id列表
      */
     private List<Integer> allWordIdList = new ArrayList<>(100);
-
+    /**
+     * 仅用于保存背诵记录的引用<br>
+     * 只在初始化时赋值,后续不再更改,用于本次背诵的所有单词的记录保存
+     */
+    private final List<Integer> saveList;
     /**
      * 反查单词的Index(快速定位功能)
      */
@@ -81,6 +85,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         this.userRecitePreference = userRecitePreference;
         this.wordFunctionHandlerState = new WordFunctionHandlerState();
         initHandler();
+        this.saveList = allWordIdList;
         this.start = 0;
         this.end = allWordIdList.size() - 1;
     }
@@ -242,6 +247,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
     public int getIndexByWordOrigin(String origin) {
         Integer result = quickPosition.get(origin.toLowerCase());
         return result == null ? -1 : result;
+    }
+
+    @Override
+    public List<Integer> getSaveIdList() {
+        return saveList;
     }
 
     /**
