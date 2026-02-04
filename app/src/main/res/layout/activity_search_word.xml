@@ -2,12 +2,12 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_search_word_start_drawer"
+    android:id="@+id/dl_search_word"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".ui.fragment.SearchWordFragment"
-    tools:openDrawer="end">
+    tools:context=".ui.activity.SearchWordActivity"
+    tools:openDrawer="">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -41,68 +41,81 @@
                     android:scaleType="fitCenter"
                     android:src="?attr/actionModeCloseDrawable" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/search_word"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
+
             </RelativeLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <TextView
-            android:id="@+id/tv_recite_origin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxLines="1"
-            android:text="@string/source_word"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:background="@color/learn_back_ground"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/abl_search_word" />
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:paddingTop="5dp"
+            android:background="@color/learn_back_ground"
             app:layout_constraintBottom_toTopOf="@+id/hs_search_word_function_area"
-            app:layout_constraintTop_toBottomOf="@id/tv_recite_origin">
-
+            app:layout_constraintTop_toBottomOf="@id/abl_search_word">
 
             <LinearLayout
-                android:id="@+id/fragment_search_word_answer_area"
+                android:id="@+id/ll_search_word_result"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:paddingBottom="7dp">
+                android:paddingBottom="7dp"
+                android:visibility="gone">
 
-                <WebView
-                    android:id="@+id/fragment_word_credit_chinese_answer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="-5dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginEnd="5dp"
-                    android:layout_marginBottom="0dp"
-                    android:clipToPadding="false"
-                    android:paddingStart="15dp"
-                    android:paddingTop="15dp"
-                    android:paddingEnd="15dp"
-                    android:paddingBottom="15dp"
-                    android:scrollbars="none"
-                    android:visibility="gone" />
-
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/fragment_search_word_select_recycler_view"
+                <TextView
+                    android:id="@+id/tv_recite_origin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:paddingStart="15dp"
-                    android:paddingTop="15dp"
-                    android:paddingEnd="15dp">
+                    android:background="@color/learn_back_ground"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/source_word"
+                    android:textColor="@color/black"
+                    android:textSize="24sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/abl_search_word" />
 
-                </androidx.recyclerview.widget.RecyclerView>
+                <WebView
+                    android:id="@+id/wv_search_word_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="none" />
+
             </LinearLayout>
 
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/nsv_search_word_select_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_search_word_select_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="15dp"
+                        android:paddingTop="15dp"
+                        android:paddingEnd="15dp" />
+
+                    <androidx.core.widget.ContentLoadingProgressBar
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+            </androidx.core.widget.NestedScrollView>
 
         </RelativeLayout>
 
@@ -114,49 +127,20 @@
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:scrollbars="none"
-            app:layout_constraintBottom_toTopOf="@+id/fragment_search_word_bottom_search">
+            app:layout_constraintBottom_toTopOf="@+id/cl_search_word_control_area">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-
+                <!--收藏夹-->
                 <LinearLayout
-                    android:id="@+id/fragment_search_word_click_rate"
+                    android:id="@+id/ll_search_word_star"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:gravity="center"
-                        android:text="@string/default_rate"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:text="@string/rate"
-                        android:textColor="@color/gray_black"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/fragment_search_word_click_star"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
-                    android:layout_toEndOf="@+id/fragment_search_word_click_rate"
-                    android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
-                    android:orientation="vertical">
 
                     <ImageView
                         android:layout_width="40dp"
@@ -172,19 +156,19 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/start"
-                        android:textColor="@color/dark_gray"
+                        android:textColor="@color/gray_black"
                         android:textSize="14sp" />
-
                 </LinearLayout>
 
+                <!--单词分析-->
                 <LinearLayout
-                    android:id="@+id/fragment_search_word_click_analysis_word"
+                    android:id="@+id/ll_search_word_analysis"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
-                    android:layout_toEndOf="@+id/fragment_search_word_click_star"
+                    android:layout_toEndOf="@+id/ll_search_word_star"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
-                    android:foreground="@drawable/item_gray_select"
                     android:orientation="vertical">
 
                     <ImageView
@@ -201,7 +185,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/analysis_word"
-                        android:textColor="@color/dark_gray"
+                        android:textColor="@color/gray_black"
                         android:textSize="14sp" />
 
                 </LinearLayout>
@@ -211,7 +195,7 @@
         </HorizontalScrollView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_search_word_bottom_search"
+            android:id="@+id/cl_search_word_control_area"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
@@ -220,40 +204,48 @@
             android:paddingEnd="10dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageButton
-                android:id="@+id/fragment_search_word_play_word"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+            <ImageView
+                android:id="@+id/iv_search_word_control_play"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentStart="true"
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/style_image_padding"
                 android:foreground="@drawable/item_gray_select_radius_18dp"
                 android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitCenter"
-                android:src="@android:drawable/ic_media_play"
+                android:src="@drawable/ic_play"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/theme_color" />
 
             <androidx.appcompat.widget.SearchView
-                android:id="@+id/fragment_search_word_search_view"
+                android:id="@+id/sv_search_word_control"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
-                android:background="@drawable/fragment_home_search_view_bg"
+                android:background="@drawable/bg_rounded_ripple_solid"
+                android:backgroundTint="@color/gray"
                 android:gravity="center"
                 android:iconifiedByDefault="true"
                 android:imeOptions="actionSearch"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_search_word_play_word"
+                app:layout_constraintStart_toEndOf="@+id/iv_search_word_control_play"
                 app:layout_constraintTop_toTopOf="parent"
                 app:queryBackground="@null" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include layout="@layout/layout_star" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

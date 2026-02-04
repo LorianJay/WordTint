@@ -32,7 +32,6 @@ import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
-import com.github.lorenj.wordtint.entity.dto.DataPage;
 import com.github.lorenj.wordtint.entity.dto.SearchWordParam;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryParam;
 import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
@@ -44,9 +43,9 @@ import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.WordSearchHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
-import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
+import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
 
@@ -258,7 +257,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
             // 初始化单词列表的adapter
             this.selectWordListAdapter = new SelectWordListAdapter(getContext());
             // 设置选中单词的回调事件
-            this.selectWordListAdapter.setRecycleViewItemClickCallBack(this);
+            //this.selectWordListAdapter.setRecycleViewItemClickCallBack(this);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
             starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
@@ -336,6 +335,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
         return new TimerTask() {
             @Override
             public void run() {
+                /*
                 StaticFactory.getExecutorService().submit(() -> {
                     DataPage<WordDTOLocal> page = wordSearchHandler.searchWord(searchWordEvent);
                     updateUIHandler.post(() -> {
@@ -354,6 +354,8 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
                     });
                 });
                 isRunning = false;
+
+                 */
             }
         };
 
@@ -362,7 +364,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
     private void bindView() {
         this.backToTrace = rootView.findViewById(R.id.toolbar_back_to_trace);
         this.title = rootView.findViewById(R.id.toolbar_title);
-        this.sourceWord = rootView.findViewById(R.id.fragment_search_word_source_word);
+        //this.sourceWord = rootView.findViewById(R.id.fragment_search_word_source_word);
         this.chineseAnswer = rootView.findViewById(R.id.fragment_word_credit_chinese_answer);
         this.analysisWord = rootView.findViewById(R.id.fragment_search_word_click_analysis_word);
         this.startDrawer = rootView.findViewById(R.id.fragment_search_word_start_drawer);

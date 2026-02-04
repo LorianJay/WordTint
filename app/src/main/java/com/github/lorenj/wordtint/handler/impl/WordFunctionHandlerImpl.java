@@ -51,10 +51,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
      * 所有单词的id列表
      */
     private List<Integer> allWordIdList = new ArrayList<>(100);
-    /**
-     * 字典信息
-     */
-    private final Map<Integer, FunctionWordVO> dict = new HashMap<>();
+
     /**
      * 反查单词的Index(快速定位功能)
      */
@@ -89,18 +86,13 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
     }
 
     @Override
-    public Map<Integer, FunctionWordVO> getDict() {
-        return dict;
-    }
-
-    @Override
     public Integer getCurrentFocusWordId() {
         return this.allWordIdList.get(currentIndex);
     }
 
     @Override
     public FunctionWordVO getWordByIndex(int index) {
-        return dict.get(allWordIdList.get(currentIndex));
+        return super.getDict().get(allWordIdList.get(currentIndex));
     }
 
     @Override
@@ -278,10 +270,10 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         // 2. 根据单词的id组装出所有的单词-字典
         List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordByIdList(allWordIdList);
         for (WordOriginEntity wordOriginEntity : allOriginWordList) {
-            FunctionWordVO functionWordVO = dict.get(wordOriginEntity.wordId);
+            FunctionWordVO functionWordVO = super.getDict().get(wordOriginEntity.wordId);
             if (functionWordVO == null) {
                 functionWordVO = new FunctionWordVO();
-                dict.put(wordOriginEntity.wordId, functionWordVO);
+                super.getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
             functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
@@ -289,7 +281,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         // 3.背诵过滤
         if (userRecitePreference.getReciteFilter() == ReciteFilter.PHRASE) {
             allWordIdList = allWordIdList.stream()
-                    .filter(dict::containsKey)
+                    .filter(super.getDict()::containsKey)
                     .collect(Collectors.toList());
         }
         // 4.背诵的顺序
@@ -297,10 +289,10 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
             Collections.shuffle(allWordIdList);
         } else if (userRecitePreference.getReciteOrder() == ReciteOrder.LEXICOGRAPHIC) {
             allWordIdList = allWordIdList.stream()
-                    .sorted((o1, o2) -> dict.get(o1)
+                    .sorted((o1, o2) -> super.getDict().get(o1)
                             .getValue()
                             .getOrDefault(WordStructure.WORD_ORIGIN, "")
-                            .compareTo(dict.get(o2).getValue().getOrDefault(WordStructure.WORD_ORIGIN, "")))
+                            .compareTo(super.getDict().get(o2).getValue().getOrDefault(WordStructure.WORD_ORIGIN, "")))
                     .collect(Collectors.toList());
         }
         // 5.如果是历史记录,则根据历史记录设置MarkColor
@@ -313,7 +305,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         // 5.快速定位(单词反查的初始化)
         quickPosition = new HashMap<>(allWordIdList.size());
         for (int i = 0; i < allWordIdList.size(); i++) {
-            FunctionWordVO functionWordVO = dict.get(allWordIdList.get(i));
+            FunctionWordVO functionWordVO = super.getDict().get(allWordIdList.get(i));
             if (functionWordVO != null) {
                 quickPosition.put(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN), i);
             }
@@ -346,7 +338,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
      * @return boolean
      */
     private boolean testWordIsCurrentChameleonWithIndex(int index) {
-        return Optional.ofNullable(dict.get(allWordIdList.get(index)))
+        return Optional.ofNullable(super.getDict().get(allWordIdList.get(index)))
                 .map(FunctionWordVO::getMarkColorList)
                 .map(set -> set.contains(getWordFunctionHandlerState().getChameleon().getValue()))
                 .orElse(false);

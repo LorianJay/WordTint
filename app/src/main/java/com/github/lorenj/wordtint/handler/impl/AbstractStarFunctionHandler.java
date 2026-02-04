@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
@@ -14,7 +15,10 @@ import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,20 +37,23 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
      */
     private final APPDatabase appDatabase;
     /**
-     * 用于存储单词分类的列表<br>
-     * key:star_id<br>
-     * value:star和其下的所有单词列表
-     */
-    //private Map<Integer, WordStarWithWordIdEntity> allStarMap = new HashMap<>();
-    /**
      * 存储所有收藏夹的id列表
      */
     private List<WordStarWithWordIdEntity> allStarList = new ArrayList<>();
+    /**
+     * 字典信息
+     */
+    private final Map<Integer, FunctionWordVO> dict = new HashMap<>();
 
     public AbstractStarFunctionHandler(Context context) {
         this.context = context;
         this.appDatabase = APPDatabase.getInstance(context);
         initHandler();
+    }
+
+    @Override
+    public Map<Integer, FunctionWordVO> getDict() {
+        return dict;
     }
 
     @Override
@@ -74,7 +81,6 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
 
     @Override
     public void reloadStar() {
-        // 加载所有的收藏夹
         this.allStarList = appDatabase.wordStarDao()
                 .findAllStarAndWordId();
     }
@@ -204,6 +210,24 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
 
     private void initHandler() {
         this.reloadStar();
+        // 组装出收藏夹的字典
+        List<Integer> allWordIdList = allStarList.stream()
+                .map(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarWordIdEntityList)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .map(wordStarWordIdEntity -> wordStarWordIdEntity.wordId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordByIdList(allWordIdList);
+        for (WordOriginEntity wordOriginEntity : allOriginWordList) {
+            FunctionWordVO functionWordVO = getDict().get(wordOriginEntity.wordId);
+            if (functionWordVO == null) {
+                functionWordVO = new FunctionWordVO();
+                getDict().put(wordOriginEntity.wordId, functionWordVO);
+            }
+            functionWordVO.setWordId(wordOriginEntity.wordId);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
+        }
     }
 
     /**

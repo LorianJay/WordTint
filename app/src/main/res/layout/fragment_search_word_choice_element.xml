@@ -8,7 +8,6 @@
         android:id="@+id/fragment_search_word_choice_element_word"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:layout_toStartOf="@id/fragment_search_word_start_word_element"
         android:clickable="true"
         android:foreground="@drawable/item_gray_select"
         android:orientation="vertical">
@@ -24,19 +23,5 @@
             android:textColor="@color/black"
             android:textSize="20sp" />
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/fragment_search_word_start_word_element"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:background="@drawable/fragment_home_face"
-        android:clickable="true"
-        android:gravity="center"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_start"
-        app:tint="@color/dark_gray" />
 
 </RelativeLayout>

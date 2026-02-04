@@ -29,6 +29,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -59,9 +61,9 @@ import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
 import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
-import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.utils.AnimationUtil;
@@ -106,7 +108,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private CardView lightResult;
     private TableLayout functionChangeModePopLayout;
     private ImageView functionMarkImageView, functionChameleonImageView, functionSwitchImageView, functionLockImageView;
-    private ImageView functionBlueToothImageView, functionShuffleImageView, functionSectionImageView, functionQuickPositionImageView, starRefresh;
+    private ImageView functionBlueToothImageView, functionShuffleImageView, functionSectionImageView, functionQuickPositionImageView;
     private TextView windowListingWrite, windowEnglishChineseAudio, windowEnglishChinese;
     private TextView windowChineseEnglish, windowOnlyRecite, windowHidePhrase;
     private long exitLastTime = 0;
@@ -163,6 +165,19 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 全局的对话框,用于弹出提示信息
      */
     private Toast globalToast;
+
+
+    /**
+     * 搜索单词页面的跳转返回
+     */
+    private final ActivityResultLauncher<Intent> searchLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    // todo
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -638,7 +653,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         // 单词搜索
         if (clickViewId == R.id.ll_recite_function_search) {
-            // todo 跳转单词搜索界面
+            searchLauncher.launch(new Intent(MainReciteActivity.this, SearchWordActivity.class));
         }
         // 单词分析
         if (clickViewId == R.id.ll_recite_function_analysis) {
@@ -670,20 +685,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     })
                     .show();
-        }
-        if (clickViewId == R.id.im_recite_star_refresh) {
-            // 刷新收藏夹信息 todo 应该要返回的时候自动刷新
-            //StaticFactory.getExecutorService().submit(() -> {
-            //    this.starCategoryAdapter = new StarCategoryAdapter(this);
-            //    ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
-            //    starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
-            //    starCategoryAdapter.setStartFunctionHandler(wordFunctionHandler);
-            //    //wordFunctionHandler.replaceAddCategory(JsonUtils.readJsonArray(WordContextPath.WORD_STAR.getPath(), WordCategoryDetailVO.class));
-            //    updateUIHandler.post(() -> {
-            //        starList.setAdapter(starCategoryAdapter);
-            //        touchHelper.attachToRecyclerView(starList);
-            //    });
-            //});
         }
         // 模式改变
         if (clickViewId == R.id.ll_recite_function_mode) {
@@ -1073,7 +1074,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         // 收藏夹区域
         this.starDrawer = findViewById(R.id.dr_main_recite_star);
         this.starCurrentWord = findViewById(R.id.tv_recite_star_current_word);
-        this.starRefresh = findViewById(R.id.im_recite_star_refresh);
         this.starList = findViewById(R.id.rc_recite_star_list);
         this.starCreateCategory = findViewById(R.id.tv_recite_star_create);
         // 其它
@@ -1109,7 +1109,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionSearchWord.setOnClickListener(this);
         this.functionSaveProgress.setOnClickListener(this);
         this.functionAnalysis.setOnClickListener(this);
-        this.starRefresh.setOnClickListener(this);
         this.functionSwitch.setOnClickListener(this);
         this.functionLock.setOnClickListener(this);
         this.lightResult.setOnTouchListener(this);
