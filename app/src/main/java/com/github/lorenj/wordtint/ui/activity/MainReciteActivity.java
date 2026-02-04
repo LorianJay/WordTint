@@ -73,6 +73,7 @@ import com.google.android.material.color.MaterialColors;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class MainReciteActivity extends AppCompatActivity implements View.OnClickListener,
         KeyEvent.Callback,
@@ -174,7 +175,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                    // todo
+                    CompletableFuture
+                            .runAsync(wordFunctionHandler::reloadStar, StaticFactory.getExecutorService())
+                            .thenRunAsync(starCategoryAdapter::notifyDataSetChanged, updateUIHandler::post);
                 }
             }
     );

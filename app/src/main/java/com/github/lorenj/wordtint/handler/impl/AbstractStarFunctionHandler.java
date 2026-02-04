@@ -48,7 +48,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
     public AbstractStarFunctionHandler(Context context) {
         this.context = context;
         this.appDatabase = APPDatabase.getInstance(context);
-        initHandler();
+        reloadStar();
     }
 
     @Override
@@ -93,6 +93,24 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
     public void reloadStar() {
         this.allStarList = appDatabase.wordStarDao()
                 .findAllStarAndWordId();
+        // 组装出收藏夹的字典
+        List<Integer> allWordIdList = allStarList.stream()
+                .map(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarWordIdEntityList)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .map(wordStarWordIdEntity -> wordStarWordIdEntity.wordId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordByIdList(allWordIdList);
+        for (WordOriginEntity wordOriginEntity : allOriginWordList) {
+            FunctionWordVO functionWordVO = getDict().get(wordOriginEntity.wordId);
+            if (functionWordVO == null) {
+                functionWordVO = new FunctionWordVO();
+                getDict().put(wordOriginEntity.wordId, functionWordVO);
+            }
+            functionWordVO.setWordId(wordOriginEntity.wordId);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
+        }
     }
 
     @Override
@@ -216,28 +234,6 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         int fromOrder = fromWord.order;
         fromWord.order = toWord.order;
         toWord.order = fromOrder;
-    }
-
-    private void initHandler() {
-        this.reloadStar();
-        // 组装出收藏夹的字典
-        List<Integer> allWordIdList = allStarList.stream()
-                .map(wordStarWithWordIdEntity -> wordStarWithWordIdEntity.wordStarWordIdEntityList)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .map(wordStarWordIdEntity -> wordStarWordIdEntity.wordId)
-                .distinct()
-                .collect(Collectors.toList());
-        List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordByIdList(allWordIdList);
-        for (WordOriginEntity wordOriginEntity : allOriginWordList) {
-            FunctionWordVO functionWordVO = getDict().get(wordOriginEntity.wordId);
-            if (functionWordVO == null) {
-                functionWordVO = new FunctionWordVO();
-                getDict().put(wordOriginEntity.wordId, functionWordVO);
-            }
-            functionWordVO.setWordId(wordOriginEntity.wordId);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
-        }
     }
 
     /**
