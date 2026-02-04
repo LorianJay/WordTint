@@ -33,7 +33,9 @@ public interface StarFunctionHandler extends StarSectionFunctionHandler {
     /**
      * 得到当前停留的单词(得到当前选中的单词)<br>
      * 该方法返回的单词是用户可能想要将其收藏到某个收藏夹内的单词<br>
-     * 所以有可能是正在背诵的单词/也有可能是当前搜索到的单词
+     * 所以有可能是正在背诵的单词/也有可能是当前搜索到的单词<br>
+     * 该方法不能在UI线程调用,如果是搜索到的单词,那么此时字典里面很可能并没有该单词的信息<br>
+     * 此时就必须从数据库查找单词的详情信息,该方法最好不要在UI线程执行!
      *
      * @return 返回当前正在背诵的单词引用
      */
@@ -51,12 +53,15 @@ public interface StarFunctionHandler extends StarSectionFunctionHandler {
      */
     void reloadStar();
 
+    /**
+     * 得到所有的收藏夹列表
+     */
     List<WordStarWithWordIdEntity> getAllStarList();
 
     /**
      * 更新单词收藏夹信息
      *
-     * @param wordStarEntity 单词收藏夹信息
+     * @param wordStarWithWordIdEntity 单词收藏夹信息
      */
     void updateStar(WordStarWithWordIdEntity wordStarWithWordIdEntity);
 

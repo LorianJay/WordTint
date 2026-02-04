@@ -15,4 +15,7 @@ import java.util.List;
 public interface WordOriginDao {
     @Query("SELECT * FROM word_origin WHERE word_id in(:wordIdList)")
     List<WordOriginEntity> findAllOriginWordByIdList(List<Integer> wordIdList);
+
+    @Query("SELECT * FROM word_origin WHERE word_id in(:wordId)")
+    List<WordOriginEntity> findAllOriginWordById(int wordId);
 }

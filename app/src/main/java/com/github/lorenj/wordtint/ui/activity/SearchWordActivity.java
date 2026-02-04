@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,16 +31,20 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
-import com.github.lorenj.wordtint.entity.dto.WordCategoryWordDTO;
+import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
+import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.wordsearch.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
+import com.github.lorenj.wordtint.ui.viewmodel.WordSearchViewModel;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -83,12 +88,7 @@ public class SearchWordActivity extends AppCompatActivity
     private RecyclerView selectWordList;
     // 单词搜索列表的adapter
     private SelectWordListAdapter selectWordListAdapter;
-    // 当前选中的单词
-    private WordCategoryWordDTO currentViewWord = null;
-    // 当前是否是最后一页,为了防止重复请求
-    private volatile boolean lastList = false;
-    // 判断当前是否有任务正在执行
-    private volatile boolean isRunning = false;
+    private LoadMoreAdapter loadMoreAdapter;
     // 单词音频播放器
     private final MediaPlayer mediaPlayer = new MediaPlayer();
     /**
@@ -106,6 +106,10 @@ public class SearchWordActivity extends AppCompatActivity
      * 单词收藏需要获取当前的单词id
      */
     private StarFunctionHandler starFunctionHandler = null;
+    private WordSearchViewModel wordSearchViewModel;
+    private int currentFocusWordId = 0;
+    private boolean textChange = false;
+    private long searchDelay = 500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,21 +133,6 @@ public class SearchWordActivity extends AppCompatActivity
         }
         return true;
     }
-
-/*
-    @Override
-    public void viewClickCallBack(WordDTOLocal wordDTOLocal) {
-        // 设置搜索单词的回调事件
-        if (queryTimer != null) {
-            queryTimer.cancel();
-            isRunning = false;
-        }
-        // 将当前搜索得到的单词转换为选中的单词
-        this.currentViewWord = new WordCategoryWordDTO();
-        currentViewWord.setWordId(wordDTOLocal.getId());
-        visibleWordAllMessage(wordDTOLocal);
-    }
- */
 
     @Override
     public void onClick(View v) {
@@ -185,11 +174,20 @@ public class SearchWordActivity extends AppCompatActivity
     }
 
     /**
-     * 当用户点击提交之后,立即执行搜索操作
+     * 当用户点击提交之后,立即执行搜索操作<br>
+     * 如果自从上次搜索结束之后,输入框的内容没有发生任何改变<br>
+     * 则无需重复搜索,直接复用上次的搜索结果
      */
     @Override
     public boolean onQueryTextSubmit(String query) {
-        return onQueryTextChange(query);
+        if (TextUtils.isEmpty(query)) return false;
+        if (textChange) {
+            return onQueryTextChange(query);
+        } else {
+            resultArea.setVisibility(View.GONE);
+            selectWordList.setVisibility(View.VISIBLE);
+        }
+        return false;
     }
 
     /**
@@ -199,9 +197,9 @@ public class SearchWordActivity extends AppCompatActivity
     @Override
     public boolean onQueryTextChange(String newText) {
         if (!TextUtils.isEmpty(newText)) {
+            textChange = true;
             if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
-            this.isRunning = true;
-            this.currentTask = this.scheduler.schedule(getQueryTask(), 1000, TimeUnit.MILLISECONDS);
+            this.currentTask = this.scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
             page = 0;
         }
         return false;
@@ -223,15 +221,10 @@ public class SearchWordActivity extends AppCompatActivity
                             searchText,
                             page * PAGE_SIZE,
                             PAGE_SIZE);
-                    if (!lastPage) {
-                        WordSearchEntity loadMore = new WordSearchEntity();
-                        loadMore.wordId = -1;
-                        loadMore.wordOrigin = "-1";
-                        wordSearchEntityList.add(loadMore);
-                    }
                     updateUIHandler.post(() -> {
                         selectWordList.setVisibility(View.VISIBLE);
                         resultArea.setVisibility(View.GONE);
+                        loadMoreAdapter.setVisible(lastPage ? View.GONE : View.VISIBLE);
                         // 第一次是全量更新,第二次是增量更新
                         if (page == 0) {
                             selectWordListAdapter.replaceAll(wordSearchEntityList);
@@ -240,7 +233,6 @@ public class SearchWordActivity extends AppCompatActivity
                         }
                     });
                 });
-                isRunning = false;
             }
         };
 
@@ -248,6 +240,10 @@ public class SearchWordActivity extends AppCompatActivity
 
 
     private void initView() {
+        loadingDialog = new AlertDialog.Builder(this)
+                .setView(LayoutInflater.from(this).inflate(R.layout.dialog_loading, null))
+                .setCancelable(false)
+                .show();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         starDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         this.appDatabase = APPDatabase.getInstance(this);
@@ -256,10 +252,19 @@ public class SearchWordActivity extends AppCompatActivity
         this.starResultWebViewHandler = new ResultWebViewHandler(this, findViewById(R.id.wv_star_recite_result));
         originWord.setText("");
         starCurrentWord.setText("");
-        loadingDialog = new AlertDialog.Builder(this)
-                .setView(LayoutInflater.from(this).inflate(R.layout.dialog_loading, null))
-                .setCancelable(false)
-                .show();
+        // 设置选中单词的回调事件
+        this.wordSearchViewModel = new WordSearchViewModel();
+        this.wordSearchViewModel.getCurrentSelectWord()
+                .observe(this, wordSearchEntity -> {
+                    if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
+                    currentFocusWordId = wordSearchEntity.wordId;
+                    StaticFactory.getExecutorService().execute(() -> {
+                        FunctionWordVO currentFocusWord = starFunctionHandler.getCurrentFocusWord();
+                        updateUIHandler.post(() -> {
+                            if (currentFocusWord != null) visibleWordAllMessage(currentFocusWord);
+                        });
+                    });
+                });
         // 中文结果显示的RecyclerView
         this.starList.setLayoutManager(new LinearLayoutManager(this));
         this.selectWordList.setLayoutManager(new LinearLayoutManager(this));
@@ -267,20 +272,20 @@ public class SearchWordActivity extends AppCompatActivity
             starFunctionHandler = new AbstractStarFunctionHandler(this) {
                 @Override
                 public Integer getCurrentFocusWordId() {
-                    return null;
+                    return currentFocusWordId;
                 }
             };
             this.starCategoryAdapter = new StarCategoryAdapter(this, starFunctionHandler);
             // 初始化单词列表的adapter
-            this.selectWordListAdapter = new SelectWordListAdapter(this);
-            // 设置选中单词的回调事件
-            //this.selectWordListAdapter.setRecycleViewItemClickCallBack(this);
+            this.selectWordListAdapter = new SelectWordListAdapter(this, wordSearchViewModel);
+            this.loadMoreAdapter = new LoadMoreAdapter(this);
+            ConcatAdapter concatAdapter = new ConcatAdapter(selectWordListAdapter, loadMoreAdapter);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
             ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
             starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
             updateUIHandler.post(() -> {
                 this.starList.setAdapter(starCategoryAdapter);
-                this.selectWordList.setAdapter(selectWordListAdapter);
+                this.selectWordList.setAdapter(concatAdapter);
                 touchHelper.attachToRecyclerView(starList);
                 this.lightResult.setVisibility(View.GONE);
                 loadingDialog.dismiss();
@@ -292,18 +297,32 @@ public class SearchWordActivity extends AppCompatActivity
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 // 滑动到底部
-                if (!recyclerView.canScrollVertically(1) && !lastList) {
+                if (!recyclerView.canScrollVertically(1) && !lastPage) {
                     // 优先执行搜索事件或者已有的分页查询事件
-                    if (!isRunning) {
-                        isRunning = true;
-                        if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
-                        page++;
-                        scheduler.schedule(getQueryTask(), 1000, TimeUnit.MILLISECONDS);
-                    }
+                    if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
+                    page++;
+                    currentTask = scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
                 }
             }
         });
 
+    }
+
+    private void visibleWordAllMessage(FunctionWordVO functionWordVO) {
+        // 设置主界面的单词全部信息
+        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+                .ifPresent(wordDTOS -> originWord.setText(wordDTOS));
+        resultWebViewHandler.displayWordResult(functionWordVO);
+        // 设置收藏夹信息
+        starResultWebViewHandler.displayWordResult(functionWordVO);
+        // 设置右侧展开列表单词的原文
+        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+                .ifPresent(wordDTOS -> starCurrentWord
+                        .setText(wordDTOS));
+        // 刷新相关UI
+        resultArea.setVisibility(View.VISIBLE);
+        selectWordList.setVisibility(View.GONE);
+        textChange = false;
     }
 
     private void bindView() {
@@ -329,6 +348,7 @@ public class SearchWordActivity extends AppCompatActivity
         this.backToTrace.setOnClickListener(this);
         this.analysisWord.setOnClickListener(this);
         this.openStarDrawer.setOnClickListener(this);
+        this.starCreateCategory.setOnClickListener(this);
         this.controlPlay.setOnClickListener(this);
     }
 }

@@ -59,8 +59,18 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
     @Override
     public FunctionWordVO getCurrentFocusWord() {
         Integer currentSelectWordId = getCurrentFocusWordId();
-        return currentSelectWordId == null ? null :
-                getDict().get(currentSelectWordId);
+        FunctionWordVO functionWordVO = getDict().get(currentSelectWordId);
+        if (functionWordVO != null) return functionWordVO;
+
+        // 如果从字典里面查不出来,则必须从数据库查,此时不能在UI线程中执行!
+        List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordById(currentSelectWordId);
+        functionWordVO = new FunctionWordVO();
+        functionWordVO.setWordId(currentSelectWordId);
+        for (WordOriginEntity wordOriginEntity : allOriginWordList) {
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
+        }
+        getDict().put(currentSelectWordId, functionWordVO);
+        return functionWordVO;
     }
 
     @Override

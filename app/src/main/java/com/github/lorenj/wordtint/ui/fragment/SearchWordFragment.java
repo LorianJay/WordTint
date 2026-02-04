@@ -255,7 +255,7 @@ public class SearchWordFragment extends Fragment implements View.OnClickListener
             wordSearchHandler = new WordSearchHandlerImpl(getContext(), allWordDict);
             this.starCategoryAdapter = new StarCategoryAdapter(getContext(),starFunctionHandler);
             // 初始化单词列表的adapter
-            this.selectWordListAdapter = new SelectWordListAdapter(getContext());
+            //this.selectWordListAdapter = new SelectWordListAdapter(getContext());
             // 设置选中单词的回调事件
             //this.selectWordListAdapter.setRecycleViewItemClickCallBack(this);
             // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
