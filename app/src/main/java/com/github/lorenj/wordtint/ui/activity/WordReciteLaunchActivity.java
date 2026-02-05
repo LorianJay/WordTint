@@ -26,6 +26,7 @@ import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
+import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.ReciteStyle;
 import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
@@ -83,7 +84,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
             } else {
 
             }
-        } else if (itemId == R.id.fragment_word_credit_launch_save_settings) {
+        } else if (itemId == R.id.tv_recite_launch_save_settings) {
             // 保存用户的当前设置
             StaticFactory.getExecutorService().execute(() -> {
                 userSettingRepository.update(UserSettingKeyEnums.RECITE_MODE, userRecitePreference.getReciteMode());
@@ -93,13 +94,13 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
                 userSettingRepository.update(UserSettingKeyEnums.SKIP_PREFERENCE, userRecitePreference.isIgnore());
             });
             toast.show();
-        } else if (itemId == R.id.fragment_word_credit_launch_restore_default) {
+        } else if (itemId == R.id.tv_recite_launch_restore_default) {
             userRecitePreference.setReciteMode((ReciteMode) UserSettingKeyEnums.RECITE_MODE.defaultValue);
             userRecitePreference.setReciteOrder((ReciteOrder) UserSettingKeyEnums.RECITE_ORDER.defaultValue);
             userRecitePreference.setReciteFilter((ReciteFilter) UserSettingKeyEnums.RECITE_FILTER.defaultValue);
             userRecitePreference.setReciteStyle((ReciteStyle) UserSettingKeyEnums.RECITE_STYLE.defaultValue);
             updateUIByPreference(userRecitePreference);
-        } else if (itemId == R.id.fragment_word_credit_launch_ignore) {
+        } else if (itemId == R.id.tv_word_recite_launch_ignore) {
             userRecitePreference.setIgnore(ignore.isChecked());
             updateUIByPreference(userRecitePreference);
         } else if (v instanceof TextView) {
@@ -120,10 +121,10 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
     private void bindView() {
         this.toolBarBack = findViewById(R.id.ib_toolbar_back);
         this.start = findViewById(R.id.tv_word_recite_start);
-        this.saveSettings = findViewById(R.id.fragment_word_credit_launch_save_settings);
+        this.saveSettings = findViewById(R.id.tv_recite_launch_save_settings);
         this.tvSelectWordCount = findViewById(R.id.fragment_word_credit_launch_word_count);
-        this.restoreDefault = findViewById(R.id.fragment_word_credit_launch_restore_default);
-        this.ignore = findViewById(R.id.fragment_word_credit_launch_ignore);
+        this.restoreDefault = findViewById(R.id.tv_recite_launch_restore_default);
+        this.ignore = findViewById(R.id.tv_word_recite_launch_ignore);
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_mode));
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_order));
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_filter));
@@ -160,12 +161,12 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
             List<Integer> allSectionIdList = Optional.ofNullable(bundle)
                     .map((Function<Bundle, List<Integer>>) args -> args.getIntegerArrayList(BookListFragment.SELECT_SECTION_LIST))
                     .orElse(new ArrayList<>());
-            // todo 如果是历史记录
             userRecitePreference = new UserRecitePreference(
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_MODE),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_ORDER),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_FILTER),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_STYLE),
+                    ReciteOrigin.RECITE_LIST,
                     false,
                     allSectionIdList);
             // 设置选词量

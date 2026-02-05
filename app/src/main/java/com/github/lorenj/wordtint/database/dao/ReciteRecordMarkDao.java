@@ -19,4 +19,8 @@ public interface ReciteRecordMarkDao {
 
     @Query("delete from recite_record_word_mark where record_word_id in(:recordWordIdList)")
     void deleteByRecordWordId(List<Integer> recordWordIdList);
+
+    @Query("select * from recite_record_word_mark where record_word_id in(:recordWordIdList)")
+    List<ReciteRecordWordMarkEntity> findAllByRecordWordId(List<Integer> recordWordIdList);
+
 }

@@ -26,4 +26,7 @@ public class ReciteRecordWordEntity {
     @ColumnInfo(name = "word_id")
     public int wordId;
 
+    @ColumnInfo(name = "order")
+    public int order;
+
 }

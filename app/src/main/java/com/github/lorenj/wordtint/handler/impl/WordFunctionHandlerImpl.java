@@ -3,10 +3,12 @@ package com.github.lorenj.wordtint.handler.impl;
 import android.content.Context;
 
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
+import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
@@ -18,6 +20,7 @@ import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,11 +261,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
      * 初始化处理器
      */
     private void initHandler() {
+        appDatabase = APPDatabase.getInstance(context);
         // 1.加载单词
         if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_LIST) {
             // 来自背诵列表-根据当前选择的章节加载获取所有的单词
             List<Integer> allSectionIdList = userRecitePreference.getAllSectionIdList();
-            appDatabase = APPDatabase.getInstance(context);
             for (Integer sectionId : allSectionIdList) {
                 List<WordBookSectionWordIdEntity> sectionWordIdEntityList = appDatabase.wordBookSectionDao()
                         .findAllBySectionId(sectionId);
@@ -272,13 +275,28 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                         .collect(Collectors.toList());
                 allWordIdList.addAll(orderWordIdList);
             }
-        } else if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_REVIEW) {
-
-        } else if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_RECORD) {
+        }
+        List<ReciteRecordWordEntity> recordWordEntityList = new ArrayList<>();
+        if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_RECORD) {
+            Integer recordId = userRecitePreference.getAllSectionIdList()
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("not found"));
+            recordWordEntityList = appDatabase.reciteRecordWordDao()
+                    .findByRecordId(recordId);
+            List<Integer> orderWordIdList = recordWordEntityList
+                    .stream()
+                    .sorted(Comparator.comparingInt(value -> value.order))
+                    .map(reciteRecordWordEntity -> reciteRecordWordEntity.wordId)
+                    .collect(Collectors.toList());
+            allWordIdList.addAll(orderWordIdList);
+        }
+        if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_REVIEW) {
 
         }
         // 2. 根据单词的id组装出所有的单词-字典
-        List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordByIdList(allWordIdList);
+        List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao()
+                .findAllOriginWordByIdList(allWordIdList);
         for (WordOriginEntity wordOriginEntity : allOriginWordList) {
             FunctionWordVO functionWordVO = super.getDict().get(wordOriginEntity.wordId);
             if (functionWordVO == null) {
@@ -295,9 +313,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                     .collect(Collectors.toList());
         }
         // 4.背诵的顺序
-        if (userRecitePreference.getReciteOrder() == ReciteOrder.DISORDER) {
+        if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_LIST
+                && userRecitePreference.getReciteOrder() == ReciteOrder.DISORDER) {
             Collections.shuffle(allWordIdList);
-        } else if (userRecitePreference.getReciteOrder() == ReciteOrder.LEXICOGRAPHIC) {
+        } else if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_LIST
+                && userRecitePreference.getReciteOrder() == ReciteOrder.LEXICOGRAPHIC) {
             allWordIdList = allWordIdList.stream()
                     .sorted((o1, o2) -> super.getDict().get(o1)
                             .getValue()
@@ -307,6 +327,23 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         }
         // 5.如果是历史记录,则根据历史记录设置MarkColor
         if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_RECORD) {
+            List<Integer> recordWordIdList = recordWordEntityList.stream()
+                    .map(reciteRecordWordEntity -> reciteRecordWordEntity.id)
+                    .collect(Collectors.toList());
+            Map<Integer, List<MarkColor>> markMap = appDatabase.reciteRecordMarkDao()
+                    .findAllByRecordWordId(recordWordIdList)
+                    .stream()
+                    .collect(Collectors.groupingBy(
+                            entity -> entity.recordWordId,
+                            Collectors.mapping(entity -> MarkColor.valueOfName(entity.markColor), Collectors.toList())
+                    ));
+            recordWordEntityList.forEach(entity -> {
+                FunctionWordVO functionWordVO = getDict().get(entity.wordId);
+                List<MarkColor> markColor = markMap.get(entity.id);
+                if (functionWordVO == null) return;
+                functionWordVO.getMarkColorList().remove(MarkColor.GREEN);
+                if (markColor != null) functionWordVO.getMarkColorList().addAll(markColor);
+            });
         }
         // 6.设置当前的背诵模式
         wordFunctionHandlerState.setCurrentReciteMode(userRecitePreference.getReciteMode());

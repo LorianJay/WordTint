@@ -24,7 +24,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +58,7 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteMode;
+import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
@@ -82,7 +82,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class MainReciteActivity extends AppCompatActivity implements View.OnClickListener,
         KeyEvent.Callback,
@@ -114,7 +113,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionLock, functionBlueTooth;
     private LinearLayout viewFlagArea, functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
     private LinearLayout lightArea;
-    private RelativeLayout functionMarkArea;
     private CardView lightResult;
     private TableLayout functionChangeModePopLayout;
     private ImageView functionMarkImageView, functionChameleonImageView, functionSwitchImageView, functionLockImageView;
@@ -222,17 +220,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             this.userRecitePreference = (UserRecitePreference) bundle.getSerializable(WordReciteLaunchActivity.USER_RECITE_PREFERENCE);
             // 删除bundle内容
             bundle.remove(BookListFragment.SELECT_SECTION_LIST);
-            bundle.remove(BookListFragment.HISTORY_WORD_SET);
             bundle.remove(BookListFragment.REVIEW_WORD_List);
             // 所有的功能均交由Handler来处理,UI必须与业务逻辑代码脱离
             this.wordFunctionHandler = new WordFunctionHandlerImpl(MainReciteActivity.this, userRecitePreference);
-
-            // 历史记录
-            //if (historyDTOSet != null) {
-            //    for (HistoryDTOLocal historyDTOLocal : historyDTOSet) {
-            //        allFunctionWordList.addAll(historyDTOLocal.getSerializeWordList());
-            //    }
-            //}
             // 单词回顾
             //if (reViewList != null) {
             //    for (int i = 0; i < reViewList.size(); i++) {
@@ -260,6 +250,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 this.starList.setAdapter(starCategoryAdapter);
                 this.reciteMarkArea.setAdapter(reciteMarkToastAdapter);
                 touchHelper.attachToRecyclerView(starList);
+                if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_RECORD)
+                    wordFunctionHandler.getWordFunctionHandlerState().setChameleon(MarkColor.BROWN);
                 // view-model的监听事件,必须在UI线程
                 wordFunctionHandler.getWordFunctionHandlerState()
                         .getChameleon()
@@ -631,14 +623,14 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     reciteRecordEntity.reciteFiler = userRecitePreference.getReciteFilter().name();
                     reciteRecordEntity.hidePreposition = wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition();
                     long reciteRecordId = reciteRecordDao.insertReciteRecord(reciteRecordEntity);
-                    List<ReciteRecordWordEntity> recordWordEntityList = saveIdList.stream()
-                            .map(wordId -> {
-                                ReciteRecordWordEntity recordWordEntity = new ReciteRecordWordEntity();
-                                recordWordEntity.recordId = (int) reciteRecordId;
-                                recordWordEntity.wordId = wordId;
-                                return recordWordEntity;
-                            })
-                            .collect(Collectors.toList());
+                    List<ReciteRecordWordEntity> recordWordEntityList = new ArrayList<>();
+                    for (int i = 0; i < saveIdList.size(); i++) {
+                        ReciteRecordWordEntity recordWordEntity = new ReciteRecordWordEntity();
+                        recordWordEntity.recordId = (int) reciteRecordId;
+                        recordWordEntity.wordId = saveIdList.get(i);
+                        recordWordEntity.order = i + 1;
+                        recordWordEntityList.add(recordWordEntity);
+                    }
                     List<Long> recordWordIdList = reciteRecordWordDao.batchInsertReciteRecordWord(recordWordEntityList);
                     List<ReciteRecordWordMarkEntity> wordMarkEntityList = new ArrayList<>();
                     for (int i = 0; i < saveIdList.size(); i++) {
@@ -969,43 +961,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
-/*
-
-
-    private void closeFlagChangeAreaFlush() {
-        functionMarkImageView.setImageResource(R.drawable.ic_toast);
-        viewFlagArea.setPadding(0, 0, 5, 0);
-        // 最开始除了绿色旗帜外,所有旗帜的对应的View全部置为不显示
-        for (int i = 0; i < viewFlagArea.getChildCount(); i++) {
-            viewFlagArea.getChildAt(i).setVisibility(View.GONE);
-            ((LinearLayout.LayoutParams) viewFlagArea.getChildAt(i).getLayoutParams()).setMargins(0, 0, 0, 0);
-        }
-        for (MarkColor markColor : wordFunctionHandler.getCurrentWordMarkColor()) {
-            viewFlagArea.getChildAt(markColor.ordinal()).setVisibility(View.VISIBLE);
-            viewFlagArea.getChildAt(markColor.ordinal()).setAlpha(1.0f);
-        }
-        // 将所有选择框复原
-        blueToothMoveIndex = -1;
-    }
-
-
-    private void openFlagChangeAreaFlush() {
-        functionMarkImageView.setImageResource(R.drawable.ic_toast_solid);
-        //viewFlagArea.setPadding(5, 0, 0, 0);
-        // 最开始除了绿色旗帜外,所有旗帜的对应的View全部置为不显示
-        //for (int i = 0; i < viewFlagArea.getChildCount(); i++) {
-        //    View child = viewFlagArea.getChildAt(i);
-        //    child.setVisibility(View.VISIBLE);
-        //    child.setAlpha(0.0f);
-        //    // 10dp转px的方法
-        //    ((LinearLayout.LayoutParams) child.getLayoutParams()).setMargins(0, DPUtils.dp2px(10), 0, DPUtils.dp2px(10));
-        //}
-        for (MarkColor markColor : wordFunctionHandler.getCurrentWordMarkColor()) {
-            viewFlagArea.getChildAt(markColor.ordinal()).setAlpha(1.0f);
-        }
-    }
-    */
-
     /**
      * 刷新标记区域的UI
      */
@@ -1013,6 +968,9 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         reciteMarkToastAdapter.notifyItemRangeChanged(0, MarkColor.values().length, null);
     }
 
+    /**
+     * 刷新变色龙的UI
+     */
     private void refreshChameleonUI() {
         if (wordFunctionHandler.getWordFunctionHandlerState().isSelectChameleon()) {
             if (globalToast != null) globalToast.cancel();
@@ -1084,8 +1042,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.lightHint = findViewById(R.id.ll_main_recite_hint);
 
         this.functionAreaHorizontalScrollView = findViewById(R.id.hs_main_recite_function_area);
-        // todo 这个外部的之前用于控制动画的可能现在可以删除了
-        this.functionMarkArea = findViewById(R.id.rl_recite_mark_area);
         this.reciteMarkArea = findViewById(R.id.rc_recite_mark_area);
         this.functionMark = findViewById(R.id.ll_recite_function_mark);
         this.functionMarkImageView = findViewById(R.id.iv_recite_function_mark);

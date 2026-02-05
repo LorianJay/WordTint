@@ -144,7 +144,7 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Re
                 recordListAdapter.currentPosition = currentPosition;
                 recordListAdapter.notifyItemChanged(previousPosition);
                 recordListAdapter.notifyItemChanged(currentPosition);
-                recordListAdapter.recordViewModel.getSelectedRecord().setValue(allReciteRecordEntityList.get(currentPosition).getReciteRecordEntity());
+                recordListAdapter.recordViewModel.getSelectedRecord().setValue(allReciteRecordEntityList.get(currentPosition));
             } else if (clickId == R.id.tx_record_delete) {
                 int position = getBindingAdapterPosition();
                 ReciteRecordEntity reciteRecordEntity = allReciteRecordEntityList.get(position).getReciteRecordEntity();

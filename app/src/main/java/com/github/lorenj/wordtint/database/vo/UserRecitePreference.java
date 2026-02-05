@@ -40,12 +40,14 @@ public class UserRecitePreference implements Serializable {
                                 ReciteOrder reciteOrder,
                                 ReciteFilter reciteFilter,
                                 ReciteStyle reciteStyle,
+                                ReciteOrigin reciteOrigin,
                                 boolean ignore,
                                 List<Integer> allSectionIdList) {
         this.reciteMode = reciteMode;
         this.reciteOrder = reciteOrder;
         this.reciteFilter = reciteFilter;
         this.reciteStyle = reciteStyle;
+        this.reciteOrigin = reciteOrigin;
         this.ignore = ignore;
         this.allSectionIdList = allSectionIdList;
     }

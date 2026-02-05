@@ -78,10 +78,6 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
      */
     public static final String SELECT_WORD_COUNT = "SELECT_WORD_COUNT";
     /**
-     * 历史单词
-     */
-    public static final String HISTORY_WORD_SET = "HISTORY_WORD_SET";
-    /**
      * 复习单词
      */
     public static final String REVIEW_WORD_List = "REVIEW_WORD_List";

@@ -1,5 +1,6 @@
 package com.github.lorenj.wordtint.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -23,19 +24,23 @@ import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
-import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.vo.ReciteRecordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.entity.local.HistoryDTOLocal;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
+import com.github.lorenj.wordtint.enums.ReciteOrigin;
+import com.github.lorenj.wordtint.enums.ReciteStyle;
+import com.github.lorenj.wordtint.ui.activity.MainReciteActivity;
+import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordViewModel;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TimerTask;
@@ -65,7 +70,6 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
      * 下拉刷新
      */
     private SwipeRefreshLayout refreshLayout;
-
     /**
      * 数据库
      */
@@ -87,7 +91,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
      */
     private LoadMoreAdapter loadMoreAdapter;
     private RecordListAdapter recordListAdapter;
-    private ReciteRecordEntity currentSelectRecord;
+    private ReciteRecordVO currentSelectRecordVO;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,8 +117,25 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
         if (clickId == R.id.tv_record_list_start) {
             loadingBar.setVisibility(View.VISIBLE);
             StaticFactory.getExecutorService().submit(() -> {
+                // 查询所有单词的id
+                Bundle bundle = new Bundle();
+                int recordId = currentSelectRecordVO.getReciteRecordEntity().id;
+                List<Integer> recordIdList = new ArrayList<>();
+                recordIdList.add(recordId);
+                userRecitePreference = new UserRecitePreference(
+                        currentSelectRecordVO.getReciteMode(),
+                        currentSelectRecordVO.getReciteOrder(),
+                        currentSelectRecordVO.getReciteFilter(),
+                        ReciteStyle.CLASSIC,
+                        ReciteOrigin.RECITE_RECORD,
+                        false,
+                        recordIdList);
                 updateUIHandler.post(() -> {
                     loadingBar.setVisibility(View.INVISIBLE);
+                    Intent intent = new Intent(requireContext(), MainReciteActivity.class);
+                    bundle.putSerializable(WordReciteLaunchActivity.USER_RECITE_PREFERENCE, userRecitePreference);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
                 });
             });
         }
@@ -207,7 +228,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                 }
             }
         });
-        recordViewModel.getSelectedRecord().observe(getViewLifecycleOwner(), reciteRecordEntity -> currentSelectRecord = reciteRecordEntity);
+        recordViewModel.getSelectedRecord().observe(getViewLifecycleOwner(), reciteRecordVO -> currentSelectRecordVO = reciteRecordVO);
         recordViewModel.getRemoveRecord().observe(getViewLifecycleOwner(), reciteRecordEntity -> StaticFactory.getExecutorService().execute(() -> {
             ReciteRecordDao reciteRecordDao = appDatabase.reciteRecordDao();
             ReciteRecordWordDao reciteRecordWordDao = appDatabase.reciteRecordWordDao();
