@@ -31,6 +31,7 @@ public class TagSelectionListAdapter extends RecyclerView.Adapter<TagSelectionLi
     private final Context context;
     private final List<MarkColor> markColorList = new ArrayList<>();
     private final RecycleViewItemClickCallBack<MarkColor> tagSelectionCallBak;
+
     public TagSelectionListAdapter(Context context, RecycleViewItemClickCallBack<MarkColor> tagSelectionCallBak) {
         this.context = context;
         this.tagSelectionCallBak = tagSelectionCallBak;
@@ -63,7 +64,7 @@ public class TagSelectionListAdapter extends RecyclerView.Adapter<TagSelectionLi
         notifyItemRangeChanged(0, wordBookSectionEntityCollection.size());
     }
 
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final View itemView;
         private final ImageView tagToast;
 
@@ -76,8 +77,10 @@ public class TagSelectionListAdapter extends RecyclerView.Adapter<TagSelectionLi
 
         @Override
         public void onClick(View v) {
-            int position = getAdapterPosition();
-            tagSelectionCallBak.viewClickCallBack(markColorList.get(position));
+            int position = getBindingAdapterPosition();
+            TagSelectionListAdapter tagSelectionListAdapter = (TagSelectionListAdapter) getBindingAdapter();
+            if (tagSelectionListAdapter == null) return;
+            tagSelectionListAdapter.tagSelectionCallBak.viewClickCallBack(tagSelectionListAdapter.markColorList.get(position));
         }
     }
 

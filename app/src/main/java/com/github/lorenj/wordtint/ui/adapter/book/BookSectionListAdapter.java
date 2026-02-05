@@ -3,6 +3,7 @@ package com.github.lorenj.wordtint.ui.adapter.book;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
@@ -24,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionListAdapter.RecyclerViewHolder>
+public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionListAdapter.BookSecionViewHolder>
         implements RecyclerViewAdapterItemChange<WordBookSectionEntityVO> {
 
     private final Context context;
@@ -38,12 +40,12 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
 
     @NonNull
     @Override
-    public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerViewHolder(LayoutInflater.from(context).inflate(R.layout.item_book_section, parent, false));
+    public BookSecionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new BookSecionViewHolder(LayoutInflater.from(context).inflate(R.layout.item_book_section, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull BookSecionViewHolder holder, @SuppressLint("RecyclerView") int position) {
         WordBookSectionEntityVO wordBookSectionEntity = wordBookSectionEntityList.get(position);
         holder.sectionTextView.setText(wordBookSectionEntity.wordBookSectionEntity.name);
         holder.elementCount.setText(String.valueOf(wordBookSectionEntity.elementCount));
@@ -58,19 +60,7 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
             drawable = drawable.mutate();
             DrawableCompat.setTint(drawable, ContextCompat.getColor(context, wordBookSectionEntity.tagColor.getMapColorID()));
         }
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position, @NonNull List<Object> payloads) {
-        if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads);
-        WordBookSectionEntityVO wordBookSectionEntity = wordBookSectionEntityList.get(position);
-        for (Object payload : payloads) {
-            if (payload == Item.CLICK_SECTION && wordBookSectionEntity.selection) {
-                holder.bookSectionSelection.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_add_plan));
-            } else if (payload == Item.CLICK_SECTION) {
-                holder.bookSectionSelection.setImageDrawable(null);
-            }
-        }
+        Log.d("position:", String.valueOf(position));
     }
 
     @Override
@@ -79,10 +69,11 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
     }
 
     @Override
-    public void replaceAll(Collection<WordBookSectionEntityVO> wordBookSectionEntityCollection) {
-        wordBookSectionEntityList.clear();
-        wordBookSectionEntityList.addAll(wordBookSectionEntityCollection);
-        notifyItemRangeChanged(0, wordBookSectionEntityCollection.size());
+    public void replaceAll(Collection<WordBookSectionEntityVO> newData) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new BookSectionCallback(this.wordBookSectionEntityList, new ArrayList<>(newData)));
+        this.wordBookSectionEntityList.clear();
+        this.wordBookSectionEntityList.addAll(newData);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     /**
@@ -97,16 +88,16 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
                 wordBookSectionEntityVO.selection = !wordBookSectionEntityVO.selection;
             }
         }
-        notifyItemRangeChanged(0, wordBookSectionEntityList.size(), Item.CLICK_SECTION);
+        notifyItemRangeChanged(0, wordBookSectionEntityList.size());
     }
 
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class BookSecionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final View itemView;
         private final TextView sectionTextView;
         private final TextView elementCount;
         private final ImageView bookSectionSelection, bookTag;
 
-        public RecyclerViewHolder(@NonNull View itemView) {
+        public BookSecionViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
             this.sectionTextView = itemView.findViewById(R.id.tv_item_book_section);
@@ -118,16 +109,16 @@ public class BookSectionListAdapter extends RecyclerView.Adapter<BookSectionList
 
         @Override
         public void onClick(View v) {
-            int position = getAdapterPosition();
+            int position = getBindingAdapterPosition();
+            if (position == RecyclerView.NO_POSITION) return;
+            BookSectionListAdapter bindingAdapter = (BookSectionListAdapter) getBindingAdapter();
+            if (bindingAdapter == null) return;
             // 传递选中的id数据
-            WordBookSectionEntityVO selectWordBookSectionEntityVO = wordBookSectionEntityList.get(position);
-            bookViewModel.selectSection(selectWordBookSectionEntityVO.wordBookSectionEntity);
+            WordBookSectionEntityVO selectWordBookSectionEntityVO = bindingAdapter.wordBookSectionEntityList.get(position);
+            bindingAdapter.bookViewModel.selectSection(selectWordBookSectionEntityVO.wordBookSectionEntity);
             selectWordBookSectionEntityVO.selection = !selectWordBookSectionEntityVO.selection;
-            notifyItemChanged(position, Item.CLICK_SECTION);
+            bindingAdapter.notifyItemChanged(position);
         }
     }
 
-    private enum Item {
-        CLICK_SECTION
-    }
 }

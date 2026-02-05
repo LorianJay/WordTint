@@ -160,8 +160,7 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onClickCurrentPage(@NonNull MenuItem item) {
-        // todo 添加滑动到顶部的方法
-//        addToPlaneList.smoothScrollToPosition(RecyclerView.SCROLLBAR_POSITION_DEFAULT);
+        bookListRecyclerView.smoothScrollToPosition(RecyclerView.SCROLLBAR_POSITION_LEFT);
     }
 
     private void bindView() {

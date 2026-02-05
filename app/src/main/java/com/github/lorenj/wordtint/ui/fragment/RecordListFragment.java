@@ -184,6 +184,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                                 return reciteRecordVO;
                             })
                             .collect(Collectors.toList());
+                    page++;
                     updateUIHandler.post(() -> {
                         loadMoreAdapter.setVisible(lastPage ? View.GONE : View.VISIBLE);
                         // 第一次是全量更新,第二次是增量更新
@@ -258,6 +259,6 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
 
     @Override
     public void onClickCurrentPage(@NonNull MenuItem item) {
-
+        recordList.smoothScrollToPosition(RecyclerView.SCROLLBAR_POSITION_LEFT);
     }
 }

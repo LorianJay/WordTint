@@ -27,7 +27,6 @@
         android:text="@string/book_section"
         android:textColor="@color/black"
         android:textSize="20sp" />
-    <!--todo 标签-->
 
     <ImageView
         android:id="@+id/iv_item_book_tag"

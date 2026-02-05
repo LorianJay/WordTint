@@ -2,6 +2,7 @@ package com.github.lorenj.wordtint.ui.adapter.book;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +22,10 @@ import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.RecyclerViewHolder>
+public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.BookViewHolder>
         implements RecyclerViewAdapterItemChange<WordBookWithSectionVO> {
 
     private final Context context;
@@ -47,49 +46,32 @@ public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.Recycl
 
     @NonNull
     @Override
-    public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerViewHolder(LayoutInflater.from(context).inflate(R.layout.item_book_parent, parent, false));
+    public BookViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new BookViewHolder(LayoutInflater.from(context).inflate(R.layout.item_book_parent, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull BookViewHolder holder, @SuppressLint("RecyclerView") int position) {
         WordBookWithSectionVO wordBookWithSectionVO = wordBookEntityList.get(position);
         holder.bookName.setText(wordBookWithSectionVO.wordBookEntity.name);
         holder.count.setText(String.valueOf(wordBookWithSectionVO.wordBookSectionEntityVOList.size()));
-        // 章节初始化
-        LinearLayoutManager bookSectionLm = new LinearLayoutManager(context);
-        holder.bookSection.setLayoutManager(bookSectionLm);
-        holder.bookSectionListAdapter = new BookSectionListAdapter(context, bookViewModel);
-        holder.bookSection.setAdapter(holder.bookSectionListAdapter);
-        holder.bookSection.setRecycledViewPool(bookSectionPool);
+        // 重新加载所有的子章节
         holder.bookSectionListAdapter.replaceAll(wordBookWithSectionVO.wordBookSectionEntityVOList);
         holder.bookSection.setVisibility(wordBookWithSectionVO.folded ? View.GONE : View.VISIBLE);
         // 标签选择初始化-保证顺序的一致性
-        Set<MarkColor> distinct = new HashSet<>();
-        List<MarkColor> allSectionTag = wordBookWithSectionVO.wordBookSectionEntityVOList.stream()
-                .filter(wordBookSectionEntityVO -> {
-                    if (wordBookSectionEntityVO.tagColor != null && distinct.contains(wordBookSectionEntityVO.tagColor)) {
-                        return false;
-                    } else if (wordBookSectionEntityVO.tagColor != null) {
-                        distinct.add(wordBookSectionEntityVO.tagColor);
-                        return true;
-                    }
-                    return false;
-                })
+        List<MarkColor> allSectionTag = wordBookWithSectionVO.wordBookSectionEntityVOList
+                .stream()
+                .filter(wordBookSectionEntityVO -> wordBookSectionEntityVO.tagColor != null)
                 .map(wordBookSectionEntityVO -> wordBookSectionEntityVO.tagColor)
+                .distinct()
                 .collect(Collectors.toList());
-        LinearLayoutManager tagSelectionLm = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-        holder.bookTagSelection.setLayoutManager(tagSelectionLm);
-        // 当标签选择列表点击了一个标签后会回调,这里用回调而不是viewModel
-        RecycleViewItemClickCallBack<MarkColor> tagSelectionCallBak = selectMarkColor -> holder.bookSectionListAdapter.batchSelectSection(selectMarkColor);
-        holder.tagSelectionListAdapter = new TagSelectionListAdapter(context, tagSelectionCallBak);
-        holder.bookTagSelection.setAdapter(holder.tagSelectionListAdapter);
-        holder.bookTagSelection.setRecycledViewPool(tagSelectionPool);
         holder.tagSelectionListAdapter.replaceAll(allSectionTag);
+        holder.bookListAdapter = this;
+        Log.d("book-list:", String.valueOf(position));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position, @NonNull List<Object> payloads) {
+    public void onBindViewHolder(@NonNull BookViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads);
         for (Object payload : payloads) {
             if (payload == Item.CLICK_BOOK) {
@@ -104,21 +86,23 @@ public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.Recycl
         return wordBookEntityList.size();
     }
 
+
     @Override
     public void replaceAll(Collection<WordBookWithSectionVO> wordBookEntityCollection) {
         wordBookEntityList.clear();
         wordBookEntityList.addAll(wordBookEntityCollection);
-        notifyItemRangeChanged(0, wordBookEntityCollection.size());
+        notifyItemRangeInserted(0, wordBookEntityCollection.size());
     }
 
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final RelativeLayout bookItem;
         private final TextView bookName, count;
         private final RecyclerView bookSection, bookTagSelection;
         private BookSectionListAdapter bookSectionListAdapter;
         private TagSelectionListAdapter tagSelectionListAdapter;
+        private BookListAdapter bookListAdapter;
 
-        public RecyclerViewHolder(@NonNull View itemView) {
+        public BookViewHolder(@NonNull View itemView) {
             super(itemView);
             this.bookName = itemView.findViewById(R.id.tv_item_book);
             this.bookSection = itemView.findViewById(R.id.rv_book_section_child);
@@ -127,16 +111,30 @@ public class BookListAdapter extends RecyclerView.Adapter<BookListAdapter.Recycl
             this.bookTagSelection = itemView.findViewById(R.id.rv_book_tag_selection);
 
             bookItem.setOnClickListener(this);
+            LinearLayoutManager bookSectionLM = new LinearLayoutManager(context);
+            bookSection.setLayoutManager(bookSectionLM);
+            bookSectionListAdapter = new BookSectionListAdapter(context, bookViewModel);
+            bookSection.setAdapter(bookSectionListAdapter);
+            bookSection.setRecycledViewPool(bookSectionPool);
+
+            LinearLayoutManager tagSelectionLm = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+            bookTagSelection.setLayoutManager(tagSelectionLm);
+            // 当标签选择列表点击了一个标签后会回调,这里用回调而不是viewModel
+            RecycleViewItemClickCallBack<MarkColor> tagSelectionCallBak = selectMarkColor -> bookSectionListAdapter.batchSelectSection(selectMarkColor);
+            tagSelectionListAdapter = new TagSelectionListAdapter(context, tagSelectionCallBak);
+            bookTagSelection.setAdapter(tagSelectionListAdapter);
+            bookTagSelection.setRecycledViewPool(tagSelectionPool);
+
         }
 
         @Override
         public void onClick(View v) {
             int vId = v.getId();
             if (vId == R.id.rl_item_book) {
-                int position = getAdapterPosition();
-                WordBookWithSectionVO wordBookWithSectionVO = wordBookEntityList.get(position);
+                int position = getBindingAdapterPosition();
+                WordBookWithSectionVO wordBookWithSectionVO = bookListAdapter.wordBookEntityList.get(position);
                 wordBookWithSectionVO.folded = !wordBookWithSectionVO.folded;
-                notifyItemChanged(position, Item.CLICK_BOOK);
+                bookListAdapter.notifyItemChanged(position, Item.CLICK_BOOK);
             }
         }
     }

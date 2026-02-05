@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     tools:context=".ui.fragment.BookListFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -13,7 +12,7 @@
         android:layout_height="50dp"
         android:background="@android:color/white"
         android:theme="@style/ThemeOverlay.AppCompat.Light"
-        app:layout_constraintBottom_toTopOf="@id/rbl_book_list"
+        app:layout_constraintBottom_toTopOf="@id/rv_book_list_parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -59,24 +58,12 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!--书籍列表的显示,这里是二级列表-->
-    <RelativeLayout
-        android:id="@+id/rbl_book_list"
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_book_list_parent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/abl_book_list">
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_book_list_parent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingBottom="5dp">
-            </androidx.recyclerview.widget.RecyclerView>
-        </androidx.core.widget.NestedScrollView>
-
-    </RelativeLayout>
-
+        app:layout_constraintTop_toBottomOf="@id/abl_book_list" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
