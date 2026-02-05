@@ -1,73 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rl_item_book"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="50dp"
+    android:background="@color/light_blue_ff"
+    android:clickable="true"
     android:layout_marginBottom="5dp"
-    android:orientation="vertical">
+    android:foreground="?attr/selectableItemBackground">
 
-    <RelativeLayout
-        android:id="@+id/rl_item_book"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/light_blue_ff"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground">
+    <ImageView
+        android:id="@+id/iv_item_book"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_bnv_recite" />
 
-        <ImageView
-            android:id="@+id/iv_item_book"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_bnv_recite" />
+    <TextView
+        android:id="@+id/tv_item_book"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@id/iv_item_book"
+        android:autoSizeTextType="uniform"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/book_name"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/tv_item_book"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="5dp"
-            android:layout_toEndOf="@id/iv_item_book"
-            android:autoSizeTextType="uniform"
-            android:maxLines="1"
-            android:text="@string/book_name"
-            android:gravity="center"
-            android:textColor="@color/black"
-            android:textSize="20sp" />
-
-        <!--标签选择-->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_book_tag_selection"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="80dp"
-            android:layout_toStartOf="@id/tv_item_book_count"
-            android:layout_toEndOf="@id/tv_item_book" />
-
-        <TextView
-            android:id="@+id/tv_item_book_count"
-            android:layout_width="35dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="5dp"
-            android:autoSizeTextType="uniform"
-            android:gravity="center"
-            android:maxLines="1"
-            android:text="@string/divide_element_count"
-            android:textColor="@color/gold"
-            android:textSize="16sp" />
-    </RelativeLayout>
-
-    <!--每本书对应的片段-->
+    <!--标签选择-->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_book_section_child"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@color/gray"
-        tools:ignore="RtlSymmetry" />
+        android:id="@+id/rv_book_tag_selection"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="80dp"
+        android:layout_toStartOf="@id/tv_item_book_count"
+        android:layout_toEndOf="@id/tv_item_book" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tv_item_book_count"
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="5dp"
+        android:autoSizeTextType="uniform"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/divide_element_count"
+        android:textColor="@color/gold"
+        android:textSize="16sp" />
+
+</RelativeLayout>

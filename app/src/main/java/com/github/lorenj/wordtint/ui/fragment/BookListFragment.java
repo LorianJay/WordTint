@@ -23,8 +23,8 @@ import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
 import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
-import com.github.lorenj.wordtint.database.vo.WordBookSectionEntityVO;
-import com.github.lorenj.wordtint.database.vo.WordBookWithSectionVO;
+import com.github.lorenj.wordtint.ui.adapter.book.WordBookSectionVO;
+import com.github.lorenj.wordtint.ui.adapter.book.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.MainActivity;
@@ -133,9 +133,9 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                     // 统计当前的选词量
                     int selectWordCount = 0;
                     for (WordBookWithSectionVO wordBookWithSectionVO : wordBookWithSectionVOList) {
-                        for (WordBookSectionEntityVO wordBookSectionEntityVO : wordBookWithSectionVO.wordBookSectionEntityVOList) {
-                            if (allSelectSection.containsKey(wordBookSectionEntityVO.wordBookSectionEntity.id)) {
-                                selectWordCount += wordBookSectionEntityVO.elementCount;
+                        for (WordBookSectionVO wordBookSectionVO : wordBookWithSectionVO.wordBookSectionVOList) {
+                            if (allSelectSection.containsKey(wordBookSectionVO.wordBookSectionEntity.id)) {
+                                selectWordCount += wordBookSectionVO.elementCount;
                             }
                         }
                     }
@@ -202,11 +202,11 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
             // 将所有entity转为对应需要的VO使用
             wordBookWithSectionVOList = allBookAndSection.stream()
                     .map(wordBookWithSectionEntity -> {
-                        List<WordBookSectionEntityVO> wordBookSectionEntityVOList = wordBookWithSectionEntity
+                        List<WordBookSectionVO> wordBookSectionEntityVOList = wordBookWithSectionEntity
                                 .wordBookSectionEntityList
                                 .stream()
                                 .map(wordBookSectionEntity -> {
-                                    WordBookSectionEntityVO result = new WordBookSectionEntityVO(wordBookSectionEntity);
+                                    WordBookSectionVO result = new WordBookSectionVO(wordBookSectionEntity);
                                     // 查询element_count
                                     result.elementCount = appDatabase.wordBookSectionDao().countBySectionId(wordBookSectionEntity.id);
                                     result.tagColor = MarkColor.valueOfName(result.wordBookSectionEntity.tagColor);
