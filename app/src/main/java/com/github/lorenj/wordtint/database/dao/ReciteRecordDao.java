@@ -2,6 +2,7 @@ package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.Query;
 
 import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
@@ -23,5 +24,11 @@ public interface ReciteRecordDao {
 
     @Insert
     void batchInsertReciteRecordWordMark(List<ReciteRecordWordMarkEntity> wordMarkEntityList);
+
+    @Query("select count(1) from recite_record")
+    int countReciteRecord();
+
+    @Query("SELECT * FROM recite_record LIMIT :arg0,:arg1")
+    List<ReciteRecordEntity> findWithLimit(int arg0, int arg1);
 
 }

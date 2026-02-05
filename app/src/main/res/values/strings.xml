@@ -67,7 +67,7 @@
     <string name="english_translation_chinese_hearing">英译中(音频)</string>
     <string name="english_translation_chinese_no_hearing">英译中(无音频)</string>
     <string name="chinese_translation_english">中译英</string>
-    <string name="only_credit">纯背诵</string>
+    <string name="only_recite">纯背诵</string>
     <string name="crediting_word">当前单词:</string>
     <string name="show_word_origin">showWordOrigin</string>
     <string name="create_new_category">+创建一个新的分类</string>
@@ -260,6 +260,16 @@
     <string name="word_position">快速定位</string>
     <string name="word_position_error">单词未找到</string>
     <string name="quick_position_message">根据单词英文快速跳转到单词所在位置(忽略大小写)</string>
+    <string name="create_time">创建时间:%1$s</string>
+    <string name="recite_word_count">选词数量:%1$s</string>
+    <string name="recite_word">背诵模式:%1$s</string>
+    <string name="recite_order">背诵顺序:%1$s</string>
+    <string name="hide_preposition">介词短语:%1$s</string>
+    <string name="recite_filer">过滤模式:%1$s</string>
+    <string name="message_number">:%1$s</string>
+    <string name="visible">显示</string>
+    <string name="gone">隐藏</string>
+    <string name="no_filer">不过滤</string>
 
 
 </resources>

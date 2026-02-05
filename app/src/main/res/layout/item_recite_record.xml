@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:background="@color/gray">
+
+    <com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout
+        android:id="@+id/sll_recite_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray"
+        android:orientation="horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rl_recite_record"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/light_blue_ff"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/iv_recite_record"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_point"
+                app:layout_constraintBottom_toBottomOf="@id/tv_item_recite_word_count"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/iv_recite_record" />
+
+            <TextView
+                android:id="@+id/tv_recite_record_create_time"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:autoSizeTextType="uniform"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:text="@string/create_time"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                app:layout_constraintStart_toEndOf="@id/iv_recite_record"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_item_recite_word_count"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:autoSizeTextType="uniform"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:text="@string/recite_word_count"
+                android:textColor="@color/gold"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="@id/tv_recite_record_create_time"
+                app:layout_constraintStart_toStartOf="@id/tv_recite_record_create_time"
+                app:layout_constraintTop_toBottomOf="@id/tv_recite_record_create_time" />
+
+            <View
+                android:id="@+id/v_item_recite_divide"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/background_radius_dotted_line"
+                android:backgroundTint="@color/dark_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_item_recite_word_count" />
+
+            <TextView
+                android:id="@+id/tv_item_recite_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginTop="2dp"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:text="@string/recite_word"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@id/iv_recite_record"
+                app:layout_constraintTop_toBottomOf="@id/v_item_recite_divide" />
+
+            <TextView
+                android:id="@+id/tv_item_recite_order"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:text="@string/recite_order"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="@id/tv_item_recite_mode"
+                app:layout_constraintTop_toBottomOf="@id/tv_item_recite_mode" />
+
+            <TextView
+                android:id="@+id/tv_item_recite_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="15dp"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:text="@string/recite_filer"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_item_recite_mode"
+                app:layout_constraintTop_toTopOf="@id/tv_item_recite_mode" />
+
+            <TextView
+                android:id="@+id/tv_item_recite_hide"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center_vertical|start"
+                android:maxLines="1"
+                android:text="@string/hide_preposition"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/tv_item_recite_filter"
+                app:layout_constraintStart_toStartOf="@id/tv_item_recite_filter"
+                app:layout_constraintTop_toBottomOf="@id/tv_item_recite_filter" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_star_section_menu"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:orientation="horizontal">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_item_record_mark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:requiresFadingEdge="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_item_recite_filter"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tx_record_delete"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@android:color/holo_red_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/delete"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout>
+
+
+</LinearLayout>

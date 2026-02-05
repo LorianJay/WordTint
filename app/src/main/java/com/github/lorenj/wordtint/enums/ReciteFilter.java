@@ -1,5 +1,7 @@
 package com.github.lorenj.wordtint.enums;
 
+import com.github.lorenj.wordtint.R;
+
 /**
  * 背诵内容
  *
@@ -10,9 +12,19 @@ public enum ReciteFilter {
     /**
      * 过滤出所有单词
      */
-    WORD,
+    NO_FILER(R.string.no_filer),
     /**
      * 过滤出所有短语
      */
-    PHRASE;
+    PHRASE(R.string.concise_phrase);
+
+    private int stringId;
+
+    ReciteFilter(int stringId) {
+        this.stringId = stringId;
+    }
+
+    public int getStringId() {
+        return stringId;
+    }
 }

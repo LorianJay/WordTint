@@ -21,7 +21,7 @@ public class UserRecitePreference implements Serializable {
     // 背诵顺序
     private ReciteOrder reciteOrder = ReciteOrder.ORDERLY;
     // 背诵过滤
-    private ReciteFilter reciteFilter = ReciteFilter.WORD;
+    private ReciteFilter reciteFilter = ReciteFilter.NO_FILER;
     // 背诵格式
     private ReciteStyle reciteStyle = ReciteStyle.CLASSIC;
     // 片段来源

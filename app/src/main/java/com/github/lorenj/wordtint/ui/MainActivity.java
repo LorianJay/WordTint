@@ -28,7 +28,7 @@ import com.github.lorenj.wordtint.ui.activity.WelcomeActivity;
 import com.github.lorenj.wordtint.ui.adapter.BottomViewAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
-import com.github.lorenj.wordtint.ui.fragment.HistoryFragment;
+import com.github.lorenj.wordtint.ui.fragment.RecordListFragment;
 import com.github.lorenj.wordtint.ui.fragment.RankFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem nowSelectMenuItem;
     private ArrayList<Fragment> listFragment;
     private volatile int position = 0;
-    private final Fragment creditFragment = new BookListFragment(), rankFragment = new RankFragment(), analysisFragment = new HistoryFragment();
+    private final Fragment creditFragment = new BookListFragment(), rankFragment = new RankFragment(), analysisFragment = new RecordListFragment();
     private BottomNavigationItemView bottomRecite;
     private UserSettingRepository userSettingRepository;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());

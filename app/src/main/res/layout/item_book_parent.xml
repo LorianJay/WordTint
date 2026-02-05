@@ -32,26 +32,20 @@
             android:autoSizeTextType="uniform"
             android:maxLines="1"
             android:text="@string/book_name"
-            android:textAlignment="viewStart"
+            android:gravity="center"
             android:textColor="@color/black"
             android:textSize="20sp" />
 
-        <HorizontalScrollView
+        <!--标签选择-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_book_tag_selection"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="80dp"
             android:layout_toStartOf="@id/tv_item_book_count"
-            android:layout_toEndOf="@id/tv_item_book">
-            <!--标签选择-->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_book_tag_selection"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                tools:ignore="RtlSymmetry" />
-
-        </HorizontalScrollView>
+            android:layout_toEndOf="@id/tv_item_book" />
 
         <TextView
             android:id="@+id/tv_item_book_count"

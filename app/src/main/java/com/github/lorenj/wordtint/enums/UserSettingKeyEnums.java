@@ -24,7 +24,7 @@ public enum UserSettingKeyEnums {
     /**
      * 背诵过滤
      */
-    RECITE_FILTER(ReciteFilter.class, ReciteFilter.WORD),
+    RECITE_FILTER(ReciteFilter.class, ReciteFilter.NO_FILER),
     /**
      * 背诵的风格
      */

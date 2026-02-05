@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Objects;
+
 /**
  * @author cnsukidayo
  * @date 2026/2/4 21:30
@@ -32,4 +34,22 @@ public class ReciteRecordEntity {
     @ColumnInfo(name = "hide_preposition")
     public boolean hidePreposition;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReciteRecordEntity that = (ReciteRecordEntity) o;
+        return id == that.id
+                && createTime == that.createTime
+                && wordCount == that.wordCount
+                && hidePreposition == that.hidePreposition
+                && Objects.equals(reciteMode, that.reciteMode)
+                && Objects.equals(reciteOrder, that.reciteOrder)
+                && Objects.equals(reciteFiler, that.reciteFiler);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, createTime, wordCount, reciteMode, reciteOrder, reciteFiler, hidePreposition);
+    }
 }

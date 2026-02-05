@@ -38,7 +38,7 @@ import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
-import com.github.lorenj.wordtint.ui.adapter.wordsearch.LoadMoreAdapter;
+import com.github.lorenj.wordtint.ui.adapter.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
 import com.github.lorenj.wordtint.ui.viewmodel.WordSearchViewModel;
@@ -140,7 +140,7 @@ public class SearchWordActivity extends AppCompatActivity
         if (itemId == R.id.iv_search_word_back) {
             setResult(RESULT_OK);
             finish();
-        } else if (itemId == R.id.fragment_search_word_click_analysis_word) {
+        } else if (itemId == R.id.analysis_word_flag) {
 
         } else if (itemId == R.id.tv_recite_star_create) {
             // 添加一个新的收藏夹
@@ -199,8 +199,8 @@ public class SearchWordActivity extends AppCompatActivity
         if (!TextUtils.isEmpty(newText)) {
             textChange = true;
             if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
-            this.currentTask = this.scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
             page = 0;
+            this.currentTask = this.scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
         }
         return false;
     }
@@ -221,6 +221,8 @@ public class SearchWordActivity extends AppCompatActivity
                             searchText,
                             page * PAGE_SIZE,
                             PAGE_SIZE);
+                    // 执行完一次真正查询后,page才自增
+                    page++;
                     updateUIHandler.post(() -> {
                         selectWordList.setVisibility(View.VISIBLE);
                         resultArea.setVisibility(View.GONE);
@@ -235,7 +237,6 @@ public class SearchWordActivity extends AppCompatActivity
                 });
             }
         };
-
     }
 
 
@@ -300,12 +301,10 @@ public class SearchWordActivity extends AppCompatActivity
                 if (!recyclerView.canScrollVertically(1) && !lastPage) {
                     // 优先执行搜索事件或者已有的分页查询事件
                     if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
-                    page++;
                     currentTask = scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
                 }
             }
         });
-
     }
 
     private void visibleWordAllMessage(FunctionWordVO functionWordVO) {

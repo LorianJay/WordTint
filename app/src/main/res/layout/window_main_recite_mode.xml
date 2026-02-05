@@ -95,7 +95,7 @@
             android:paddingTop="@dimen/fragment_word_credit_pop_window_change_mode"
             android:paddingEnd="@dimen/fragment_word_credit_pop_window_change_mode"
             android:paddingBottom="@dimen/fragment_word_credit_pop_window_change_mode"
-            android:text="@string/only_credit"
+            android:text="@string/only_recite"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
     </TableRow>

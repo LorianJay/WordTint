@@ -623,8 +623,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     reciteRecordEntity.createTime = System.currentTimeMillis();
                     reciteRecordEntity.wordCount = saveIdList.size();
                     reciteRecordEntity.reciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode().name();
-                    reciteRecordEntity.reciteMode = userRecitePreference.getReciteOrder().name();
-                    reciteRecordEntity.reciteMode = userRecitePreference.getReciteFilter().name();
+                    reciteRecordEntity.reciteOrder = userRecitePreference.getReciteOrder().name();
+                    reciteRecordEntity.reciteFiler = userRecitePreference.getReciteFilter().name();
                     reciteRecordEntity.hidePreposition = wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition();
                     long reciteRecordId = reciteRecordDao.insertReciteRecord(reciteRecordEntity);
                     List<ReciteRecordWordEntity> recordWordEntityList = saveIdList.stream()
@@ -766,7 +766,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CHINESE_TRANSLATION_ENGLISH);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_only_recite) {
-            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CREDIT);
+            wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.ONLY_RECITE);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_hide_phrase) {
             wordFunctionHandler.getWordFunctionHandlerState().setHidePreposition(!wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition());
@@ -882,7 +882,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
                     null));
-        } else if (currentReciteMode == ReciteMode.CREDIT) {
+        } else if (currentReciteMode == ReciteMode.ONLY_RECITE) {
             this.windowOnlyRecite.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.fragment_word_credit_pop_window_change_mode,
@@ -946,13 +946,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 resultWebViewHandler.gone();
             } else if (currentReciteMode == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
                 // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
-                wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.CREDIT);
+                wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.ONLY_RECITE);
                 currentWord.getValue().remove(WordStructure.PHRASE);
                 visibleWordAllMessage(currentWord);
                 if (prepositionPhrase != null)
                     currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
                 originWord.setText("");
-            } else if (currentReciteMode == ReciteMode.CREDIT) {
+            } else if (currentReciteMode == ReciteMode.ONLY_RECITE) {
                 visibleWordAllMessage(currentWord);
                 playWordAudio(currentWord);
             }

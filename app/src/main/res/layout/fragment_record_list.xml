@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragment.HistoryFragment">
+    tools:context=".ui.fragment.RecordListFragment">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/fragment_history_barlayout"
+        android:id="@+id/abl_record_list"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@android:color/white"
@@ -19,17 +19,17 @@
             android:layout_height="match_parent">
 
             <ProgressBar
-                android:id="@+id/history_fragment_loading_bar"
+                android:id="@+id/pb_record_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:indeterminateTint="@color/theme_color"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_history_start_credit"
+                app:layout_constraintEnd_toStartOf="@+id/tv_record_list_start"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/fragment_history_start_credit"
+                android:id="@+id/tv_record_list_start"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="10dp"
@@ -44,27 +44,24 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/fragment_history_swipe_refresh"
+        android:id="@+id/sRl_record_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/light_gray"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fragment_history_barlayout">
-        <!--外部包一个垂直滑动窗口,可以多滑动一段距离-->
-        <androidx.core.widget.NestedScrollView
+        app:layout_constraintTop_toBottomOf="@id/abl_record_list">
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent">
-            <!--只有一个RecyclerView,该布局可用于单个fragment-->
+            android:layout_height="0dp">
+
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/single_history_recycler_view"
+                android:id="@+id/rv_record_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="5dp">
-
-            </androidx.recyclerview.widget.RecyclerView>
-        </androidx.core.widget.NestedScrollView>
+                android:paddingBottom="5dp" />
+        </RelativeLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
