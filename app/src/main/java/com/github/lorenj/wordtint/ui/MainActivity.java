@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 BottomViewAdapter adapter = new BottomViewAdapter(MainActivity.this, listFragment);
                 viewPager.setAdapter(adapter);
                 viewPager.setSaveEnabled(false);
+                viewPager.setUserInputEnabled(false);
                 viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                     @Override
                     public void onPageSelected(int position) {

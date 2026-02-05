@@ -1,12 +1,11 @@
 package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
-import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
-import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 
 import java.util.List;
 
@@ -19,16 +18,13 @@ public interface ReciteRecordDao {
     @Insert
     long insertReciteRecord(ReciteRecordEntity reciteRecordEntity);
 
-    @Insert
-    List<Long> batchInsertReciteRecordWord(List<ReciteRecordWordEntity> recordWordEntityList);
-
-    @Insert
-    void batchInsertReciteRecordWordMark(List<ReciteRecordWordMarkEntity> wordMarkEntityList);
-
     @Query("select count(1) from recite_record")
     int countReciteRecord();
 
     @Query("SELECT * FROM recite_record LIMIT :arg0,:arg1")
-    List<ReciteRecordEntity> findWithLimit(int arg0, int arg1);
+    List<ReciteRecordEntity> findReciteRecordWithLimit(int arg0, int arg1);
+
+    @Delete
+    void delete(ReciteRecordEntity reciteRecordEntity);
 
 }

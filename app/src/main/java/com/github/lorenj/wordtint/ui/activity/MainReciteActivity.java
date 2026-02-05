@@ -48,6 +48,8 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
@@ -618,6 +620,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             StaticFactory.getExecutorService().submit(() -> {
                 List<Integer> saveIdList = wordFunctionHandler.getSaveIdList();
                 ReciteRecordDao reciteRecordDao = appDatabase.reciteRecordDao();
+                ReciteRecordWordDao reciteRecordWordDao = appDatabase.reciteRecordWordDao();
+                ReciteRecordMarkDao reciteRecordMarkDao = appDatabase.reciteRecordMarkDao();
                 appDatabase.runInTransaction(() -> {
                     ReciteRecordEntity reciteRecordEntity = new ReciteRecordEntity();
                     reciteRecordEntity.createTime = System.currentTimeMillis();
@@ -635,7 +639,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                                 return recordWordEntity;
                             })
                             .collect(Collectors.toList());
-                    List<Long> recordWordIdList = reciteRecordDao.batchInsertReciteRecordWord(recordWordEntityList);
+                    List<Long> recordWordIdList = reciteRecordWordDao.batchInsertReciteRecordWord(recordWordEntityList);
                     List<ReciteRecordWordMarkEntity> wordMarkEntityList = new ArrayList<>();
                     for (int i = 0; i < saveIdList.size(); i++) {
                         Long recordWordId = recordWordIdList.get(i);
@@ -650,7 +654,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                             wordMarkEntityList.add(wordMarkEntity);
                         }
                     }
-                    reciteRecordDao.batchInsertReciteRecordWordMark(wordMarkEntityList);
+                    reciteRecordMarkDao.batchInsertReciteRecordWordMark(wordMarkEntityList);
                 });
                 updateUIHandler.post(() -> {
                     if (globalToast != null) globalToast.cancel();

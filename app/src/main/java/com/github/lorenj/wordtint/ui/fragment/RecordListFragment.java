@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,9 +18,12 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.pathsystem.document.UserInfoPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.vo.ReciteRecordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.entity.local.HistoryDTOLocal;
@@ -30,11 +32,10 @@ import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.ui.adapter.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.history.RecordViewModel;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
-import com.github.lorenj.wordtint.utils.JsonUtils;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TimerTask;
@@ -54,7 +55,6 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
 
     private View rootView;
     private RecyclerView recordList;
-    private LinearLayoutManager historyLayoutManager;
 
     private final Handler updateUIHandler = new Handler();
     private TextView startLearn;
@@ -87,6 +87,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
      */
     private LoadMoreAdapter loadMoreAdapter;
     private RecordListAdapter recordListAdapter;
+    private ReciteRecordEntity currentSelectRecord;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -112,30 +113,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
         if (clickId == R.id.tv_record_list_start) {
             loadingBar.setVisibility(View.VISIBLE);
             StaticFactory.getExecutorService().submit(() -> {
-                try {
-                    userRecitePreference = JsonUtils.readJson(UserInfoPath.USER_CREDIT_STYLE.getPath(), UserRecitePreference.class);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                // 拷贝Bean
-                Bundle bundle = new Bundle();
-                //bundle.putParcelable(WordReciteLaunchActivity.USER_RECITE_PREFERENCE, userCreditStyleWrapper);
-                // 首先将id转为String类型的List
-                bundle.putSerializable(BookListFragment.HISTORY_WORD_SET, historyDTOSet);
-                // 统计当前的选词量
-                int selectWordCount = 0;
-                for (HistoryDTOLocal historyDTOLocal : historyDTOSet) {
-                    selectWordCount += historyDTOLocal.getSerializeWordList().size();
-                }
-                bundle.putInt(BookListFragment.SELECT_WORD_COUNT, selectWordCount);
                 updateUIHandler.post(() -> {
-                    if (userRecitePreference.isIgnore()) {
-                        Navigation.findNavController(getView()).navigate(R.id.action_navigation_main_to_word_credit, bundle,
-                                StaticFactory.getSimpleNavOptions());
-                    } else {
-                        Navigation.findNavController(getView()).navigate(R.id.action_main_navigation_to_navigation_word_credit_launch, bundle,
-                                StaticFactory.getSimpleNavOptions());
-                    }
                     loadingBar.setVisibility(View.INVISIBLE);
                 });
             });
@@ -172,7 +150,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                     int countWord = appDatabase.reciteRecordDao().countReciteRecord();
                     lastPage = (page + 1) * PAGE_SIZE >= countWord;
                     List<ReciteRecordVO> reciteRecordVOList = appDatabase.reciteRecordDao()
-                            .findWithLimit(page * PAGE_SIZE, PAGE_SIZE)
+                            .findReciteRecordWithLimit(page * PAGE_SIZE, PAGE_SIZE)
                             .stream()
                             .map(reciteRecordEntity -> {
                                 ReciteRecordVO reciteRecordVO = new ReciteRecordVO(
@@ -193,17 +171,18 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                         } else {
                             recordListAdapter.addAll(reciteRecordVOList);
                         }
+                        refreshLayout.setRefreshing(false);
                     });
                 });
             }
         };
     }
 
-
     private void initView() {
-        this.historyLayoutManager = new LinearLayoutManager(getContext());
-        this.recordList.setLayoutManager(historyLayoutManager);
-        this.recordListAdapter = new RecordListAdapter(getContext());
+        LinearLayoutManager recordListLayoutManager = new LinearLayoutManager(getContext());
+        this.recordList.setLayoutManager(recordListLayoutManager);
+        RecordViewModel recordViewModel = new RecordViewModel();
+        this.recordListAdapter = new RecordListAdapter(getContext(), recordViewModel);
         this.loadMoreAdapter = new LoadMoreAdapter(getContext());
         ConcatAdapter concatAdapter = new ConcatAdapter(recordListAdapter, loadMoreAdapter);
         this.recordList.setAdapter(concatAdapter);
@@ -215,7 +194,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
         this.refreshLayout.setOnRefreshListener(this);
 
         appDatabase = APPDatabase.getInstance(getContext());
-
+        recordList.setItemAnimator(null);
         recordList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -228,6 +207,24 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                 }
             }
         });
+        recordViewModel.getSelectedRecord().observe(getViewLifecycleOwner(), reciteRecordEntity -> currentSelectRecord = reciteRecordEntity);
+        recordViewModel.getRemoveRecord().observe(getViewLifecycleOwner(), reciteRecordEntity -> StaticFactory.getExecutorService().execute(() -> {
+            ReciteRecordDao reciteRecordDao = appDatabase.reciteRecordDao();
+            ReciteRecordWordDao reciteRecordWordDao = appDatabase.reciteRecordWordDao();
+            ReciteRecordMarkDao reciteRecordMarkDao = appDatabase.reciteRecordMarkDao();
+            appDatabase.runInTransaction(() -> {
+                List<Integer> recordWordIdList = reciteRecordWordDao.findByRecordId(reciteRecordEntity.id)
+                        .stream()
+                        .map(reciteRecordWordEntity -> reciteRecordWordEntity.id)
+                        .collect(Collectors.toList());
+                // 删除所有标记
+                reciteRecordMarkDao.deleteByRecordWordId(recordWordIdList);
+                // 删除所有单词列表
+                reciteRecordWordDao.deleteByRecordId(reciteRecordEntity.id);
+                // 删除背诵记录
+                reciteRecordDao.delete(reciteRecordEntity);
+            });
+        }));
     }
 
 

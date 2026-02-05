@@ -8,6 +8,8 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
 import com.github.lorenj.wordtint.database.dao.UserSettingDao;
 import com.github.lorenj.wordtint.database.dao.WordBookDao;
 import com.github.lorenj.wordtint.database.dao.WordBookSectionDao;
@@ -58,6 +60,8 @@ public abstract class APPDatabase extends RoomDatabase {
     public abstract WordSearchDao wordSearchDao();
 
     public abstract ReciteRecordDao reciteRecordDao();
+    public abstract ReciteRecordWordDao reciteRecordWordDao();
+    public abstract ReciteRecordMarkDao reciteRecordMarkDao();
 
     public static APPDatabase getInstance(Context context) {
         if (INSTANCE == null) {
