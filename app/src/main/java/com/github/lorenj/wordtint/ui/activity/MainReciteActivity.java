@@ -18,6 +18,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -35,6 +38,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.WindowCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -186,6 +190,19 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_recite);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsController controller = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.statusBars());
+                // 即使滑屏也不要让它跳出来影响布局
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(lp);
+        }
         bindView();
         initView();
     }
@@ -935,7 +952,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 .ifPresent(wordDTOS -> originWord.setText(wordDTOS));
         String phrase = functionWordVO.getValue().get(WordStructure.PHRASE);
         if (phrase != null) {
-            functionWordVO.getValue().put(WordStructure.PHRASE,phrase.replace("\\n","\n"));
+            functionWordVO.getValue().put(WordStructure.PHRASE, phrase.replace("\\n", "\n"));
         }
         resultWebViewHandler.displayWordResult(functionWordVO);
         // 设置收藏夹信息

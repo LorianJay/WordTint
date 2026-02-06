@@ -41,6 +41,7 @@ public class StarListAdapter implements RecyclerViewAdapterItemChange<WordStarWi
         ConcatAdapter.Config config = new ConcatAdapter.Config.Builder()
                 .setIsolateViewTypes(false)
                 .build();
+        this.resultPool.setMaxRecycledViews(0, 20);
         this.globalAdapter = new ConcatAdapter(config);
     }
 
