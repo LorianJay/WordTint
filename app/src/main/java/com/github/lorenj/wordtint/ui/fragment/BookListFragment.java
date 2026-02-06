@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,13 +24,13 @@ import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
 import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
-import com.github.lorenj.wordtint.ui.adapter.book.WordBookSectionVO;
-import com.github.lorenj.wordtint.ui.adapter.book.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
 import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.book.WordBookSectionVO;
+import com.github.lorenj.wordtint.ui.adapter.book.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
 import com.google.android.material.badge.BadgeDrawable;
@@ -193,8 +194,8 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                     }
                 });
         this.bookListRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
         this.bookListAdapter = new BookListAdapter(requireContext(), bookViewModel);
-        this.bookListRecyclerView.setAdapter(bookListAdapter);
         StaticFactory.getExecutorService().execute(() -> {
             // 查询所有的书籍
             List<WordBookWithSectionEntity> allBookAndSection = appDatabase.wordBookDao().findAllBookAndSections();
@@ -216,7 +217,10 @@ public class BookListFragment extends Fragment implements View.OnClickListener, 
                         return new WordBookWithSectionVO(wordBookWithSectionEntity.wordBookEntity, wordBookSectionEntityVOList);
                     })
                     .collect(Collectors.toList());
-            updateUIHandler.post(() -> bookListAdapter.replaceAll(wordBookWithSectionVOList));
+            updateUIHandler.post(() -> {
+                ConcatAdapter concatAdapter = bookListAdapter.replaceAll(wordBookWithSectionVOList);
+                this.bookListRecyclerView.setAdapter(concatAdapter);
+            });
         });
     }
 

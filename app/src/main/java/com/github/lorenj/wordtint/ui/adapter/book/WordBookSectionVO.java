@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author cnsukidayo
  * @date 2026/1/29 16:24
  */
-public class WordBookSectionVO implements BaseBookItem {
+public class WordBookSectionVO {
 
     public WordBookSectionEntity wordBookSectionEntity;
     /**
@@ -28,6 +28,14 @@ public class WordBookSectionVO implements BaseBookItem {
 
     public WordBookSectionVO(WordBookSectionEntity wordBookSectionEntity) {
         this.wordBookSectionEntity = wordBookSectionEntity;
+    }
+
+    public static WordBookSectionVO clone(WordBookSectionVO wordBookSectionVO) {
+        WordBookSectionVO result = new WordBookSectionVO(wordBookSectionVO.wordBookSectionEntity);
+        result.selection = wordBookSectionVO.selection;
+        result.elementCount = wordBookSectionVO.elementCount;
+        result.tagColor = wordBookSectionVO.tagColor;
+        return result;
     }
 
     @Override
@@ -51,10 +59,5 @@ public class WordBookSectionVO implements BaseBookItem {
         result = 31 * result + elementCount;
         result = 31 * result + (tagColor != null ? tagColor.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public int getItemType() {
-        return SECTION;
     }
 }

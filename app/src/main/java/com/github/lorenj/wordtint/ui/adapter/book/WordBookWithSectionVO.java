@@ -8,7 +8,7 @@ import java.util.List;
  * @author cnsukidayo
  * @date 2026/1/29 15:23
  */
-public class WordBookWithSectionVO implements BaseBookItem {
+public class WordBookWithSectionVO {
     public WordBookEntity wordBookEntity;
     public List<WordBookSectionVO> wordBookSectionVOList;
     /**
@@ -21,10 +21,5 @@ public class WordBookWithSectionVO implements BaseBookItem {
         this.wordBookEntity = wordBookEntity;
         this.wordBookSectionVOList = wordBookSectionVOList;
         this.folded = true;
-    }
-
-    @Override
-    public int getItemType() {
-        return BOOK;
     }
 }
