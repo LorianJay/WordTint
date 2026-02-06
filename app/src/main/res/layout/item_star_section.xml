@@ -12,9 +12,9 @@
     <View
         android:id="@+id/v_star_section_separate"
         android:layout_width="match_parent"
+        android:layout_height="2dp"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
-        android:layout_height="2dp"
         android:background="@color/dark_gray" />
 
     <com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout
@@ -71,18 +71,23 @@
 
     </com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout>
 
-    <RelativeLayout
+    <HorizontalScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:paddingStart="5dp"
-        android:paddingEnd="5dp"
-        android:paddingBottom="5dp">
+        android:layout_height="wrap_content">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_star_section_result"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="5dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_star_section_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+    </HorizontalScrollView>
 
 </LinearLayout>

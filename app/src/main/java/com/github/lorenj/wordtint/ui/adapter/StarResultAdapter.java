@@ -18,6 +18,7 @@ import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StarResultAdapter extends RecyclerView.Adapter<StarResultAdapter.ReciteResultViewHolder>
@@ -45,8 +46,9 @@ public class StarResultAdapter extends RecyclerView.Adapter<StarResultAdapter.Re
         } else {
             holder.parent.setOrientation(LinearLayout.HORIZONTAL);
         }
-        String value = currentSectionWord.getValue().get(currentWordStructure);
-        holder.resultValue.setText(value);
+        String value = Optional.ofNullable(currentSectionWord.getValue().get(currentWordStructure))
+                .orElse("");
+        holder.resultValue.setText(value.replace("\\n", "\n"));
         holder.resultKey.setText(currentWordStructure.getKeyHint());
     }
 

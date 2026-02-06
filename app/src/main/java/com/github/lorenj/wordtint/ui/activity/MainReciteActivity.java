@@ -933,6 +933,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         // 设置主界面的单词全部信息
         Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
                 .ifPresent(wordDTOS -> originWord.setText(wordDTOS));
+        String phrase = functionWordVO.getValue().get(WordStructure.PHRASE);
+        if (phrase != null) {
+            functionWordVO.getValue().put(WordStructure.PHRASE,phrase.replace("\\n","\n"));
+        }
         resultWebViewHandler.displayWordResult(functionWordVO);
         // 设置收藏夹信息
         starResultWebViewHandler.displayWordResult(functionWordVO);

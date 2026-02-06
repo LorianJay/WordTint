@@ -174,6 +174,10 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
         List<WordStarWordIdEntity> newList = new ArrayList<>(this.wordStarWordIdEntityList);
         newList.add(item);
         replaceAll(newList);
+        int position = wordStarWordIdEntityList.size() - 1;
+        if (position >= 0) notifyItemChanged(position, Item.ITEM_MOVE);
+        position--;
+        if (position >= 0) notifyItemChanged(position, Item.ITEM_MOVE);
     }
 
     public void setFunctionListener(FunctionContentCallBack functionContentCallBack) {
