@@ -3,7 +3,6 @@ package com.github.lorenj.wordtint.ui.adapter.book;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +59,6 @@ public class BookSectionAdapter extends RecyclerView.Adapter<BookSectionAdapter.
             Drawable drawable = holder.bookTag.getDrawable().mutate();
             DrawableCompat.setTint(drawable, ContextCompat.getColor(context, wordBookSectionEntity.tagColor.getMapColorID()));
         }
-        Log.d("Adapter-position:", String.valueOf(position));
     }
 
     @Override

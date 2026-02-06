@@ -46,7 +46,7 @@ public interface StarFunctionHandler extends StarSectionFunctionHandler {
      *
      * @param wordStarEntity 单词类别实例对象
      */
-    void createNewStar(WordStarEntity wordStarEntity);
+    WordStarWithWordIdEntity createNewStar(WordStarEntity wordStarEntity);
 
     /**
      * 重新加载收藏夹

@@ -19,4 +19,26 @@ public class WordStarWordIdEntity implements Serializable {
 
     @ColumnInfo(name = "order")
     public int order;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WordStarWordIdEntity that = (WordStarWordIdEntity) o;
+
+        if (id != that.id) return false;
+        if (starId != that.starId) return false;
+        if (wordId != that.wordId) return false;
+        return order == that.order;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + starId;
+        result = 31 * result + wordId;
+        result = 31 * result + order;
+        return result;
+    }
 }

@@ -10,8 +10,6 @@ import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.category.WordMetaInfoFilter;
 import com.github.lorenj.wordtint.context.support.category.WordMetaInfoFilterImpl;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
-import com.github.lorenj.wordtint.handler.WordMeaningConvertHandler;
-import com.github.lorenj.wordtint.handler.impl.WordMeaningConvertHandlerImpl;
 import com.github.lorenj.wordtint.ui.markdown.plugin.GlobalMarkwonPlugin;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 import com.google.gson.Gson;
@@ -52,10 +50,6 @@ public class StaticFactory {
 
     private static final class EmptyWordHolder {
         static final WordDTOLocal EMPTY_WORD = new WordDTOLocal();
-    }
-
-    private static final class WordMeaningConvertHandlerHolder {
-        static final WordMeaningConvertHandler WORD_MEANING_CONVERT_HANDLER = new WordMeaningConvertHandlerImpl();
     }
 
     private static final class SimpleNavOptionsHolder {
@@ -119,16 +113,6 @@ public class StaticFactory {
      */
     public static WordDTOLocal getEmptyWord() {
         return EmptyWordHolder.EMPTY_WORD;
-    }
-
-    /**
-     * 得到处理单词的处理器,该处理器可以将一个Word实体对象中的中英文意思映射到一个Map中.<br>
-     * 详情见{@link WordMeaningConvertHandler}接口
-     *
-     * @return 返回@{@link WordMeaningConvertHandler}接口的实现类
-     */
-    public static WordMeaningConvertHandler getWordMeaningConvertHandler() {
-        return WordMeaningConvertHandlerHolder.WORD_MEANING_CONVERT_HANDLER;
     }
 
     /**

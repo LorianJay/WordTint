@@ -45,15 +45,8 @@ import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
 import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
-import com.github.lorenj.wordtint.database.WordSupplementReviewHandler;
-import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
-import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
-import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
-import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
-import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
-import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
-import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
+import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.MarkColor;
@@ -61,15 +54,14 @@ import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.WordStructure;
-import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
-import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
 import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
-import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.utils.AnimationUtil;
@@ -78,8 +70,6 @@ import com.google.android.material.color.MaterialColors;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -96,7 +86,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private DrawerLayout starDrawer;
     private RecyclerView starList, reciteMarkArea;
     private ResultWebViewHandler resultWebViewHandler, starResultWebViewHandler;
-    private StarCategoryAdapter starCategoryAdapter;
+    private StarListAdapter starListAdapter;
+    private StarSimpleAdapter starSimpleAdapter;
     private ReciteMarkToastAdapter reciteMarkToastAdapter;
     // 单词音频播放器
     private final MediaPlayer mediaPlayer = new MediaPlayer();
@@ -109,6 +100,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private TextView originWord, controlNextWord, controlPreviousWord;
     private TextView currentIndex, wordCount, lightHint;
     private TextView starCurrentWord, starCreateCategory;
+    private ImageView starMove;
     private AlertDialog loadingDialog = null;
     private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionLock, functionBlueTooth;
     private LinearLayout viewFlagArea, functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
@@ -128,11 +120,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 用户的背词风格
      */
     private UserRecitePreference userRecitePreference;
-    /**
-     * 单词分析的功能
-     */
-    private WordAnalysisHandler wordAnalysisHandler;
-    private WordSupplementReviewHandler wordSupplementReviewHandler;
 
     /**
      * 滑动显示答案组件时的坐标<br>
@@ -184,7 +171,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 if (result.getResultCode() == RESULT_OK) {
                     CompletableFuture
                             .runAsync(wordFunctionHandler::reloadStar, StaticFactory.getExecutorService())
-                            .thenRunAsync(starCategoryAdapter::notifyDataSetChanged, updateUIHandler::post);
+                            .thenRunAsync(new Runnable() {
+                                @Override
+                                public void run() {
+                                    wordFunctionHandler.getWordFunctionHandlerState().setSortStar(true);
+                                    starMove.performClick();
+                                }
+                            }, updateUIHandler::post);
                 }
             }
     );
@@ -223,33 +216,20 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             bundle.remove(BookListFragment.REVIEW_WORD_List);
             // 所有的功能均交由Handler来处理,UI必须与业务逻辑代码脱离
             this.wordFunctionHandler = new WordFunctionHandlerImpl(MainReciteActivity.this, userRecitePreference);
-            // 单词回顾
-            //if (reViewList != null) {
-            //    for (int i = 0; i < reViewList.size(); i++) {
-            //        FunctionWordDTOLocal functionWordDTOLocal = new FunctionWordDTOLocal();
-            //        functionWordDTOLocal.setId(reViewList.get(i));
-            //        HashSet<MarkColor> wordsFlagList = new HashSet<>();
-            //        wordsFlagList.add(MarkColor.GREEN);
-            //        wordsFlagList.add(MarkColor.BROWN);
-            //        functionWordDTOLocal.setWordsFlagList(wordsFlagList);
-            //        allFunctionWordList.add(functionWordDTOLocal);
-            //    }
-            //}
-            // 单词分析功能
-            this.wordAnalysisHandler = new WordAnalysisHandlerImpl(this);
-            this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(this);
+            // 绑定ItemTouchHelper,实现收藏夹拖拽移动功能
+            ItemTouchHelper starSimpleTouchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback());
             // 设置recycleView的各个adapter
-            this.starCategoryAdapter = new StarCategoryAdapter(this, wordFunctionHandler);
+            this.starListAdapter = new StarListAdapter(this, wordFunctionHandler, starSimpleTouchHelper);
+            this.starListAdapter.refreshConcatAdapter();
+            this.starSimpleAdapter = new StarSimpleAdapter(this, wordFunctionHandler);
             this.reciteMarkToastAdapter = new ReciteMarkToastAdapter(this, wordFunctionHandler);
             this.reciteMarkArea.setItemAnimator(null);
-            // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
-            ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
-            starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
+            starSimpleAdapter.setStartDragListener(starSimpleTouchHelper::startDrag);
             // 更新UI
             updateUIHandler.post(() -> {
-                this.starList.setAdapter(starCategoryAdapter);
+                this.starList.setAdapter(starListAdapter.getGlobalAdapter());
                 this.reciteMarkArea.setAdapter(reciteMarkToastAdapter);
-                touchHelper.attachToRecyclerView(starList);
+                starSimpleTouchHelper.attachToRecyclerView(starList);
                 if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_RECORD)
                     wordFunctionHandler.getWordFunctionHandlerState().setChameleon(MarkColor.BROWN);
                 // view-model的监听事件,必须在UI线程
@@ -610,44 +590,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         // 保存当前的进度
         if (clickViewId == R.id.ll_recite_function_saving) {
             StaticFactory.getExecutorService().submit(() -> {
-                List<Integer> saveIdList = wordFunctionHandler.getSaveIdList();
-                ReciteRecordDao reciteRecordDao = appDatabase.reciteRecordDao();
-                ReciteRecordWordDao reciteRecordWordDao = appDatabase.reciteRecordWordDao();
-                ReciteRecordMarkDao reciteRecordMarkDao = appDatabase.reciteRecordMarkDao();
-                appDatabase.runInTransaction(() -> {
-                    ReciteRecordEntity reciteRecordEntity = new ReciteRecordEntity();
-                    reciteRecordEntity.createTime = System.currentTimeMillis();
-                    reciteRecordEntity.wordCount = saveIdList.size();
-                    reciteRecordEntity.reciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode().name();
-                    reciteRecordEntity.reciteOrder = userRecitePreference.getReciteOrder().name();
-                    reciteRecordEntity.reciteFiler = userRecitePreference.getReciteFilter().name();
-                    reciteRecordEntity.hidePreposition = wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition();
-                    long reciteRecordId = reciteRecordDao.insertReciteRecord(reciteRecordEntity);
-                    List<ReciteRecordWordEntity> recordWordEntityList = new ArrayList<>();
-                    for (int i = 0; i < saveIdList.size(); i++) {
-                        ReciteRecordWordEntity recordWordEntity = new ReciteRecordWordEntity();
-                        recordWordEntity.recordId = (int) reciteRecordId;
-                        recordWordEntity.wordId = saveIdList.get(i);
-                        recordWordEntity.order = i + 1;
-                        recordWordEntityList.add(recordWordEntity);
-                    }
-                    List<Long> recordWordIdList = reciteRecordWordDao.batchInsertReciteRecordWord(recordWordEntityList);
-                    List<ReciteRecordWordMarkEntity> wordMarkEntityList = new ArrayList<>();
-                    for (int i = 0; i < saveIdList.size(); i++) {
-                        Long recordWordId = recordWordIdList.get(i);
-                        Integer wordId = saveIdList.get(i);
-                        FunctionWordVO functionWordVO = wordFunctionHandler.getDict().get(wordId);
-                        if (functionWordVO == null) continue;
-                        for (MarkColor markColor : functionWordVO.getMarkColorList()) {
-                            if (markColor == MarkColor.BROWN) continue;
-                            ReciteRecordWordMarkEntity wordMarkEntity = new ReciteRecordWordMarkEntity();
-                            wordMarkEntity.recordWordId = Math.toIntExact(recordWordId);
-                            wordMarkEntity.markColor = markColor.name();
-                            wordMarkEntityList.add(wordMarkEntity);
-                        }
-                    }
-                    reciteRecordMarkDao.batchInsertReciteRecordWordMark(wordMarkEntityList);
-                });
+                wordFunctionHandler.saveProgress();
                 updateUIHandler.post(() -> {
                     if (globalToast != null) globalToast.cancel();
                     globalToast = Toast.makeText(MainReciteActivity.this, R.string.save_success, Toast.LENGTH_LONG);
@@ -723,13 +666,26 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                         wordStarEntity.title = categoryTile.getText().toString();
                         wordStarEntity.describeInfo = categoryDescribe.getText().toString();
                         StaticFactory.getExecutorService().execute(() -> {
-                            wordFunctionHandler.createNewStar(wordStarEntity);
-                            updateUIHandler.post(() -> starCategoryAdapter.notifyItemInserted(wordFunctionHandler.getAllStarList().size() - 1));
+                            WordStarWithWordIdEntity newStar = wordFunctionHandler.createNewStar(wordStarEntity);
+                            updateUIHandler.post(() -> starListAdapter.addItem(newStar));
                         });
                     })
                     .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                     })
                     .show();
+        }
+        if (clickViewId == R.id.iv_recite_star_move) {
+            boolean sortStar = wordFunctionHandler.getWordFunctionHandlerState().isSortStar();
+            wordFunctionHandler.getWordFunctionHandlerState().setSortStar(!sortStar);
+            sortStar = wordFunctionHandler.getWordFunctionHandlerState().isSortStar();
+            if (sortStar) {
+                this.starMove.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
+                this.starList.setAdapter(starSimpleAdapter);
+            } else {
+                this.starMove.getDrawable().setTint(getResources().getColor(R.color.dark_gray, null));
+                this.starListAdapter.refreshConcatAdapter();
+                this.starList.setAdapter(starListAdapter.getGlobalAdapter());
+            }
         }
         // 模式改变
         if (clickViewId == R.id.ll_recite_function_mode) {
@@ -899,28 +855,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * @param currentWord 待被展示的单词
      */
     private void reciteWord(FunctionWordVO currentWord) {
-        // 异步写入单词背诵记录
-        /*
-        StaticFactory.getExecutorService().submit(() -> {
-            // 先清除增量,只要当前看过该单词就算清除
-            AddWordReViewParamLocal addWordReViewParamLocal = new AddWordReViewParamLocal();
-            addWordReViewParamLocal.setId(Math.toIntExact(previousWord.getId()));
-            if (userRecitePreference.isReview()) {
-                wordSupplementReviewHandler.deleteWordReView(addWordReViewParamLocal.getId());
-            }
-            // 正常全量增加
-            AddWordAnalysisParamLocal addWordAnalysisParamLocal = new AddWordAnalysisParamLocal();
-            addWordAnalysisParamLocal.setId(Math.toIntExact(previousWord.getId()));
-            addWordAnalysisParamLocal.setWordFlag(recordMarkColor);
-            addWordAnalysisParamLocal.setCreateTimestamp(System.currentTimeMillis());
-            wordAnalysisHandler.insertWordAnalysis(addWordAnalysisParamLocal);
-            // 当然也可以再把当前单词增加到末尾
-            addWordReViewParamLocal.setWordFlag(recordMarkColor);
-            wordSupplementReviewHandler.insertWordReView(addWordReViewParamLocal);
-            // 每次记录之后都要清除一下
-            recordMarkColor.clear();
-        });
-         */
         // 更新UI相关
         updateUIHandler.post(() -> {
             // 如果隐藏了介词信息,必须在visible之前处理
@@ -1083,6 +1017,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         // 收藏夹区域
         this.starDrawer = findViewById(R.id.dr_main_recite_star);
         this.starCurrentWord = findViewById(R.id.tv_recite_star_current_word);
+        this.starMove = findViewById(R.id.iv_recite_star_move);
         this.starList = findViewById(R.id.rc_recite_star_list);
         this.starCreateCategory = findViewById(R.id.tv_recite_star_create);
         // 其它
@@ -1115,6 +1050,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.controlPlay.setOnClickListener(this);
         this.functionStar.setOnClickListener(this);
         this.starCreateCategory.setOnClickListener(this);
+        this.starMove.setOnClickListener(this);
         this.functionSearchWord.setOnClickListener(this);
         this.functionSaveProgress.setOnClickListener(this);
         this.functionAnalysis.setOnClickListener(this);

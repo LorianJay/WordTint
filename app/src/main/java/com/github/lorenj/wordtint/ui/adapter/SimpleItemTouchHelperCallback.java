@@ -10,10 +10,7 @@ import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
 
 public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
-    private final MoveAndSwipedListener mAdapter;
-
-    public SimpleItemTouchHelperCallback(MoveAndSwipedListener listener) {
-        mAdapter = listener;
+    public SimpleItemTouchHelperCallback() {
     }
 
     /**
@@ -57,7 +54,12 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
-        mAdapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
+        RecyclerView.Adapter<? extends RecyclerView.ViewHolder> bindingAdapter = source.getBindingAdapter();
+        if (bindingAdapter instanceof MoveAndSwipedListener
+                && source.getBindingAdapter() == target.getBindingAdapter()) {
+            MoveAndSwipedListener moveAndSwipedListener = (MoveAndSwipedListener) bindingAdapter;
+            moveAndSwipedListener.onItemMove(source.getBindingAdapterPosition(), target.getBindingAdapterPosition());
+        }
         return true;
     }
 
@@ -87,7 +89,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
                                             int totalSize, long msSinceStartScroll) {
         final int standardSpeed = super.interpolateOutOfBoundsScroll(recyclerView, viewSize, viewSizeOutOfBounds, totalSize, msSinceStartScroll);
         // 滑动速度
-        int minSpeed = 10;
+        int minSpeed = 5;
         if (Math.abs(standardSpeed) < minSpeed && viewSizeOutOfBounds != 0) {
             return standardSpeed > 0 ? minSpeed : -minSpeed;
         }

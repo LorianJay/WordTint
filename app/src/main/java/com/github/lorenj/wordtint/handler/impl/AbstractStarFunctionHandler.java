@@ -79,7 +79,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
     }
 
     @Override
-    public void createNewStar(WordStarEntity wordStarEntity) {
+    public WordStarWithWordIdEntity createNewStar(WordStarEntity wordStarEntity) {
         if (wordStarEntity.order == 0) wordStarEntity.order = allStarList.size() + 1;
         WordStarWithWordIdEntity wordStarWithWordIdEntity = new WordStarWithWordIdEntity();
         wordStarWithWordIdEntity.wordStarEntity = wordStarEntity;
@@ -87,6 +87,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         long starId = appDatabase.wordStarDao().insert(wordStarEntity);
         wordStarEntity.id = (int) starId;
         allStarList.add(wordStarWithWordIdEntity);
+        return wordStarWithWordIdEntity;
     }
 
     @Override

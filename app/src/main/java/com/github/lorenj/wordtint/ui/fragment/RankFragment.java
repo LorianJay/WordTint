@@ -22,7 +22,6 @@ import com.github.lorenj.wordtint.database.impl.WordSupplementReviewHandlerImpl;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
-import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
 import com.github.lorenj.wordtint.ui.adapter.StartViewAdapter;
 import com.github.lorenj.wordtint.utils.JsonUtils;
 
@@ -67,7 +66,7 @@ public class RankFragment extends Fragment implements ViewPager.OnPageChangeList
     }
 
     private void initView() {
-        this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
+        //this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
         this.wordSupplementReviewHandler = new WordSupplementReviewHandlerImpl(getContext());
         this.markColorList = new ArrayList<>();
         this.listFragment = new ArrayList<>();

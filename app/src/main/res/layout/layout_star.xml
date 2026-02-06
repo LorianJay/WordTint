@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="end"
     android:background="@color/white"
     android:clickable="true"
@@ -15,10 +15,10 @@
         android:fitsSystemWindows="true">
 
         <androidx.appcompat.widget.Toolbar
-            app:layout_collapseMode="pin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white">
+            android:background="@color/white"
+            app:layout_collapseMode="pin">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -48,21 +48,34 @@
                     android:textColor="@color/black"
                     android:textSize="22sp" />
 
+                <ImageView
+                    android:id="@+id/iv_recite_star_move"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/style_image_padding"
+                    android:gravity="center"
+                    android:importantForAccessibility="no"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_element_move"
+                    app:tint="@color/dark_gray" />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <RelativeLayout
-            app:layout_constraintBottom_toTopOf="@id/tv_recite_star_create"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/tv_recite_star_create"
+            app:layout_constraintTop_toTopOf="parent">
 
             <WebView
                 android:id="@+id/wv_star_recite_result"
@@ -98,7 +111,6 @@
 
         <TextView
             android:id="@+id/tv_recite_star_create"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginStart="7dp"
@@ -110,7 +122,8 @@
             android:paddingBottom="3dp"
             android:text="@string/add_new_category"
             android:textColor="@color/theme_color"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

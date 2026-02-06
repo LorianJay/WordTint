@@ -31,7 +31,7 @@ public class BookHeaderAdapter extends RecyclerView.Adapter<BookHeaderAdapter.Bo
      */
     private final RecyclerView.RecycledViewPool tagSelectionPool;
     private final ConcatAdapter bookListAdapter;
-    private BookSectionAdapter bookSectionAdapter;
+    private final BookSectionAdapter bookSectionAdapter;
 
     public BookHeaderAdapter(Context context,
                              ConcatAdapter bookListAdapter,

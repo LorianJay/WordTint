@@ -66,6 +66,11 @@ public class WordFunctionHandlerState {
     private int currentFocusSwitchPosition = previousFocusSwitchPosition;
 
     /**
+     * 是否正在排序收藏夹
+     */
+    private boolean sortStar = false;
+
+    /**
      * 得到当前的背诵模式
      *
      * @return 非空
@@ -173,5 +178,13 @@ public class WordFunctionHandlerState {
 
     public void setHidePreposition(boolean hidePreposition) {
         this.hidePreposition = hidePreposition;
+    }
+
+    public boolean isSortStar() {
+        return sortStar;
+    }
+
+    public void setSortStar(boolean sortStar) {
+        this.sortStar = sortStar;
     }
 }

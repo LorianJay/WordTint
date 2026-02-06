@@ -31,14 +31,16 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
+import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
+import com.github.lorenj.wordtint.ui.adapter.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
-import com.github.lorenj.wordtint.ui.adapter.star.StarCategoryAdapter;
-import com.github.lorenj.wordtint.ui.adapter.LoadMoreAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
 import com.github.lorenj.wordtint.ui.viewmodel.WordSearchViewModel;
@@ -67,9 +69,11 @@ public class SearchWordActivity extends AppCompatActivity
     private LinearLayout resultArea;
     // 收藏夹列表单词显示适配器
     private StarResultAdapter chineseAnswerAdapterDrawer;
-    private StarCategoryAdapter starCategoryAdapter;
+    private StarListAdapter starListAdapter;
+    private StarSimpleAdapter starSimpleAdapter;
     private Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private LinearLayout analysisWord, openStarDrawer;
+    private ImageView starMove;
     private TextView originWord;
     // 收藏界抽屉布局
     private DrawerLayout starDrawer;
@@ -110,6 +114,11 @@ public class SearchWordActivity extends AppCompatActivity
     private int currentFocusWordId = 0;
     private boolean textChange = false;
     private long searchDelay = 500;
+    /**
+     * 是否正在排序收藏夹
+     */
+    private boolean sortStar = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,8 +164,8 @@ public class SearchWordActivity extends AppCompatActivity
                         wordStarEntity.title = categoryTile.getText().toString();
                         wordStarEntity.describeInfo = categoryDescribe.getText().toString();
                         StaticFactory.getExecutorService().execute(() -> {
-                            starFunctionHandler.createNewStar(wordStarEntity);
-                            updateUIHandler.post(() -> starCategoryAdapter.notifyItemInserted(starFunctionHandler.getAllStarList().size() - 1));
+                            WordStarWithWordIdEntity newStar = starFunctionHandler.createNewStar(wordStarEntity);
+                            updateUIHandler.post(() -> starListAdapter.addItem(newStar));
                         });
                     })
                     .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
@@ -170,6 +179,17 @@ public class SearchWordActivity extends AppCompatActivity
         } else if (itemId == R.id.iv_search_word_control_play) {
             mediaPlayer.seekTo(0);
             mediaPlayer.start();
+        }
+        if (itemId == R.id.iv_recite_star_move) {
+            sortStar = !sortStar;
+            if (sortStar) {
+                this.starMove.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
+                this.starList.setAdapter(starSimpleAdapter);
+            } else {
+                this.starMove.getDrawable().setTint(getResources().getColor(R.color.dark_gray, null));
+                this.starListAdapter.refreshConcatAdapter();
+                this.starList.setAdapter(starListAdapter.getGlobalAdapter());
+            }
         }
     }
 
@@ -276,18 +296,21 @@ public class SearchWordActivity extends AppCompatActivity
                     return currentFocusWordId;
                 }
             };
-            this.starCategoryAdapter = new StarCategoryAdapter(this, starFunctionHandler);
             // 初始化单词列表的adapter
             this.selectWordListAdapter = new SelectWordListAdapter(this, wordSearchViewModel);
             this.loadMoreAdapter = new LoadMoreAdapter(this);
             ConcatAdapter concatAdapter = new ConcatAdapter(selectWordListAdapter, loadMoreAdapter);
-            // 绑定ItemTouchHelper,实现单个列表的编辑删除等功能
-            ItemTouchHelper touchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback(starCategoryAdapter));
-            starCategoryAdapter.setStartDragListener(touchHelper::startDrag);
+            // 绑定ItemTouchHelper,实现收藏夹拖拽移动功能
+            ItemTouchHelper starSimpleTouchHelper = new ItemTouchHelper(new SimpleItemTouchHelperCallback());
+            // 设置recycleView的各个adapter
+            this.starListAdapter = new StarListAdapter(this, starFunctionHandler, starSimpleTouchHelper);
+            this.starListAdapter.refreshConcatAdapter();
+            this.starSimpleAdapter = new StarSimpleAdapter(this, starFunctionHandler);
+            starSimpleAdapter.setStartDragListener(starSimpleTouchHelper::startDrag);
             updateUIHandler.post(() -> {
-                this.starList.setAdapter(starCategoryAdapter);
+                this.starList.setAdapter(starListAdapter.getGlobalAdapter());
                 this.selectWordList.setAdapter(concatAdapter);
-                touchHelper.attachToRecyclerView(starList);
+                starSimpleTouchHelper.attachToRecyclerView(starList);
                 this.lightResult.setVisibility(View.GONE);
                 loadingDialog.dismiss();
             });
@@ -336,6 +359,7 @@ public class SearchWordActivity extends AppCompatActivity
         this.starDrawer = findViewById(R.id.dl_search_word);
         this.openStarDrawer = findViewById(R.id.ll_search_word_star);
         this.starCurrentWord = findViewById(R.id.tv_recite_star_current_word);
+        this.starMove = findViewById(R.id.iv_recite_star_move);
         this.starList = findViewById(R.id.rc_recite_star_list);
         this.starCreateCategory = findViewById(R.id.tv_recite_star_create);
 
@@ -347,6 +371,7 @@ public class SearchWordActivity extends AppCompatActivity
         this.backToTrace.setOnClickListener(this);
         this.analysisWord.setOnClickListener(this);
         this.openStarDrawer.setOnClickListener(this);
+        this.starMove.setOnClickListener(this);
         this.starCreateCategory.setOnClickListener(this);
         this.controlPlay.setOnClickListener(this);
     }

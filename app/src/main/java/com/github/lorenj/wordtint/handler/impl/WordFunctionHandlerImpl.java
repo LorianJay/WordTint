@@ -3,7 +3,12 @@ package com.github.lorenj.wordtint.handler.impl;
 import android.content.Context;
 
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
+import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
+import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
@@ -221,7 +226,43 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
 
     @Override
     public void saveProgress() {
-        // todo 保存背诵进度
+        ReciteRecordDao reciteRecordDao = appDatabase.reciteRecordDao();
+        ReciteRecordWordDao reciteRecordWordDao = appDatabase.reciteRecordWordDao();
+        ReciteRecordMarkDao reciteRecordMarkDao = appDatabase.reciteRecordMarkDao();
+        appDatabase.runInTransaction(() -> {
+            ReciteRecordEntity reciteRecordEntity = new ReciteRecordEntity();
+            reciteRecordEntity.createTime = System.currentTimeMillis();
+            reciteRecordEntity.wordCount = saveList.size();
+            reciteRecordEntity.reciteMode = this.getWordFunctionHandlerState().getCurrentReciteMode().name();
+            reciteRecordEntity.reciteOrder = userRecitePreference.getReciteOrder().name();
+            reciteRecordEntity.reciteFiler = userRecitePreference.getReciteFilter().name();
+            reciteRecordEntity.hidePreposition = this.getWordFunctionHandlerState().isHidePreposition();
+            long reciteRecordId = reciteRecordDao.insertReciteRecord(reciteRecordEntity);
+            List<ReciteRecordWordEntity> recordWordEntityList = new ArrayList<>();
+            for (int i = 0; i < saveList.size(); i++) {
+                ReciteRecordWordEntity recordWordEntity = new ReciteRecordWordEntity();
+                recordWordEntity.recordId = (int) reciteRecordId;
+                recordWordEntity.wordId = saveList.get(i);
+                recordWordEntity.order = i + 1;
+                recordWordEntityList.add(recordWordEntity);
+            }
+            List<Long> recordWordIdList = reciteRecordWordDao.batchInsertReciteRecordWord(recordWordEntityList);
+            List<ReciteRecordWordMarkEntity> wordMarkEntityList = new ArrayList<>();
+            for (int i = 0; i < saveList.size(); i++) {
+                Long recordWordId = recordWordIdList.get(i);
+                Integer wordId = saveList.get(i);
+                FunctionWordVO functionWordVO = getDict().get(wordId);
+                if (functionWordVO == null) continue;
+                for (MarkColor markColor : functionWordVO.getMarkColorList()) {
+                    if (markColor == MarkColor.BROWN) continue;
+                    ReciteRecordWordMarkEntity wordMarkEntity = new ReciteRecordWordMarkEntity();
+                    wordMarkEntity.recordWordId = Math.toIntExact(recordWordId);
+                    wordMarkEntity.markColor = markColor.name();
+                    wordMarkEntityList.add(wordMarkEntity);
+                }
+            }
+            reciteRecordMarkDao.batchInsertReciteRecordWordMark(wordMarkEntityList);
+        });
     }
 
     @Override
@@ -250,11 +291,6 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
     public int getIndexByWordOrigin(String origin) {
         Integer result = quickPosition.get(origin.toLowerCase());
         return result == null ? -1 : result;
-    }
-
-    @Override
-    public List<Integer> getSaveIdList() {
-        return saveList;
     }
 
     /**

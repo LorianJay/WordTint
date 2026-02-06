@@ -20,6 +20,7 @@
         android:orientation="horizontal">
 
         <LinearLayout
+            android:id="@+id/ll_star_section_move"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -40,7 +41,7 @@
 
         <LinearLayout
             android:id="@+id/ll_star_section_menu"
-            android:layout_width="120dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:background="@color/white"
             android:orientation="horizontal">
@@ -53,22 +54,9 @@
                 android:layout_weight="1"
                 android:background="@android:color/holo_red_light"
                 android:gravity="center"
-
                 android:text="@string/delete"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
-
-            <ImageButton
-                android:id="@+id/iv_star_section_move"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="0.2"
-                android:background="@drawable/style_image_padding"
-                android:gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_element_move"
-                app:tint="@color/dark_gray" />
         </LinearLayout>
 
 

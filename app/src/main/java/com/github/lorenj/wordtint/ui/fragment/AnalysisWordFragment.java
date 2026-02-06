@@ -17,7 +17,6 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.entity.local.WordAnalysisLocal;
 import com.github.lorenj.wordtint.entity.local.WordDTOLocal;
 import com.github.lorenj.wordtint.handler.WordAnalysisHandler;
-import com.github.lorenj.wordtint.handler.impl.WordAnalysisHandlerImpl;
 import com.github.lorenj.wordtint.ui.adapter.WordAnalysisProgressRecyclerViewAdapter;
 import com.github.lorenj.wordtint.R;
 
@@ -62,7 +61,7 @@ public class AnalysisWordFragment extends Fragment implements View.OnClickListen
     private void initView() {
         this.title.setText(R.string.analysis_word);
         this.updateUIHandler = new Handler();
-        this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
+        //this.wordAnalysisHandler = new WordAnalysisHandlerImpl(getContext());
         this.analysisProgress.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         Bundle bundle = getArguments();
         if (bundle != null) {
