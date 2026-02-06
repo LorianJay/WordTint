@@ -10,18 +10,6 @@
         <item name="android:windowEnterAnimation">@anim/alpha_in</item>
     </style>
 
-    <style name="settings_linear_layout">
-        <item name="android:background">@drawable/background_solid_radius_6dp</item>
-        <item name="android:backgroundTint">@color/white</item>
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:layout_marginEnd">10dp</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:showDividers">middle</item>
-        <item name="android:divider">@drawable/divider_1dp</item>
-    </style>
-
     <style name="settings_text_view">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_star_section_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="4dp"
+    android:layout_marginStart="3dp"
+    android:layout_marginEnd="3dp"
+    android:background="@drawable/background_rounded_ripple_hollow_middle"
     android:orientation="vertical">
 
     <View
         android:id="@+id/v_star_section_separate"
         android:layout_width="match_parent"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:layout_height="2dp"
         android:background="@color/dark_gray" />
 
@@ -16,20 +21,24 @@
         android:id="@+id/sll_star_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
         android:background="@color/white"
         android:orientation="horizontal">
 
         <LinearLayout
+
             android:id="@+id/ll_star_section_move"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:background="?attr/selectableItemBackground"
+            android:minHeight="55dp"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tv_star_section_origin"
+
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
@@ -62,22 +71,18 @@
 
     </com.github.lorenj.wordtint.ui.adapter.customview.ScrollerLinearLayout>
 
-    <HorizontalScrollView
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:scrollbars="none">
+        android:layout_marginTop="3dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:paddingBottom="5dp">
 
-        <RelativeLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_star_section_result"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_star_section_result"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </RelativeLayout>
-    </HorizontalScrollView>
-
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
 
 </LinearLayout>

@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -80,11 +81,23 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
         } else {
             holder.separator.setBackgroundColor(context.getResources().getColor(R.color.dark_gray, null));
         }
+        // 最后一个单词设置为底部圆角
+        if (position == wordStarWordIdEntityList.size() - 1) {
+            holder.parent.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow_bottom,
+                    null));
+        } else {
+            holder.parent.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow_middle,
+                    null));
+        }
+        holder.scroller.scrollTo(0, 0);
         WordStarWordIdEntity wordStarWordIdEntity = wordStarWordIdEntityList.get(position);
         FunctionWordVO currentSectionWord = starFunctionHandler.getWordDetailByWordId(wordStarWordIdEntity);
         holder.starResultAdapter.addItem(currentSectionWord);
         holder.wordOrigin.setText(currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN));
-        Log.d("", "StarSectionAdapter-position:" + position);
     }
 
     @Override
@@ -93,12 +106,25 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
             super.onBindViewHolder(holder, position, payloads);
             return;
         }
+
         for (Object payload : payloads) {
             if (payload == Item.ITEM_MOVE) {
+                Log.d("itemchange", "itemchange");
                 if (position == 0) {
                     holder.separator.setBackgroundColor(context.getResources().getColor(android.R.color.holo_blue_light, null));
                 } else {
                     holder.separator.setBackgroundColor(context.getResources().getColor(R.color.dark_gray, null));
+                }
+                if (position == wordStarWordIdEntityList.size() - 1) {
+                    holder.parent.setBackground(ResourcesCompat.getDrawable(
+                            context.getResources(),
+                            R.drawable.background_rounded_ripple_hollow_bottom,
+                            null));
+                } else {
+                    holder.parent.setBackground(ResourcesCompat.getDrawable(
+                            context.getResources(),
+                            R.drawable.background_rounded_ripple_hollow_middle,
+                            null));
                 }
             }
         }
@@ -121,6 +147,11 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
         Collections.swap(wordStarWordIdEntityList, fromPosition, toPosition);
         starFunctionHandler.moveStarInnerWord(fromWord, toWord);
         if (fromPosition == 0 || toPosition == 0) {
+            notifyItemChanged(fromPosition, Item.ITEM_MOVE);
+            notifyItemChanged(toPosition, Item.ITEM_MOVE);
+        }
+        if (fromPosition == wordStarWordIdEntityList.size() - 1
+                || toPosition == wordStarWordIdEntityList.size() - 1) {
             notifyItemChanged(fromPosition, Item.ITEM_MOVE);
             notifyItemChanged(toPosition, Item.ITEM_MOVE);
         }
@@ -151,6 +182,7 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
 
     public static class StarSectionViewHolder extends RecyclerView.ViewHolder implements
             StateChangedListener, View.OnClickListener, View.OnLongClickListener {
+        private LinearLayout parent;
         /**
          * separator颜色线条
          */
@@ -163,6 +195,7 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
         public StarSectionViewHolder(@NonNull View itemView, StarSectionAdapter starSectionAdapter) {
             super(itemView);
             this.itemView = itemView;
+            this.parent = itemView.findViewById(R.id.ll_star_section_parent);
             this.delete = itemView.findViewById(R.id.tv_star_section_delete);
             this.scroller = itemView.findViewById(R.id.sll_star_section);
             this.wordOrigin = itemView.findViewById(R.id.tv_star_section_origin);
@@ -210,9 +243,10 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
                     starSectionAdapter.starFunctionHandler.removeWordFromStar(innerStarWordIdEntity);
                     starSectionAdapter.updateUIHandler.post(() -> {
                         starSectionAdapter.functionContentCallBack.updateCategoryMessage();
+                        starSectionAdapter.wordStarWordIdEntityList.remove(position);
                         starSectionAdapter.notifyItemRemoved(position);
-                        starSectionAdapter.notifyItemRangeChanged(position, starSectionAdapter.getItemCount() - position);
-                        if (position == 0) starSectionAdapter.notifyItemChanged(0);
+                        //starSectionAdapter.notifyItemRangeChanged(position, starSectionAdapter.getItemCount() - position);
+                        if (position == 0) starSectionAdapter.notifyItemChanged(0, Item.ITEM_MOVE);
                     });
                 });
             }

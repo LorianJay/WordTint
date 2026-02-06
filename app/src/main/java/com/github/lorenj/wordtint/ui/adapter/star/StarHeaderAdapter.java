@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -78,10 +79,23 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
     public void onBindViewHolder(@NonNull StarHeaderViewHolder holder, @SuppressLint("RecyclerView") int position) {
         // 重置改变,防止由于复用而导致的显示问题
         holder.scroller.scrollTo(0, 0);
-        //holder.starSection.setVisibility(View.GONE);
-        //holder.listState.setRotation(90);
-        //holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.dark_gray, null));
-        //holder.fold = true;
+        holder.openList.getBackground().setTint(context.getColor(R.color.dark_gray));
+        if (fold) {
+            holder.listState.setRotation(90);
+            holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.dark_gray, null));
+            holder.openList.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow,
+                    null));
+        }
+        if (!fold) {
+            holder.listState.setRotation(180);
+            holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.light_blue_ff, null));
+            holder.openList.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow_top,
+                    null));
+        }
         holder.title.setText(starFunctionHandler.calculationTitle(wordStarWithWordIdEntity.wordStarEntity));
         holder.describe.setText(starFunctionHandler.calculationDescribe(wordStarWithWordIdEntity.wordStarEntity));
     }
@@ -93,9 +107,27 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
             return;
         }
         for (Object payload : payloads) {
-            if (payload == Item.BOOK_EDIT) {
+            if (payload == Item.STAR_EDIT) {
                 holder.title.setText(starFunctionHandler.calculationTitle(wordStarWithWordIdEntity.wordStarEntity));
                 holder.describe.setText(starFunctionHandler.calculationDescribe(wordStarWithWordIdEntity.wordStarEntity));
+            }
+            holder.openList.getBackground().setTint(context.getColor(R.color.dark_gray));
+            if (payload == Item.STAR_FOLD && fold) {
+                holder.listState.setRotation(90);
+                holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.dark_gray, null));
+                holder.openList.setBackground(ResourcesCompat.getDrawable(
+                        context.getResources(),
+                        R.drawable.background_rounded_ripple_hollow,
+                        null));
+            }
+            if (payload == Item.STAR_FOLD && !fold) {
+                holder.listState.setRotation(180);
+                holder.listState.getDrawable().setTint(context.getResources().getColor(R.color.light_blue_ff, null));
+                holder.openList.setBackground(ResourcesCompat.getDrawable(
+                        context.getResources(),
+                        R.drawable.background_rounded_ripple_hollow_top,
+                        null));
+
             }
         }
     }
@@ -132,7 +164,7 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
             this.itemView = itemView;
             this.title = itemView.findViewById(R.id.tv_item_star_title);
             this.describe = itemView.findViewById(R.id.tv_item_star_describe);
-            this.scroller = itemView.findViewById(R.id.sll_item_star_parent);
+            this.scroller = itemView.findViewById(R.id.sll_item_star_scroller);
             this.openList = itemView.findViewById(R.id.ll_item_star);
             this.listState = itemView.findViewById(R.id.iv_item_star_fold);
             this.edit = itemView.findViewById(R.id.ll_item_star_swipe_edit);
@@ -163,7 +195,7 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
                             starHeaderAdapter.wordStarWithWordIdEntity.wordStarEntity.describeInfo = starDescribe.getText().toString();
                             StaticFactory.getExecutorService().execute(() -> {
                                 starHeaderAdapter.starFunctionHandler.updateStar(starHeaderAdapter.wordStarWithWordIdEntity);
-                                starHeaderAdapter.updateUIHandler.post(() -> starHeaderAdapter.notifyItemChanged(getBindingAdapterPosition()));
+                                starHeaderAdapter.updateUIHandler.post(() -> starHeaderAdapter.notifyItemChanged(getBindingAdapterPosition(), Item.STAR_EDIT));
                             });
                         })
                         .setNegativeButton(starHeaderAdapter.context.getString(R.string.cancel), (dialog, which) -> {
@@ -187,8 +219,7 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
                     if (!starHeaderAdapter.starFunctionHandler.addWordToStar(wordStarWordIdEntity))
                         return;
                     starHeaderAdapter.updateUIHandler.post(() -> {
-                        title.setText(starHeaderAdapter.starFunctionHandler.calculationTitle(starHeaderAdapter.wordStarWithWordIdEntity.wordStarEntity));
-                        describe.setText(starHeaderAdapter.starFunctionHandler.calculationDescribe(starHeaderAdapter.wordStarWithWordIdEntity.wordStarEntity));
+                        starHeaderAdapter.notifyItemChanged(getBindingAdapterPosition(), Item.STAR_EDIT);
                         starHeaderAdapter.starSectionAdapter.addItem(wordStarWordIdEntity);
                     });
                 });
@@ -206,7 +237,7 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
             // 展开收藏夹
             if (clickViewId == R.id.ll_item_star) {
                 starHeaderAdapter.fold = !starHeaderAdapter.fold;
-                starHeaderAdapter.notifyItemChanged(getBindingAdapterPosition());
+                starHeaderAdapter.notifyItemChanged(getBindingAdapterPosition(), Item.STAR_FOLD);
                 // 如果当前是折叠就添加,否则就删除
                 if (starHeaderAdapter.fold) {
                     starHeaderAdapter.starListAdapter.removeAdapter(starHeaderAdapter.starSectionAdapter);
@@ -220,7 +251,8 @@ public class StarHeaderAdapter extends RecyclerView.Adapter<StarHeaderAdapter.St
     }
 
     private enum Item {
-        BOOK_EDIT
+        STAR_EDIT,
+        STAR_FOLD
     }
 
 }
