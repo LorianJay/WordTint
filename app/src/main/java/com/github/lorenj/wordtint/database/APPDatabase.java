@@ -29,8 +29,10 @@ import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
 import com.github.lorenj.wordtint.ui.viewmodel.WelcomeViewModel;
+import com.github.lorenj.wordtint.utils.ZipUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,6 +44,8 @@ import java.util.Optional;
         WordStarWordIdEntity.class, WordSearchEntity.class, ReciteRecordEntity.class,
         ReciteRecordWordEntity.class, ReciteRecordWordMarkEntity.class}, version = 5)
 public abstract class APPDatabase extends RoomDatabase {
+
+    private static int total = 0, completed = 0;
 
     private static volatile APPDatabase INSTANCE = null;
 
@@ -60,7 +64,9 @@ public abstract class APPDatabase extends RoomDatabase {
     public abstract WordSearchDao wordSearchDao();
 
     public abstract ReciteRecordDao reciteRecordDao();
+
     public abstract ReciteRecordWordDao reciteRecordWordDao();
+
     public abstract ReciteRecordMarkDao reciteRecordMarkDao();
 
     public static APPDatabase getInstance(Context context) {
@@ -95,9 +101,7 @@ public abstract class APPDatabase extends RoomDatabase {
                 String[] files = Optional.ofNullable(context.getAssets().list("sql"))
                         .orElse(new String[0]);
 
-                int total = files.length;
-                int completed = 0;
-
+                total = files.length + 1;
                 for (String fileName : files) {
 
                     try (InputStream is = context.getAssets().open("sql/" + fileName);
@@ -131,5 +135,15 @@ public abstract class APPDatabase extends RoomDatabase {
                 throw new RuntimeException(e);
             }
         });
+        // 解压音频文件
+        File outputDir = new File(context.getFilesDir(), "");
+        try {
+            ZipUtils.unzipFromAssets(context, "audio/audio.zip", outputDir);
+            completed++;
+            int progress = completed * 100 / total;
+            callback.onProgress(progress);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
