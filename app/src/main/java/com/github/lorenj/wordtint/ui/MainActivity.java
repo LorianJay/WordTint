@@ -8,7 +8,6 @@ import android.os.Looper;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -28,9 +27,10 @@ import com.github.lorenj.wordtint.ui.activity.SearchWordActivity;
 import com.github.lorenj.wordtint.ui.activity.WelcomeActivity;
 import com.github.lorenj.wordtint.ui.adapter.BottomViewAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
+import com.github.lorenj.wordtint.ui.fragment.AnalysisFragment;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
-import com.github.lorenj.wordtint.ui.fragment.RankFragment;
 import com.github.lorenj.wordtint.ui.fragment.RecordListFragment;
+import com.github.lorenj.wordtint.ui.fragment.SettingFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -46,7 +46,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem nowSelectMenuItem;
     private ArrayList<Fragment> listFragment;
     private volatile int position = 0;
-    private final Fragment creditFragment = new BookListFragment(), rankFragment = new RankFragment(), analysisFragment = new RecordListFragment();
+    private final Fragment creditFragment = new BookListFragment();
+    private final Fragment recordListFragment = new RecordListFragment();
+    private final Fragment analysisFragment = new AnalysisFragment();
+    private final Fragment settingFragment = new SettingFragment();
     private BottomNavigationItemView bottomRecite;
     private UserSettingRepository userSettingRepository;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
@@ -76,15 +79,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int position = -1;
         if (itemId == R.id.item_main_bottom_recite) {
             position = 0;
-        } else if (itemId == R.id.item_main_bottom_hearing) {
+        } else if (itemId == R.id.item_main_bottom_record) {
             position = 1;
         } else if (itemId == R.id.item_main_bottom_analysis) {
             position = 2;
+        } else if (itemId == R.id.item_main_bottom_setting) {
+            position = 3;
         }
         viewPager.setCurrentItem(position, false);
+        Fragment currentClickFragment = listFragment.get(position);
         // 如果当前点击的目标页面就是当前页面则触发回调事件
-        if (this.position == position) {
-            ((NavigationItemSelectListener) listFragment.get(position)).onClickCurrentPage(item);
+        if (this.position == position
+                && currentClickFragment instanceof NavigationItemSelectListener) {
+            ((NavigationItemSelectListener) currentClickFragment).onClickCurrentPage(item);
         }
         this.position = position;
         return false;
@@ -119,16 +126,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return ((KeyEvent.Callback) fragment).onKeyDown(keyCode, event);
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    /**
-     * 方便每个fragment设置自已的键盘弹起规则
-     *
-     * @param mode {@link WindowManager.LayoutParams#softInputMode
-     *             WindowManager.LayoutParams.softInputMode
-     */
-    public void setFragmentWindowSoftInputMode(int mode) {
-        getWindow().setSoftInputMode(mode);
     }
 
     private void bindView() {
@@ -169,8 +166,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 bindView();
                 listFragment = new ArrayList<>(4);
                 listFragment.add(creditFragment);
-                listFragment.add(rankFragment);
+                listFragment.add(recordListFragment);
                 listFragment.add(analysisFragment);
+                listFragment.add(settingFragment);
                 BottomViewAdapter adapter = new BottomViewAdapter(MainActivity.this, listFragment);
                 viewPager.setAdapter(adapter);
                 viewPager.setSaveEnabled(false);

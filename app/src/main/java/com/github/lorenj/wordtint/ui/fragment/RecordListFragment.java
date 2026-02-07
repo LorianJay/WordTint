@@ -34,7 +34,7 @@ import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.ReciteStyle;
 import com.github.lorenj.wordtint.ui.activity.MainReciteActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
-import com.github.lorenj.wordtint.ui.adapter.LoadMoreAdapter;
+import com.github.lorenj.wordtint.ui.adapter.common.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordViewModel;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;

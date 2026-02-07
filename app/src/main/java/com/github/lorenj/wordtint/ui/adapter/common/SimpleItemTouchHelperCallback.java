@@ -1,4 +1,4 @@
-package com.github.lorenj.wordtint.ui.adapter;
+package com.github.lorenj.wordtint.ui.adapter.common;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

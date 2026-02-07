@@ -1,4 +1,4 @@
-package com.github.lorenj.wordtint.ui.adapter;
+package com.github.lorenj.wordtint.ui.adapter.common;
 
 import android.content.Context;
 import android.content.res.ColorStateList;

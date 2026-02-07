@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.fragment.MockExamineFragment">
+    tools:context=".ui.activity.MockExamineActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_mock_examine_background"
@@ -25,7 +25,7 @@
             android:foregroundTint="@color/gray"
             android:gravity="center"
             android:paddingBottom="3dp"
-            android:text="11:40"
+            android:text="@string/default_txt"
             android:textColor="@color/gray"
             android:textSize="35sp"
             android:visibility="gone"
@@ -39,14 +39,13 @@
             android:layout_marginEnd="7dp"
             android:foregroundTint="@color/gray"
             android:gravity="center"
-            android:text="11:40"
+            android:text="@string/default_txt"
             android:textColor="@color/gray"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_mock_examine_top_time" />
-
 
         <TextView
             android:id="@+id/tv_mock_examine_bottom_time"
@@ -59,7 +58,7 @@
             android:foregroundTint="@color/gray"
             android:gravity="center"
             android:paddingBottom="3dp"
-            android:text="11:40"
+            android:text="@string/default_txt"
             android:textColor="@color/gray"
             android:textSize="35sp"
             android:visibility="gone"
@@ -73,14 +72,13 @@
             android:layout_marginEnd="7dp"
             android:foregroundTint="@color/gray"
             android:gravity="center"
-            android:text="11:40"
+            android:text="@string/default_txt"
             android:textColor="@color/gray"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_mock_examine_bottom_time" />
-
 
         <TextView
             android:id="@+id/tv_mock_examine_interrupt"
@@ -196,35 +194,70 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragment_mock_examine_select"
+        android:id="@+id/cl_mock_examine_select"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">
 
-        <include
-            android:id="@+id/include"
-            layout="@layout/global_toolbar" />
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/abl_mock_examine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <ImageButton
+                    android:id="@+id/ib_mock_back"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:paddingStart="5dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="5dp"
+                    android:scaleType="fitCenter"
+                    android:src="?attr/actionModeCloseDrawable" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="@string/mock_examine"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
+
+            </RelativeLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/include">
+            app:layout_constraintTop_toBottomOf="@+id/abl_mock_examine">
 
             <TextView
-                android:id="@+id/fragment_mock_examine_politician"
+                android:id="@+id/tv_mock_examine_politician"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginStart="7dp"
                 android:layout_marginTop="7dp"
                 android:layout_marginEnd="7dp"
                 android:layout_marginBottom="2dp"
-                android:background="@drawable/background_text_border_radius"
-                android:foreground="@drawable/foreground_border_radius_all"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/background_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="@string/mock_politician"
@@ -240,9 +273,8 @@
                 android:layout_marginTop="7dp"
                 android:layout_marginEnd="7dp"
                 android:layout_marginBottom="2dp"
-                android:background="@drawable/background_text_border_radius"
-                android:foreground="@drawable/foreground_border_radius_all"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/background_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="@string/mock_english"
@@ -258,9 +290,8 @@
                 android:layout_marginTop="7dp"
                 android:layout_marginEnd="7dp"
                 android:layout_marginBottom="2dp"
-                android:background="@drawable/background_text_border_radius"
-                android:foreground="@drawable/foreground_border_radius_all"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/background_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="@string/mock_math"
@@ -277,9 +308,8 @@
                 android:layout_marginTop="7dp"
                 android:layout_marginEnd="7dp"
                 android:layout_marginBottom="2dp"
-                android:background="@drawable/background_text_border_radius"
-                android:foreground="@drawable/foreground_border_radius_all"
-                android:foregroundTint="@color/theme_color"
+                android:background="@drawable/background_rounded_ripple_hollow"
+                android:backgroundTint="@color/theme_color"
                 android:gravity="center"
                 android:paddingBottom="3dp"
                 android:text="@string/mock_major"

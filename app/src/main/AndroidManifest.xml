@@ -19,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AnyLanguageWord">
         <activity
+            android:name=".ui.activity.MockExamineActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.SearchWordActivity"
             android:exported="false" />
         <activity

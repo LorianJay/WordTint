@@ -1,4 +1,4 @@
-package com.github.lorenj.wordtint.ui.adapter;
+package com.github.lorenj.wordtint.ui.adapter.star;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

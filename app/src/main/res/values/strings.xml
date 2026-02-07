@@ -270,6 +270,16 @@
     <string name="visible">显示</string>
     <string name="gone">隐藏</string>
     <string name="no_filer">不过滤</string>
+    <string name="developer_name">LorenJ</string>
+    <string name="email_address">xxxxx@gmail.com</string>
+    <string name="about_creator">关于作者:</string>
+    <string name="donate">打赏</string>
+    <string name="github_address">www.github.com</string>
+    <string name="more">更多</string>
+    <string name="advanced_setting">高级设置</string>
+    <string name="version_information">版本信息</string>
+    <string name="current_version">当前版本</string>
+    <string name="source_license">源代码许可证</string>
 
 
 </resources>

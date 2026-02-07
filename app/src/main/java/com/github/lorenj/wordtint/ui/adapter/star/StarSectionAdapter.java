@@ -25,7 +25,6 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
-import com.github.lorenj.wordtint.ui.adapter.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.MoveAndSwipedListener;
 import com.github.lorenj.wordtint.ui.adapter.listener.StateChangedListener;
 

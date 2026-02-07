@@ -51,21 +51,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         } else if (vId == R.id.btn_welcome_accept_agreement) {
             agreementArea.setVisibility(View.GONE);
             initProgressArea.setVisibility(View.VISIBLE);
-            // 开始初始化数据库
-            welcomeViewModel.getInitState().observe(this, initState -> {
-                initProgressBar.setProgress(initState.progress);
-                if (initState.progress == 100) {
-                    setResult(RESULT_OK);
-                    finish();
-                }
-            });
             // 异步执行
-            StaticFactory.getExecutorService().execute(() -> {
-                welcomeViewModel.initDatabase(WelcomeActivity.this);
-                UserSettingRepository userSettingRepository = UserSettingRepository
-                        .getInstance(APPDatabase.getInstance(WelcomeActivity.this).userSettingDao());
-                userSettingRepository.update(UserSettingKeyEnums.AGREE_USER_POLICY, true);
-            });
+            StaticFactory.getExecutorService().execute(() -> welcomeViewModel.initDatabase(WelcomeActivity.this));
         }
     }
 
@@ -87,6 +74,19 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         }
         Markwon markwon = StaticFactory.getGlobalMarkwon(this);
         markwon.setMarkdown(welcomeMessage, message);
+        // 初始化数据库的回调事件
+        welcomeViewModel.getInitState().observe(this, initState -> {
+            initProgressBar.setProgress(initState.progress);
+            if (initState.progress == 100) {
+                StaticFactory.getExecutorService().execute(() -> {
+                    UserSettingRepository userSettingRepository = UserSettingRepository
+                            .getInstance(APPDatabase.getInstance(WelcomeActivity.this).userSettingDao());
+                    userSettingRepository.update(UserSettingKeyEnums.AGREE_USER_POLICY, true);
+                });
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
     }
 
     private void bindView() {

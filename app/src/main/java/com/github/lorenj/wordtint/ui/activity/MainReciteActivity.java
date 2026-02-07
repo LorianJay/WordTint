@@ -59,7 +59,7 @@ import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
-import com.github.lorenj.wordtint.ui.adapter.SimpleItemTouchHelperCallback;
+import com.github.lorenj.wordtint.ui.adapter.common.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarListAdapter;

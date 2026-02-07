@@ -1,31 +1,31 @@
-package com.github.lorenj.wordtint.ui.fragment;
+package com.github.lorenj.wordtint.ui.activity;
 
-import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.LayoutInflater;
+import android.os.Looper;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.widget.TextView;
 
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
 
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.R;
+import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 
 import java.util.concurrent.TimeUnit;
 
-public class MockExamineFragment extends Fragment implements View.OnClickListener {
+public class MockExamineActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private View rootView, backGround, selectGround;
-    private Handler updateUIHandler;
+    private View backGround, selectGround;
+    private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     // 功能按钮
-    private TextView titleTextView, mockPolitician, mockEnglish, mockMath, mockMajor;
+    private TextView mockPolitician, mockEnglish, mockMath, mockMajor;
     private TextView interrupt, exit, remove5s, add5s, remove30s, add30s;
     // 显示
     private TextView topTime, bottomTime, subTopTime, subBottomTime;
@@ -42,32 +42,15 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
     // 消失的时间记录
     private long remainFadeButtonTime = 0;
     private long recordFadeButtonTimeStamp = 0;
-    /**
-     * activity
-     */
-    private FragmentActivity requireActivity;
-
-    public MockExamineFragment() {
-    }
-
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        if (rootView != null) {
-            return rootView;
-        }
-        rootView = inflater.inflate(R.layout.fragment_mock_examine, container, false);
-        updateUIHandler = new Handler();
+        setContentView(R.layout.activity_mock_examine);
         bindView();
         initView();
-        return rootView;
     }
+
 
     @Override
     public void onClick(View v) {
@@ -88,8 +71,16 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
             isRunning = false;
             selectGround.setVisibility(View.VISIBLE);
             backGround.setVisibility(View.GONE);
-            requireActivity.getWindow().setStatusBarColor(Color.WHITE);
-            requireActivity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                WindowInsetsController controller = getWindow().getInsetsController();
+                if (controller != null) {
+                    controller.show(WindowInsets.Type.statusBars());
+                    controller.setSystemBarsAppearance(
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    );
+                }
+            }
             return;
         } else if (itemId == R.id.tv_mock_examine_remove_5) {
             remainTime += 1000 * 5;
@@ -119,14 +110,22 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
         timeTaskRunning = true;
         isRunning = true;
         StaticFactory.getExecutorService().execute(timedTasks());
-        requireActivity.getWindow().setStatusBarColor(Color.BLACK);
-        requireActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.statusBars());
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        }
+
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         remainTime = 1000 * 60 * 60 * 3;
         recordTimeStamp = System.currentTimeMillis();
         remainFadeButtonTime = 1000 * 5;
         selectGround.setVisibility(View.GONE);
         backGround.setVisibility(View.VISIBLE);
     }
+
 
     /**
      * 计时任务
@@ -149,7 +148,7 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
                     // 如果按钮需要消失了
                     if (remainFadeButtonTime < 0) {
                         invisibleButton(View.GONE);
-                        if(!isRunning){
+                        if (!isRunning) {
                             topTime.setVisibility(View.GONE);
                             subTopTime.setVisibility(View.GONE);
                             bottomTime.setVisibility(View.GONE);
@@ -160,7 +159,7 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
                     // 如果已经倒计时结束,播放通知音效
                     if (remainTime == 0) {
                         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                        Ringtone ringtone = RingtoneManager.getRingtone(getContext(), notificationUri);
+                        Ringtone ringtone = RingtoneManager.getRingtone(this, notificationUri);
                         if (!ringtone.isPlaying()) {
                             ringtone.play();
                         }
@@ -168,7 +167,7 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
                     // 剩余时间
                     long hourRemain = remainTime / 1000 / 60 / 60;
                     long minuteRemain = remainTime / 1000 / 60 % 60;
-                    long secondRemain = remainTime / 1000 % 60 ;
+                    long secondRemain = remainTime / 1000 % 60;
                     // 已经走过的时间
                     long hourAlready = alreadyTime / 1000 / 60 / 60;
                     long minuteAlready = alreadyTime / 1000 / 60 % 60;
@@ -186,8 +185,8 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
                         bottomTime.setVisibility(View.VISIBLE);
                         subBottomTime.setVisibility(View.VISIBLE);
                     }
-                    topTime.setText(String.format("%02d:%02d:%02d", hourAlready , minuteAlready, secondAlready));
-                    bottomTime.setText(String.format("%02d:%02d:%02d", hourAlready , minuteAlready, secondAlready));
+                    topTime.setText(String.format("%02d:%02d:%02d", hourAlready, minuteAlready, secondAlready));
+                    bottomTime.setText(String.format("%02d:%02d:%02d", hourAlready, minuteAlready, secondAlready));
                     subTopTime.setText(String.format("%02d:%02d:%02d", hourRemain, minuteRemain, secondRemain));
                     subBottomTime.setText(String.format("%02d:%02d:%02d", hourRemain, minuteRemain, secondRemain));
                 });
@@ -195,6 +194,7 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
             }
         };
     }
+
 
     /**
      * 计算剩余时间
@@ -220,11 +220,8 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
         this.add30s.setVisibility(visible);
     }
 
-    private void initView() {
-        // 先隐藏标题信息
-        this.titleTextView.setText("模拟考试");
-        this.requireActivity = requireActivity();
 
+    private void initView() {
         this.mockPolitician.setOnClickListener(this);
         this.mockEnglish.setOnClickListener(this);
         this.mockMath.setOnClickListener(this);
@@ -238,24 +235,24 @@ public class MockExamineFragment extends Fragment implements View.OnClickListene
         this.add30s.setOnClickListener(this);
     }
 
+
     private void bindView() {
-        this.titleTextView = rootView.findViewById(R.id.toolbar_title);
-        this.selectGround = rootView.findViewById(R.id.fragment_mock_examine_select);
-        this.mockPolitician = rootView.findViewById(R.id.tv_mock_examine_politician);
-        this.mockEnglish = rootView.findViewById(R.id.tv_mock_examine_english);
-        this.mockMath = rootView.findViewById(R.id.tv_mock_examine_math);
-        this.mockMajor = rootView.findViewById(R.id.tv_mock_examine_major);
-        this.topTime = rootView.findViewById(R.id.tv_mock_examine_top_time);
-        this.subTopTime = rootView.findViewById(R.id.tv_mock_examine_sub_top_time);
-        this.bottomTime = rootView.findViewById(R.id.tv_mock_examine_bottom_time);
-        this.subBottomTime = rootView.findViewById(R.id.tv_mock_examine_sub_bottom_time);
-        this.backGround = rootView.findViewById(R.id.cl_mock_examine_background);
-        this.interrupt = rootView.findViewById(R.id.tv_mock_examine_interrupt);
-        this.exit = rootView.findViewById(R.id.tv_mock_examine_exit);
-        this.remove5s = rootView.findViewById(R.id.tv_mock_examine_remove_5);
-        this.add5s = rootView.findViewById(R.id.tv_mock_examine_add_5);
-        this.remove30s = rootView.findViewById(R.id.tv_mock_examine_remove_30);
-        this.add30s = rootView.findViewById(R.id.tv_mock_examine_add_30);
+        this.selectGround = findViewById(R.id.cl_mock_examine_select);
+        this.mockPolitician = findViewById(R.id.tv_mock_examine_politician);
+        this.mockEnglish = findViewById(R.id.tv_mock_examine_english);
+        this.mockMath = findViewById(R.id.tv_mock_examine_math);
+        this.mockMajor = findViewById(R.id.tv_mock_examine_major);
+        this.topTime = findViewById(R.id.tv_mock_examine_top_time);
+        this.subTopTime = findViewById(R.id.tv_mock_examine_sub_top_time);
+        this.bottomTime = findViewById(R.id.tv_mock_examine_bottom_time);
+        this.subBottomTime = findViewById(R.id.tv_mock_examine_sub_bottom_time);
+        this.backGround = findViewById(R.id.cl_mock_examine_background);
+        this.interrupt = findViewById(R.id.tv_mock_examine_interrupt);
+        this.exit = findViewById(R.id.tv_mock_examine_exit);
+        this.remove5s = findViewById(R.id.tv_mock_examine_remove_5);
+        this.add5s = findViewById(R.id.tv_mock_examine_add_5);
+        this.remove30s = findViewById(R.id.tv_mock_examine_remove_30);
+        this.add30s = findViewById(R.id.tv_mock_examine_add_30);
     }
 
 
