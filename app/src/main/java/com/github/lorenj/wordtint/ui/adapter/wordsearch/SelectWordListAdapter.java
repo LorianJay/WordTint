@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
-import com.github.lorenj.wordtint.ui.viewmodel.WordSearchViewModel;
 
 import java.util.ArrayList;
 import java.util.Collection;

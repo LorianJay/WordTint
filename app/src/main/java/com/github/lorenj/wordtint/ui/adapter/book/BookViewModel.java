@@ -1,4 +1,4 @@
-package com.github.lorenj.wordtint.ui.viewmodel;
+package com.github.lorenj.wordtint.ui.adapter.book;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

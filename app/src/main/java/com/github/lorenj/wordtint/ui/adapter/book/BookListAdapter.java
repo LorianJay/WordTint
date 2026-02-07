@@ -5,8 +5,6 @@ import android.content.Context;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
-
 import java.util.ArrayList;
 import java.util.List;
 

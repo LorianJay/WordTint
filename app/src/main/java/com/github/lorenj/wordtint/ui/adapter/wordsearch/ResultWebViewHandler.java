@@ -5,7 +5,7 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.utils.FileUtils;
 import com.github.lorenj.wordtint.utils.RegularUtils;
@@ -36,7 +36,7 @@ public class ResultWebViewHandler {
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         try (InputStream welcomeInputStream = context.getAssets().open("template/english.html");) {
-            template = FileUtils.readAll(welcomeInputStream);
+            template = FileUtils.inputStreamToString(welcomeInputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

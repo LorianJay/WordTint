@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
-import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
 
 import java.util.List;
 import java.util.stream.Collectors;

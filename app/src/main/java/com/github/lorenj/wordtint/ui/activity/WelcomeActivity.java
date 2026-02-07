@@ -13,11 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
 import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
-import com.github.lorenj.wordtint.ui.viewmodel.WelcomeViewModel;
+import com.github.lorenj.wordtint.ui.adapter.WelcomeViewModel;
 import com.github.lorenj.wordtint.utils.FileUtils;
 
 import java.io.IOException;
@@ -66,8 +66,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
     private void initView() {
         // 读取欢迎markdown文件
-        try (InputStream welcomeInputStream = assetManager.open("systemFile/welcomeMessage.md");) {
-            message = FileUtils.readAll(welcomeInputStream);
+        try (InputStream welcomeInputStream = assetManager.open("systemFile/welcomeMessage.md")) {
+            message = FileUtils.inputStreamToString(welcomeInputStream);
         } catch (IOException e) {
             e.printStackTrace();
             return;

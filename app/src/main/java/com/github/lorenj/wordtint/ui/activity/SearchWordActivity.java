@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
@@ -43,7 +43,7 @@ import com.github.lorenj.wordtint.ui.adapter.star.StarListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
-import com.github.lorenj.wordtint.ui.viewmodel.WordSearchViewModel;
+import com.github.lorenj.wordtint.ui.adapter.wordsearch.WordSearchViewModel;
 
 import java.util.List;
 import java.util.Optional;

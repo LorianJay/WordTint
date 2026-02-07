@@ -18,8 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
 import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
@@ -60,8 +59,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         // 状态栏反色
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        // 初始化外部存储路径
-        AnyLanguageWordProperties.setExternalFilesDir(getExternalFilesDir(""));
         // 申请权限
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         initView();

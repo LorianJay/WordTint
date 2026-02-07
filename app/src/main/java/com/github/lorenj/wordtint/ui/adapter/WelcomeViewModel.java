@@ -1,4 +1,4 @@
-package com.github.lorenj.wordtint.ui.viewmodel;
+package com.github.lorenj.wordtint.ui.adapter;
 
 import android.content.Context;
 

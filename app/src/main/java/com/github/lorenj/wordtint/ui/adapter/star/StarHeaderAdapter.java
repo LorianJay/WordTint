@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;

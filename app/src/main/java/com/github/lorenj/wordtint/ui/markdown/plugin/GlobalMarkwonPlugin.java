@@ -6,13 +6,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
+import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.ui.markdown.handler.APPLinkResolver;
 import com.github.lorenj.wordtint.ui.markdown.handler.SpanHandler;
 import com.github.lorenj.wordtint.ui.markdown.movementmethod.ClickableSpanMovementMethod;
 import com.github.lorenj.wordtint.ui.markdown.spanfactory.AppHeadingSpanFactory;
 import com.github.lorenj.wordtint.ui.markdown.spanfactory.AppLinkSpanFactory;
-import com.github.lorenj.wordtint.R;
 
 import org.commonmark.node.Heading;
 import org.commonmark.node.Link;
@@ -28,7 +27,6 @@ import io.noties.markwon.core.CorePlugin;
 import io.noties.markwon.core.CoreProps;
 import io.noties.markwon.core.MarkwonTheme;
 import io.noties.markwon.html.HtmlPlugin;
-import io.noties.markwon.image.destination.ImageDestinationProcessor;
 
 /**
  * 调用链路:<br>
@@ -109,13 +107,6 @@ public class GlobalMarkwonPlugin extends AbstractMarkwonPlugin {
     public void configureConfiguration(@NonNull MarkwonConfiguration.Builder builder) {
         // 配置解析器功能
         builder.linkResolver(new APPLinkResolver());
-        builder.imageDestinationProcessor(new ImageDestinationProcessor() {
-            @NonNull
-            @Override
-            public String process(@NonNull String destination) {
-                return AnyLanguageWordProperties.imagePrefix + destination;
-            }
-        });
     }
 
     @Override

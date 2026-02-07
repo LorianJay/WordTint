@@ -19,14 +19,13 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
 import com.github.lorenj.wordtint.database.vo.ReciteRecordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
-import com.github.lorenj.wordtint.entity.local.HistoryDTOLocal;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
@@ -38,10 +37,8 @@ import com.github.lorenj.wordtint.ui.adapter.common.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordViewModel;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
-import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -55,8 +52,7 @@ import java.util.stream.Collectors;
  * @date Wednesday, February 01, 2023
  */
 public class RecordListFragment extends Fragment implements NavigationItemSelectListener,
-        View.OnClickListener,
-        RecycleViewItemClickCallBack<HistoryDTOLocal>, SwipeRefreshLayout.OnRefreshListener {
+        View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private View rootView;
     private RecyclerView recordList;
@@ -65,7 +61,6 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
     private TextView startLearn;
     private ProgressBar loadingBar;
     private UserRecitePreference userRecitePreference;
-    private final HashSet<HistoryDTOLocal> historyDTOSet = new HashSet<>();
     /**
      * 下拉刷新
      */
@@ -139,18 +134,6 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                 });
             });
         }
-    }
-
-
-    /**
-     * 用户选择一个历史记录后的回调事件
-     *
-     * @param recycleViewOnClick 回调对象
-     */
-    @Override
-    public void viewClickCallBack(HistoryDTOLocal recycleViewOnClick) {
-        historyDTOSet.clear();
-        historyDTOSet.add(recycleViewOnClick);
     }
 
     @Override

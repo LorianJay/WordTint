@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordBookWithSectionEntity;
@@ -32,7 +32,7 @@ import com.github.lorenj.wordtint.ui.adapter.book.BookListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.book.WordBookSectionVO;
 import com.github.lorenj.wordtint.ui.adapter.book.WordBookWithSectionVO;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
-import com.github.lorenj.wordtint.ui.viewmodel.BookViewModel;
+import com.github.lorenj.wordtint.ui.adapter.book.BookViewModel;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 

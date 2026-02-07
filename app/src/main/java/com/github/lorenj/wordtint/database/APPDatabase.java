@@ -28,7 +28,7 @@ import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
-import com.github.lorenj.wordtint.ui.viewmodel.WelcomeViewModel;
+import com.github.lorenj.wordtint.ui.adapter.WelcomeViewModel;
 import com.github.lorenj.wordtint.utils.ZipUtils;
 
 import java.io.BufferedReader;

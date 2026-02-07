@@ -9,8 +9,7 @@ import android.text.style.ForegroundColorSpan;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +45,7 @@ public class SpanHandler extends SimpleTagHandler {
                     case "color":
                         colorID = context.getResources().getIdentifier(property.value(), "color", context.getPackageName());
                         if (colorID == 0) {
-                            colorID = context.getResources().getIdentifier(property.value(), "color", AnyLanguageWordProperties.androidPackageName);
+                            colorID = context.getResources().getIdentifier(property.value(), "color", "android");
                         }
                         if (colorID == 0) {
                             return null;

@@ -6,7 +6,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 
-import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 
 import io.noties.markwon.LinkResolver;
 import io.noties.markwon.LinkResolverDef;
