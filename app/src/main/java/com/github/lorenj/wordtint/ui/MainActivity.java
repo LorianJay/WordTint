@@ -24,12 +24,13 @@ import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.rep.UserSettingRepository;
 import com.github.lorenj.wordtint.enums.UserSettingKeyEnums;
+import com.github.lorenj.wordtint.ui.activity.SearchWordActivity;
 import com.github.lorenj.wordtint.ui.activity.WelcomeActivity;
 import com.github.lorenj.wordtint.ui.adapter.BottomViewAdapter;
 import com.github.lorenj.wordtint.ui.adapter.listener.NavigationItemSelectListener;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
-import com.github.lorenj.wordtint.ui.fragment.RecordListFragment;
 import com.github.lorenj.wordtint.ui.fragment.RankFragment;
+import com.github.lorenj.wordtint.ui.fragment.RecordListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -93,7 +94,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onLongClick(View v) {
         int itemId = v.getId();
         if (itemId == R.id.item_main_bottom_recite) {
-            // todo 跳转到搜索页面
+            Intent intent = new Intent(this, SearchWordActivity.class);
+            startActivity(intent);
         }
         return false;
     }

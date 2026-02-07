@@ -45,8 +45,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
-import com.github.lorenj.wordtint.context.AnyLanguageWordProperties;
-import com.github.lorenj.wordtint.context.pathsystem.document.WordContextPath;
 import com.github.lorenj.wordtint.context.support.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
@@ -399,17 +397,18 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             }
         }
         if (clickViewId == R.id.tv_recite_control_next) {
-            // todo 背诵记录的问题应该在这里解决
             reciteWord(wordFunctionHandler.gotoNextWord());
         }
         if (clickViewId == R.id.tv_recite_control_previous) {
             reciteWord(wordFunctionHandler.gotoPreviousWord());
         }
-        if (clickViewId == R.id.fragment_word_credit_play_word) {
+        if (clickViewId == R.id.iv_recite_control_play) {
             reciteWord(wordFunctionHandler.getCurrentFocusWord());
             // 如果当前是听音频模式,需要手动播放音频
             if (wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode()
-                    == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
+                    == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING
+                    || wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode()
+                    == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
                 playWordAudio(wordFunctionHandler.getCurrentFocusWord());
             }
         }
@@ -660,11 +659,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_search) {
             searchLauncher.launch(new Intent(MainReciteActivity.this, SearchWordActivity.class));
         }
-        // 单词分析
+        // todo 单词分析
         if (clickViewId == R.id.ll_recite_function_analysis) {
-            Bundle bundle = new Bundle();
-            //bundle.putSerializable(WordCreditFragment.ANALYSIS_WORD, wordFunctionHandler.getCurrentStructureWordMap());
-            // 跳转当前单词的分析界面
         }
         // 收藏夹区域
         if (clickViewId == R.id.ll_recite_function_star) {
@@ -893,7 +889,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 resultWebViewHandler.gone();
             } else if (currentReciteMode == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
                 // 先展示所有单词信息,然后将英文原文和音标进行隐藏;还要隐藏短语
-                wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.ONLY_RECITE);
                 currentWord.getValue().remove(WordStructure.PHRASE);
                 visibleWordAllMessage(currentWord);
                 if (prepositionPhrase != null)
@@ -969,14 +964,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * @param functionWordVO 待播放音频的单词
      */
     private void playWordAudio(FunctionWordVO functionWordVO) {
-        File file = new File(AnyLanguageWordProperties.getExternalFilesDir(),
-                WordContextPath.WORD_AUDIO.getPath() + functionWordVO.getValue().get(WordStructure.WORD_ORIGIN));
-        if (!file.exists()) {
+        String wordOrigin = Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+                .orElse("");
+        File audioFile = new File(getFilesDir() + "/audio", wordOrigin + ".mp3");
+        if (!audioFile.exists()) {
             return;
         }
         mediaPlayer.reset();
         try {
-            mediaPlayer.setDataSource(file.getAbsolutePath());
+            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
             mediaPlayer.prepare();
             mediaPlayer.start();
         } catch (IOException e) {
