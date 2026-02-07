@@ -2,9 +2,6 @@ package com.github.lorenj.wordtint.context.factory;
 
 import android.content.Context;
 
-import androidx.navigation.NavOptions;
-
-import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.ui.markdown.plugin.GlobalMarkwonPlugin;
 import com.google.gson.Gson;
 
@@ -36,18 +33,9 @@ public class StaticFactory {
                 new SynchronousQueue<>());
     }
 
-    private static final class SimpleNavOptionsHolder {
-        static final NavOptions NAV_OPTIONS = new NavOptions.Builder()
-                .setEnterAnim(R.anim.slide_in_right)
-                .setExitAnim(R.anim.fade_out)
-                .setPopExitAnim(R.anim.slide_out_left)
-                .build();
-    }
-
     private static final class CssInlineStyleParserHolder {
         static final CssInlineStyleParser CSS_INLINE_STYLE_PARSER = CssInlineStyleParser.create();
     }
-
 
     /**
      * 得到Gson实例
@@ -65,15 +53,6 @@ public class StaticFactory {
      */
     public static ExecutorService getExecutorService() {
         return ExecutorServiceHolder.EXECUTOR_SERVICE;
-    }
-
-    /**
-     * 得到navigation控制页面跳转的进入和退出动画参数默认示例对象
-     *
-     * @return 返回封装动画参数的NavOptions实例
-     */
-    public static NavOptions getSimpleNavOptions() {
-        return SimpleNavOptionsHolder.NAV_OPTIONS;
     }
 
     /**

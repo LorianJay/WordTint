@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -102,27 +101,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         }
         return false;
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Fragment fragment = getSupportFragmentManager().getPrimaryNavigationFragment().getChildFragmentManager().getPrimaryNavigationFragment();
-        if (fragment instanceof KeyEvent.Callback) {
-            return ((KeyEvent.Callback) fragment).onKeyUp(keyCode, event);
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Fragment fragment = getSupportFragmentManager()
-                .getPrimaryNavigationFragment()
-                .getChildFragmentManager()
-                .getPrimaryNavigationFragment();
-        if (fragment instanceof KeyEvent.Callback) {
-            return ((KeyEvent.Callback) fragment).onKeyDown(keyCode, event);
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     private void bindView() {

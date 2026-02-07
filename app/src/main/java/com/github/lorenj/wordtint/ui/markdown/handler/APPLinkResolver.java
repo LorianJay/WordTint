@@ -6,8 +6,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 
-import com.github.lorenj.wordtint.context.factory.StaticFactory;
-
 import io.noties.markwon.LinkResolver;
 import io.noties.markwon.LinkResolverDef;
 
@@ -25,7 +23,7 @@ public class APPLinkResolver extends LinkResolverDef {
             String navigationAction = link.replaceFirst("navigation:", "");
             Log.d(String.valueOf(this.getClass()), "跳转的目标页面navigationAction:" + navigationAction);
             int id = view.getContext().getResources().getIdentifier(navigationAction, "id", view.getContext().getPackageName());
-            Navigation.findNavController(view).navigate(id, null, StaticFactory.getSimpleNavOptions());
+            Navigation.findNavController(view).navigate(id, null);
             return;
         }
         super.resolve(view, link);
