@@ -74,3 +74,4 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 app/libs
+/.key/wordtint_key.jks

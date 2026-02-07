@@ -14,7 +14,6 @@ import com.jayway.jsonpath.JsonPath;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -58,7 +57,7 @@ public class ResultWebViewHandler {
             }
             renderHtml = renderHtml.replace(htmlRegex, readValue);
         }
-        resultWebView.loadData(renderHtml, "text/html", StandardCharsets.UTF_8.name());
+        resultWebView.loadDataWithBaseURL("file:///android_asset/", renderHtml, "text/html", "utf-8", null);
         this.resultWebView.setVisibility(View.VISIBLE);
     }
 
