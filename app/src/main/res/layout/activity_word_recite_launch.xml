@@ -57,7 +57,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@drawable/divider_1dp"
+            android:divider="@drawable/background_divider_1dp"
             android:orientation="vertical"
             android:showDividers="middle">
 

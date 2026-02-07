@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple75">#75BB86FC</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="green">#45BF5C</color>
     <color name="blue">#05BAFB</color>
     <color name="theme_color">#2B9C4C</color>
     <color name="light_theme_color">#302B9C4C</color>
@@ -17,7 +15,6 @@
     <color name="halo_brown_dark">#804000</color>
     <color name="theme_color_pink">#FF2F6B</color>
     <color name="learn_back_ground">#5DD34E</color>
-    <color name="learn_back_ground_99">#995DD34E</color>
     <color name="gold">#E5B300</color>
     <color name="semi_transparent">#80FFFFFF</color>
     <color name="light_blue_ff">#d04290FF</color>

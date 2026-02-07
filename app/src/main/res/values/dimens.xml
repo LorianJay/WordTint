@@ -1,20 +1,10 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
     <!--词性提示的宽度,暂时不能改不同的词性宽度也是不同的这是为了统一效果-->
-    <dimen name="fragment_word_credit_hint_width">107dp</dimen>
     <dimen name="fragment_word_credit_pop_window_change_mode">15dp</dimen>
-    <dimen name="user_face_oval">64dp</dimen>
     <!--收藏夹背景的弧度、画笔的宽度-->
-    <dimen name="fragment_word_credit_start_category_radius">10dp</dimen>
     <dimen name="fragment_word_credit_start_category_stroke">1dp</dimen>
     <!--主页信息流图片的边角弧度、元组间距等-->
     <dimen name="fragment_home_post_bg_radius">6dp</dimen>
-    <dimen name="fragment_home_image_rotation_radius">12dp</dimen>
-    <dimen name="fragment_home_image_rotation_margin">3dp</dimen>
-    <dimen name="fragment_home_image_rotation_oval_width">7dp</dimen>
-    <dimen name="fragment_home_post_distance">2dp</dimen>
     <!--markdown的一些基础配置-->
     <dimen name="markwon_heading_h1">26sp</dimen>
     <dimen name="markwon_heading_h2">22sp</dimen>
@@ -24,5 +14,4 @@
     <dimen name="markwon_heading_h6">12sp</dimen>
     <dimen name="markwon_between_heading_height">0dp</dimen>
 
-    <dimen name="app_layout_margin">12dp</dimen>
 </resources>

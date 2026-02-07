@@ -150,9 +150,8 @@ public class SearchWordActivity extends AppCompatActivity
         if (itemId == R.id.iv_search_word_back) {
             setResult(RESULT_OK);
             finish();
-        } else if (itemId == R.id.analysis_word_flag) {
-
-        } else if (itemId == R.id.tv_recite_star_create) {
+        }
+        if (itemId == R.id.tv_recite_star_create) {
             // 添加一个新的收藏夹
             View addNewCategory = getLayoutInflater().inflate(R.layout.dialog_recite_new_star, null);
             EditText categoryTile = addNewCategory.findViewById(R.id.et_new_star_title);

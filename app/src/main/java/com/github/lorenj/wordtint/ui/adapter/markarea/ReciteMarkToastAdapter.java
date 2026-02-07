@@ -71,7 +71,7 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToast
             }
             if (payload == Item.SWITCH_SELECT) {
                 if (position == wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusSwitchPosition()) {
-                    holder.toastMark.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.fg_selected_border, null));
+                    holder.toastMark.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.background_selected_border, null));
                     holder.toastMark.setScaleX(0.9f);
                     holder.toastMark.setScaleY(0.9f);
                 }

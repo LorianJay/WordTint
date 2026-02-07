@@ -1,6 +1,0 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <stroke
-        android:width="5px"
-        android:color="@color/theme_color" />
-    <corners android:radius="6dp" />
-</shape>

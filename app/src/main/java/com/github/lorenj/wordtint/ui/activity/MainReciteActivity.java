@@ -557,7 +557,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             }
             if (wordFunctionHandler.getWordFunctionHandlerState().getWordFunctionState()
                     == WordFunctionState.NONE) {
-                View rangeRandomWordInputView = getLayoutInflater().inflate(R.layout.fragment_word_credit_dialog_section, null);
+                View rangeRandomWordInputView = getLayoutInflater().inflate(R.layout.dialog_word_recite_section, null);
                 EditText minValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_min_value);
                 EditText maxValue = rangeRandomWordInputView.findViewById(R.id.fragment_word_credit_dialog_section_max_value);
                 new AlertDialog.Builder(this)
@@ -830,33 +830,33 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING) {
             this.windowEnglishChineseAudio.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
-                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    R.drawable.background_green_select_border,
                     null));
         } else if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
             this.windowEnglishChinese.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
-                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    R.drawable.background_green_select_border,
                     null));
         } else if (currentReciteMode == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
             this.windowChineseEnglish.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
-                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    R.drawable.background_green_select_border,
                     null));
         } else if (currentReciteMode == ReciteMode.LISTENING) {
             this.windowListingWrite.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
-                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    R.drawable.background_green_select_border,
                     null));
         } else if (currentReciteMode == ReciteMode.ONLY_RECITE) {
             this.windowOnlyRecite.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
-                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    R.drawable.background_green_select_border,
                     null));
         }
         if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition()) {
             this.windowHidePhrase.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
-                    R.drawable.fragment_word_credit_pop_window_change_mode,
+                    R.drawable.background_green_select_border,
                     null));
         }
     }

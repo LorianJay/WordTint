@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
-    android:foreground="@drawable/foreground_border_radius_all"
+    android:foreground="@drawable/background_rounded_ripple_hollow"
     android:foregroundTint="@color/dark_gray"
     android:layout_marginTop="3dp"
     android:orientation="horizontal"

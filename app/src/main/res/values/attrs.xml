@@ -1,9 +1,4 @@
 <resources>
-    <declare-styleable name="FullscreenAttrs">
-        <attr name="fullscreenBackgroundColor" format="color" />
-        <attr name="fullscreenTextColor" format="color" />
-    </declare-styleable>
-
     <!-- 自定义四角矩形ImageView 的四个圆角属性 -->
     <declare-styleable name="Round_Angle_Image_View">
         <attr name="left_top_radius" format="dimension" />

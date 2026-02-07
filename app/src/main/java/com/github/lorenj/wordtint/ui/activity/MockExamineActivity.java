@@ -99,7 +99,7 @@ public class MockExamineActivity extends AppCompatActivity implements View.OnCli
             alreadyTime += 1000 * 30;
             return;
         }
-        if (itemId == R.id.fragment_mock_examine_politician ||
+        if (itemId == R.id.tv_mock_examine_politician ||
                 itemId == R.id.tv_mock_examine_math) {
             alreadyTime = 1000 * 60 * 60 * 8;
         } else if (itemId == R.id.tv_mock_examine_english ||

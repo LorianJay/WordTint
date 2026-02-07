@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><!--用于添加LinearLayout各元素之间的间距-->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <size
-        android:width="0dp"
-        android:height="16dp" />
-</shape>
