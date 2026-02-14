@@ -167,7 +167,6 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                                 return reciteRecordVO;
                             })
                             .collect(Collectors.toList());
-                    page++;
                     updateUIHandler.post(() -> {
                         loadMoreAdapter.setVisible(lastPage ? View.GONE : View.VISIBLE);
                         // 第一次是全量更新,第二次是增量更新
@@ -208,6 +207,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                 if (!recyclerView.canScrollVertically(1) && !lastPage) {
                     // 优先执行搜索事件或者已有的分页查询事件
                     if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
+                    page++;
                     currentTask = scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
                 }
             }

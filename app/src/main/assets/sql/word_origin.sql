@@ -1911,7 +1911,6 @@ INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (916685721, 'WORD_O
 INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (916685721, 'PREP', '反对;违反;靠近;对比;以...为背景');
 INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (2103672103, 'WORD_ORIGIN', 'age');
 INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (2103672103, 'V', '变老');
-INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (2103672103, 'PHRASE', X'616374206F6E6527732061676520E4B8BEE6ADA2E5928CE5B9B4E9BE84E79BB8E7ACA65C6E636F6D65206F662061676520E68890E5B9B4086F662061676520E68890E5B9B4E79A845C6E756E6465722061676520E69CAAE68890E5B9B4E79A84');
 INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (2103672103, 'N', '年龄;时代');
 INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (2033299770, 'WORD_ORIGIN', 'coach');
 INSERT INTO "word_origin" ("word_id", "key", "value") VALUES (2033299770, 'V', '指导');
