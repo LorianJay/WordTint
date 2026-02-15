@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebView;
@@ -38,8 +41,8 @@ import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.ui.adapter.common.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.common.SimpleItemTouchHelperCallback;
-import com.github.lorenj.wordtint.ui.adapter.star.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.star.StarResultAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
@@ -241,8 +244,6 @@ public class SearchWordActivity extends AppCompatActivity
                             searchText,
                             page * PAGE_SIZE,
                             PAGE_SIZE);
-                    // 执行完一次真正查询后,page才自增
-                    page++;
                     updateUIHandler.post(() -> {
                         selectWordList.setVisibility(View.VISIBLE);
                         resultArea.setVisibility(View.GONE);
@@ -324,10 +325,35 @@ public class SearchWordActivity extends AppCompatActivity
                 if (!recyclerView.canScrollVertically(1) && !lastPage) {
                     // 优先执行搜索事件或者已有的分页查询事件
                     if (currentTask != null && !currentTask.isDone()) currentTask.cancel(true);
+                    page++;
                     currentTask = scheduler.schedule(getQueryTask(), searchDelay, TimeUnit.MILLISECONDS);
                 }
             }
         });
+        // 不允许弹出选项卡
+        EditText searchEditText = searchInput.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchEditText.setCustomInsertionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+            }
+        });
+        searchEditText.setLongClickable(false);
+        searchEditText.setOnLongClickListener(v -> true);
     }
 
     private void visibleWordAllMessage(FunctionWordVO functionWordVO) {

@@ -21,7 +21,7 @@ public interface ReciteRecordDao {
     @Query("select count(1) from recite_record")
     int countReciteRecord();
 
-    @Query("SELECT * FROM recite_record LIMIT :arg0,:arg1")
+    @Query("SELECT * FROM recite_record order by create_time desc LIMIT :arg0,:arg1")
     List<ReciteRecordEntity> findReciteRecordWithLimit(int arg0, int arg1);
 
     @Delete
