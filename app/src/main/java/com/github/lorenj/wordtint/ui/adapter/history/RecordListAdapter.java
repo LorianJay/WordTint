@@ -33,7 +33,7 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Re
      * 所有标记的颜色
      */
     private final RecyclerView.RecycledViewPool markPool;
-    private int currentPosition = -1;
+    private int currentPosition = -2;
     private RecordViewModel recordViewModel;
 
     public RecordListAdapter(Context context, RecordViewModel recordViewModel) {
@@ -81,6 +81,7 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Re
 
     @Override
     public void replaceAll(Collection<ReciteRecordVO> newWordList) {
+        currentPosition++;
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new RecordDiffCallback(this.allReciteRecordEntityList, new ArrayList<>(newWordList)));
         this.allReciteRecordEntityList.clear();
         this.allReciteRecordEntityList.addAll(newWordList);
