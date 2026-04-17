@@ -1,6 +1,7 @@
 package com.github.lorenj.wordtint.ui.adapter.wordsearch;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -53,7 +54,10 @@ public class ResultWebViewHandler {
             try {
                 readValue = documentContext.read(jsonPath);
             } catch (Exception e) {
-
+                Log.e("ResultWebViewHandler", e.getMessage(), e);
+            }
+            if (readValue != null) {
+                readValue = readValue.replace("\\n", "\n");
             }
             renderHtml = renderHtml.replace(htmlRegex, readValue);
         }
