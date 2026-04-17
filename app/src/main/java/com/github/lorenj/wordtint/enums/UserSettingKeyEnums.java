@@ -28,7 +28,11 @@ public enum UserSettingKeyEnums {
     /**
      * 背诵的风格
      */
-    RECITE_STYLE(ReciteStyle.class, ReciteStyle.CLASSIC);
+    RECITE_STYLE(ReciteStyle.class, ReciteStyle.CLASSIC),
+    /**
+     * 介词显示模式
+     */
+    Recite_PREPOSITION(RecitePreposition.class, RecitePreposition.VISIBLE);
 
     public final Class<?> type;
     public final Object defaultValue;

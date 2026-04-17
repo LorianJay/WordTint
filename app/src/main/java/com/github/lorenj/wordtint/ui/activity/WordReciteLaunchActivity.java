@@ -168,6 +168,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_FILTER),
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_STYLE),
                     ReciteOrigin.RECITE_LIST,
+                    userSettingRepository.getUserSettingValue(UserSettingKeyEnums.Recite_PREPOSITION),
                     false,
                     allSectionIdList);
             // 设置选词量

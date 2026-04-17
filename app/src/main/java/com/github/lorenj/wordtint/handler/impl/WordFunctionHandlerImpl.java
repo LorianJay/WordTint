@@ -236,7 +236,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
             reciteRecordEntity.reciteMode = this.getWordFunctionHandlerState().getCurrentReciteMode().name();
             reciteRecordEntity.reciteOrder = userRecitePreference.getReciteOrder().name();
             reciteRecordEntity.reciteFiler = userRecitePreference.getReciteFilter().name();
-            reciteRecordEntity.hidePreposition = this.getWordFunctionHandlerState().isHidePreposition();
+            reciteRecordEntity.recitePreposition = this.getWordFunctionHandlerState().getRecitePreposition().name();
             long reciteRecordId = reciteRecordDao.insertReciteRecord(reciteRecordEntity);
             List<ReciteRecordWordEntity> recordWordEntityList = new ArrayList<>();
             for (int i = 0; i < saveList.size(); i++) {
@@ -383,7 +383,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         }
         // 6.设置当前的背诵模式
         wordFunctionHandlerState.setCurrentReciteMode(userRecitePreference.getReciteMode());
-        wordFunctionHandlerState.setHidePreposition(userRecitePreference.isHidePreposition());
+        wordFunctionHandlerState.setRecitePreposition(userRecitePreference.getRecitePreposition());
         wordFunctionHandlerState.setWordFunctionState(WordFunctionState.NONE);
         // 5.快速定位(单词反查的初始化)
         quickPosition = new HashMap<>(allWordIdList.size());

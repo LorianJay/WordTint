@@ -30,6 +30,7 @@ import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
+import com.github.lorenj.wordtint.enums.RecitePreposition;
 import com.github.lorenj.wordtint.enums.ReciteStyle;
 import com.github.lorenj.wordtint.ui.activity.MainReciteActivity;
 import com.github.lorenj.wordtint.ui.activity.WordReciteLaunchActivity;
@@ -123,6 +124,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                         currentSelectRecordVO.getReciteFilter(),
                         ReciteStyle.CLASSIC,
                         ReciteOrigin.RECITE_RECORD,
+                        currentSelectRecordVO.getRecitePreposition(),
                         false,
                         recordIdList);
                 updateUIHandler.post(() -> {
@@ -162,7 +164,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                                         ReciteMode.valueOf(reciteRecordEntity.reciteMode),
                                         ReciteOrder.valueOf(reciteRecordEntity.reciteOrder),
                                         ReciteFilter.valueOf(reciteRecordEntity.reciteFiler),
-                                        reciteRecordEntity.hidePreposition ? R.string.gone : R.string.visible
+                                        RecitePreposition.valueOf(reciteRecordEntity.recitePreposition)
                                 );
                                 return reciteRecordVO;
                             })

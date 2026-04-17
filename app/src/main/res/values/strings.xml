@@ -129,6 +129,7 @@
     <string name="message_number">:%1$s</string>
     <string name="visible">显示</string>
     <string name="gone">隐藏</string>
+    <string name="invisible">隐藏</string>
     <string name="no_filer">不过滤</string>
     <string name="developer_name">LorenJ</string>
     <string name="email_address">xxxxx@gmail.com</string>

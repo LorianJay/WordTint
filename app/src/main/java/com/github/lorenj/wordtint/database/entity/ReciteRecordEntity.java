@@ -32,7 +32,7 @@ public class ReciteRecordEntity {
     public String reciteFiler;
 
     @ColumnInfo(name = "hide_preposition")
-    public boolean hidePreposition;
+    public String recitePreposition;
 
     @Override
     public boolean equals(Object o) {
@@ -42,7 +42,7 @@ public class ReciteRecordEntity {
         return id == that.id
                 && createTime == that.createTime
                 && wordCount == that.wordCount
-                && hidePreposition == that.hidePreposition
+                && Objects.equals(recitePreposition, that.recitePreposition)
                 && Objects.equals(reciteMode, that.reciteMode)
                 && Objects.equals(reciteOrder, that.reciteOrder)
                 && Objects.equals(reciteFiler, that.reciteFiler);
@@ -50,6 +50,6 @@ public class ReciteRecordEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createTime, wordCount, reciteMode, reciteOrder, reciteFiler, hidePreposition);
+        return Objects.hash(id, createTime, wordCount, reciteMode, reciteOrder, reciteFiler, recitePreposition);
     }
 }

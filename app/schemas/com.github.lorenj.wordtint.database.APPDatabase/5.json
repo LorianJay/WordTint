@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "c3d96e90de8a9a753120921051e101cf",
+    "identityHash": "5349f60eb22a0db5e53395162017da9b",
     "entities": [
       {
         "tableName": "word_book",
@@ -322,7 +322,7 @@
       },
       {
         "tableName": "recite_record",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `create_time` INTEGER NOT NULL, `word_count` INTEGER NOT NULL, `recite_mode` TEXT, `recite_order` TEXT, `recite_filer` TEXT, `hide_preposition` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `create_time` INTEGER NOT NULL, `word_count` INTEGER NOT NULL, `recite_mode` TEXT, `recite_order` TEXT, `recite_filer` TEXT, `hide_preposition` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -361,10 +361,10 @@
             "notNull": false
           },
           {
-            "fieldPath": "hidePreposition",
+            "fieldPath": "recitePreposition",
             "columnName": "hide_preposition",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -470,7 +470,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c3d96e90de8a9a753120921051e101cf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5349f60eb22a0db5e53395162017da9b')"
     ]
   }
 }

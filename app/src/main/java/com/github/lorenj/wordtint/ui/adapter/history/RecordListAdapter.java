@@ -69,7 +69,7 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Re
                 context.getString(reciteRecordEntity.getReciteFilter().getStringId())));
         holder.hidePreposition.setText(context.getString(
                 R.string.hide_preposition,
-                context.getString(reciteRecordEntity.getHidePreposition())));
+                context.getString(reciteRecordEntity.getRecitePreposition().getStringId())));
         holder.recordListAdapter = this;
         holder.recordSelection.setVisibility(position == currentPosition ? View.VISIBLE : View.GONE);
     }

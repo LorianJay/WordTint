@@ -1,10 +1,10 @@
 package com.github.lorenj.wordtint.database.vo;
 
-import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
+import com.github.lorenj.wordtint.enums.RecitePreposition;
 
 /**
  * @author cnsukidayo
@@ -22,7 +22,7 @@ public class ReciteRecordVO {
 
     private ReciteFilter reciteFilter = ReciteFilter.NO_FILER;
 
-    private int hidePreposition = R.string.visible;
+    private RecitePreposition recitePreposition = RecitePreposition.VISIBLE;
 
     public ReciteRecordVO() {
     }
@@ -31,12 +31,12 @@ public class ReciteRecordVO {
                           ReciteMode reciteMode,
                           ReciteOrder reciteOrder,
                           ReciteFilter reciteFilter,
-                          int hidePreposition) {
+                          RecitePreposition recitePreposition) {
         this.reciteRecordEntity = reciteRecordEntity;
         this.reciteMode = reciteMode;
         this.reciteOrder = reciteOrder;
         this.reciteFilter = reciteFilter;
-        this.hidePreposition = hidePreposition;
+        this.recitePreposition = recitePreposition;
     }
 
     public ReciteRecordEntity getReciteRecordEntity() {
@@ -71,11 +71,11 @@ public class ReciteRecordVO {
         this.reciteFilter = reciteFilter;
     }
 
-    public int getHidePreposition() {
-        return hidePreposition;
+    public RecitePreposition getRecitePreposition() {
+        return recitePreposition;
     }
 
-    public void setHidePreposition(int hidePreposition) {
-        this.hidePreposition = hidePreposition;
+    public void setRecitePreposition(RecitePreposition recitePreposition) {
+        this.recitePreposition = recitePreposition;
     }
 }

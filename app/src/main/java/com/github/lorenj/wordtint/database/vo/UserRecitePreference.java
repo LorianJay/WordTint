@@ -4,6 +4,7 @@ import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
+import com.github.lorenj.wordtint.enums.RecitePreposition;
 import com.github.lorenj.wordtint.enums.ReciteStyle;
 
 import java.io.Serializable;
@@ -26,12 +27,12 @@ public class UserRecitePreference implements Serializable {
     private ReciteStyle reciteStyle = ReciteStyle.CLASSIC;
     // 片段来源
     private ReciteOrigin reciteOrigin = ReciteOrigin.RECITE_LIST;
+    // 介词模式
+    private RecitePreposition recitePreposition = RecitePreposition.VISIBLE;
     // 所有选中的章节
     private List<Integer> allSectionIdList;
     // 是否跳过
     private boolean ignore = false;
-    // 是否隐藏介词短语
-    private boolean hidePreposition = false;
 
     public UserRecitePreference() {
     }
@@ -41,6 +42,7 @@ public class UserRecitePreference implements Serializable {
                                 ReciteFilter reciteFilter,
                                 ReciteStyle reciteStyle,
                                 ReciteOrigin reciteOrigin,
+                                RecitePreposition recitePreposition,
                                 boolean ignore,
                                 List<Integer> allSectionIdList) {
         this.reciteMode = reciteMode;
@@ -48,6 +50,7 @@ public class UserRecitePreference implements Serializable {
         this.reciteFilter = reciteFilter;
         this.reciteStyle = reciteStyle;
         this.reciteOrigin = reciteOrigin;
+        this.recitePreposition = recitePreposition;
         this.ignore = ignore;
         this.allSectionIdList = allSectionIdList;
     }
@@ -108,11 +111,11 @@ public class UserRecitePreference implements Serializable {
         this.allSectionIdList = allSectionIdList;
     }
 
-    public boolean isHidePreposition() {
-        return hidePreposition;
+    public RecitePreposition getRecitePreposition() {
+        return recitePreposition;
     }
 
-    public void setHidePreposition(boolean hidePreposition) {
-        this.hidePreposition = hidePreposition;
+    public void setRecitePreposition(RecitePreposition recitePreposition) {
+        this.recitePreposition = recitePreposition;
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteMode;
+import com.github.lorenj.wordtint.enums.RecitePreposition;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 
 /**
@@ -21,7 +22,7 @@ public class WordFunctionHandlerState {
     /**
      * 是否隐藏介词
      */
-    private boolean hidePreposition = false;
+    private RecitePreposition recitePreposition = RecitePreposition.VISIBLE;
     /**
      * 当前单词功能的状态
      */
@@ -172,12 +173,12 @@ public class WordFunctionHandlerState {
         this.currentFocusSwitchPosition = currentFocusSwitchPosition;
     }
 
-    public boolean isHidePreposition() {
-        return hidePreposition;
+    public RecitePreposition getRecitePreposition() {
+        return recitePreposition;
     }
 
-    public void setHidePreposition(boolean hidePreposition) {
-        this.hidePreposition = hidePreposition;
+    public void setRecitePreposition(RecitePreposition recitePreposition) {
+        this.recitePreposition = recitePreposition;
     }
 
     public boolean isSortStar() {

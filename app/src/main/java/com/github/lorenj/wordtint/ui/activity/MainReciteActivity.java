@@ -54,6 +54,7 @@ import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteMode;
 import com.github.lorenj.wordtint.enums.ReciteOrigin;
+import com.github.lorenj.wordtint.enums.RecitePreposition;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
@@ -416,10 +417,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             // 是否要隐藏介词的处理
             FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
             String value = currentFocusWord.getValue().get(WordStructure.PHRASE);
-            if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition())
+            if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE)
                 currentFocusWord.getValue().remove(WordStructure.PHRASE);
             visibleWordAllMessage(currentFocusWord);
-            if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition())
+            if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE)
                 currentFocusWord.getValue().put(WordStructure.PHRASE, value);
         }
         // 功能区域
@@ -734,7 +735,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             wordFunctionHandler.getWordFunctionHandlerState().setCurrentReciteMode(ReciteMode.ONLY_RECITE);
             updateChangeModePopWindowState();
         } else if (clickViewId == R.id.window_mode_hide_phrase) {
-            wordFunctionHandler.getWordFunctionHandlerState().setHidePreposition(!wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition());
+            if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.VISIBLE) {
+                wordFunctionHandler.getWordFunctionHandlerState().setRecitePreposition(RecitePreposition.INVISIBLE);
+            } else if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE) {
+                wordFunctionHandler.getWordFunctionHandlerState().setRecitePreposition(RecitePreposition.VISIBLE);
+            }
             updateChangeModePopWindowState();
         }
     }
@@ -853,7 +858,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     R.drawable.background_green_select_border,
                     null));
         }
-        if (wordFunctionHandler.getWordFunctionHandlerState().isHidePreposition()) {
+        if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE) {
             this.windowHidePhrase.setBackground(ResourcesCompat.getDrawable(
                     getResources(),
                     R.drawable.background_green_select_border,
@@ -872,7 +877,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         updateUIHandler.post(() -> {
             // 如果隐藏了介词信息,必须在visible之前处理
             String prepositionPhrase = currentWord.getValue().get(WordStructure.PHRASE);
-            if (userRecitePreference.isHidePreposition())
+            if (userRecitePreference.getRecitePreposition() == RecitePreposition.INVISIBLE)
                 currentWord.getValue().remove(WordStructure.PHRASE);
             ReciteMode currentReciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode();
             if (currentReciteMode == ReciteMode.LISTENING) {
