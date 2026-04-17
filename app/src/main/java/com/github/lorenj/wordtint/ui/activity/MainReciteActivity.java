@@ -3,7 +3,6 @@ package com.github.lorenj.wordtint.ui.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -57,6 +56,7 @@ import com.github.lorenj.wordtint.enums.ReciteOrigin;
 import com.github.lorenj.wordtint.enums.RecitePreposition;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.enums.WordStructure;
+import com.github.lorenj.wordtint.handler.WordAudioHandler;
 import com.github.lorenj.wordtint.handler.WordFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
@@ -71,8 +71,6 @@ import com.github.lorenj.wordtint.utils.AnimationUtil;
 import com.github.lorenj.wordtint.utils.MathUtils;
 import com.google.android.material.color.MaterialColors;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -86,14 +84,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
     private boolean moreFunctionOpen = true, markAreaFold, changingChameleon;
     private WordFunctionHandler wordFunctionHandler;
+    private final WordAudioHandler wordAudioHandler = StaticFactory.wordAudioHandler();
     private DrawerLayout starDrawer;
     private RecyclerView starList, reciteMarkArea;
     private ResultWebViewHandler resultWebViewHandler, starResultWebViewHandler;
     private StarListAdapter starListAdapter;
     private StarSimpleAdapter starSimpleAdapter;
     private ReciteMarkToastAdapter reciteMarkToastAdapter;
-    // 单词音频播放器
-    private final MediaPlayer mediaPlayer = new MediaPlayer();
 
     /**
      * UI相关
@@ -410,7 +407,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING
                     || wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode()
                     == ReciteMode.CHINESE_TRANSLATION_ENGLISH) {
-                playWordAudio(wordFunctionHandler.getCurrentFocusWord());
+                wordAudioHandler.playWordAudio(wordFunctionHandler.getCurrentFocusWord(), this);
             }
         }
         if (clickViewId == R.id.cv_main_recite_light) {
@@ -882,12 +879,12 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             ReciteMode currentReciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode();
             if (currentReciteMode == ReciteMode.LISTENING) {
                 visibleWordAllMessage(currentWord);
-                playWordAudio(currentWord);
+                wordAudioHandler.playWordAudio(currentWord, this);
                 resultWebViewHandler.gone();
                 originWord.setText("");
             } else if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_HEARING) {
                 visibleWordAllMessage(currentWord);
-                playWordAudio(currentWord);
+                wordAudioHandler.playWordAudio(currentWord, this);
                 resultWebViewHandler.gone();
             } else if (currentReciteMode == ReciteMode.ENGLISH_TRANSLATION_CHINESE_NO_HEARING) {
                 visibleWordAllMessage(currentWord);
@@ -901,7 +898,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 originWord.setText("");
             } else if (currentReciteMode == ReciteMode.ONLY_RECITE) {
                 visibleWordAllMessage(currentWord);
-                playWordAudio(currentWord);
+                wordAudioHandler.playWordAudio(currentWord, this);
             }
             if (prepositionPhrase != null)
                 currentWord.getValue().put(WordStructure.PHRASE, prepositionPhrase);
@@ -958,29 +955,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                 .ifPresent(wordDTOS -> starCurrentWord
                         .setText(wordDTOS));
     }
-
-    /**
-     * 播放一个单词的音频信息
-     *
-     * @param functionWordVO 待播放音频的单词
-     */
-    private void playWordAudio(FunctionWordVO functionWordVO) {
-        String wordOrigin = Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
-                .orElse("");
-        File audioFile = new File(getFilesDir() + "/audio", wordOrigin + ".mp3");
-        if (!audioFile.exists()) {
-            return;
-        }
-        mediaPlayer.reset();
-        try {
-            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     private void bindView() {
         // 显示内容区域

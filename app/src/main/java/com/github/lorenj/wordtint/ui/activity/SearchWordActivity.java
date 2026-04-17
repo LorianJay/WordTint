@@ -38,6 +38,7 @@ import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEnt
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
+import com.github.lorenj.wordtint.handler.WordAudioHandler;
 import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.ui.adapter.common.LoadMoreAdapter;
 import com.github.lorenj.wordtint.ui.adapter.common.SimpleItemTouchHelperCallback;
@@ -121,7 +122,10 @@ public class SearchWordActivity extends AppCompatActivity
      * 是否正在排序收藏夹
      */
     private boolean sortStar = false;
-
+    /**
+     * 单词音频播放器
+     */
+    private final WordAudioHandler wordAudioHandler = StaticFactory.wordAudioHandler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,8 +184,7 @@ public class SearchWordActivity extends AppCompatActivity
         } else if (itemId == R.id.ll_search_word_star) {
             starDrawer.openDrawer(GravityCompat.END);
         } else if (itemId == R.id.iv_search_word_control_play) {
-            mediaPlayer.seekTo(0);
-            mediaPlayer.start();
+            wordAudioHandler.playWordAudio(starFunctionHandler.getCurrentFocusWord(), this);
         }
         if (itemId == R.id.iv_recite_star_move) {
             sortStar = !sortStar;
@@ -282,6 +285,7 @@ public class SearchWordActivity extends AppCompatActivity
                     currentFocusWordId = wordSearchEntity.wordId;
                     StaticFactory.getExecutorService().execute(() -> {
                         FunctionWordVO currentFocusWord = starFunctionHandler.getCurrentFocusWord();
+                        wordAudioHandler.playWordAudio(currentFocusWord, this);
                         updateUIHandler.post(() -> {
                             if (currentFocusWord != null) visibleWordAllMessage(currentFocusWord);
                         });

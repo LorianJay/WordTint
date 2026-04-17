@@ -2,6 +2,8 @@ package com.github.lorenj.wordtint.context.factory;
 
 import android.content.Context;
 
+import com.github.lorenj.wordtint.handler.WordAudioHandler;
+import com.github.lorenj.wordtint.handler.impl.WordAudioHandlerImpl;
 import com.github.lorenj.wordtint.ui.markdown.plugin.GlobalMarkwonPlugin;
 import com.google.gson.Gson;
 
@@ -20,7 +22,6 @@ public class StaticFactory {
     private StaticFactory() {
     }
 
-
     private static final class GsonHolder {
         static final Gson GSON = new Gson();
     }
@@ -35,6 +36,10 @@ public class StaticFactory {
 
     private static final class CssInlineStyleParserHolder {
         static final CssInlineStyleParser CSS_INLINE_STYLE_PARSER = CssInlineStyleParser.create();
+    }
+
+    private static final class WordAudioHandlerHolder {
+        static final WordAudioHandler WORD_AUDIO_HANDLER = new WordAudioHandlerImpl();
     }
 
     /**
@@ -78,5 +83,8 @@ public class StaticFactory {
         return CssInlineStyleParserHolder.CSS_INLINE_STYLE_PARSER;
     }
 
+    public static WordAudioHandler wordAudioHandler() {
+        return WordAudioHandlerHolder.WORD_AUDIO_HANDLER;
+    }
 
 }
