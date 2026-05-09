@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.github.lorenj.wordtint.R;
+import com.github.lorenj.wordtint.ui.activity.AdvancedSettingActivity;
 import com.github.lorenj.wordtint.ui.activity.MockExamineActivity;
 
 public class SettingFragment extends Fragment implements View.OnClickListener {
@@ -23,7 +24,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
      * UI
      */
     private TextView currentVersion;
-    private RelativeLayout mockExamine;
+    private RelativeLayout mockExamine, advancedSetting;
 
     public SettingFragment() {
     }
@@ -51,6 +52,9 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         if (clickId == R.id.rl_setting_mock) {
             Intent intent = new Intent(getActivity(), MockExamineActivity.class);
             startActivity(intent);
+        } else if (clickId == R.id.rl_advanced_setting) {
+            Intent intent = new Intent(getActivity(), AdvancedSettingActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -68,9 +72,10 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     private void bindView() {
         currentVersion = rootView.findViewById(R.id.tx_setting_version);
         mockExamine = rootView.findViewById(R.id.rl_setting_mock);
-
+        advancedSetting = rootView.findViewById(R.id.rl_advanced_setting);
 
         mockExamine.setOnClickListener(this);
+        advancedSetting.setOnClickListener(this);
     }
 
 }

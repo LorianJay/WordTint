@@ -141,6 +141,9 @@
     <string name="version_information">版本信息</string>
     <string name="current_version">当前版本</string>
     <string name="source_license">源代码许可证</string>
+    <string name="execute_sql">执行SQL</string>
+    <string name="execute_succeed">执行成功</string>
+    <string name="execute_fail">执行失败</string>
 
 
 </resources>
