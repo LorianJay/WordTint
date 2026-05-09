@@ -455,7 +455,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_note) {
             final EditText inputEditText = new EditText(this);
             inputEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-            inputEditText.setMinLines(1);
+            inputEditText.setMinLines(4);
             inputEditText.setMaxLines(4);
             inputEditText.setVerticalScrollBarEnabled(true);
             inputEditText.setMovementMethod(ScrollingMovementMethod.getInstance());
@@ -477,6 +477,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     .setPositiveButton(getResources().getText(R.string.save), (dialog, which) -> {
                         String noteContext = inputEditText.getText().toString();
                         wordNoteEntity.setWordNote(noteContext);
+                        currentWord.setWordNoteEntity(wordNoteEntity);
                         StaticFactory.getExecutorService()
                                 .execute(() -> appDatabase.wordNoteDao().upsert(wordNoteEntity));
                     })
