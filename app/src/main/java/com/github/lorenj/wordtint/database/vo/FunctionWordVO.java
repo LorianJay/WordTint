@@ -1,5 +1,6 @@
 package com.github.lorenj.wordtint.database.vo;
 
+import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.WordStructure;
 
@@ -33,6 +34,11 @@ public class FunctionWordVO {
      * 当前单词存储的意思
      */
     private Map<WordStructure, String> value = new HashMap<>(2);
+
+    /**
+     * 单词注释
+     */
+    private WordNoteEntity wordNoteEntity;
 
     public FunctionWordVO() {
         markColorList.add(MarkColor.GREEN);
@@ -69,5 +75,13 @@ public class FunctionWordVO {
 
     public void setValue(Map<WordStructure, String> value) {
         this.value = value;
+    }
+
+    public WordNoteEntity getWordNoteEntity() {
+        return wordNoteEntity;
+    }
+
+    public void setWordNoteEntity(WordNoteEntity wordNoteEntity) {
+        this.wordNoteEntity = wordNoteEntity;
     }
 }

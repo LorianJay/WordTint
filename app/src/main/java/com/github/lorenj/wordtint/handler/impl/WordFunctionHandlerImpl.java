@@ -10,6 +10,7 @@ import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
+import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
@@ -385,13 +386,21 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         wordFunctionHandlerState.setCurrentReciteMode(userRecitePreference.getReciteMode());
         wordFunctionHandlerState.setRecitePreposition(userRecitePreference.getRecitePreposition());
         wordFunctionHandlerState.setWordFunctionState(WordFunctionState.NONE);
-        // 5.快速定位(单词反查的初始化)
+        // 7.快速定位(单词反查的初始化)
         quickPosition = new HashMap<>(allWordIdList.size());
         for (int i = 0; i < allWordIdList.size(); i++) {
             FunctionWordVO functionWordVO = super.getDict().get(allWordIdList.get(i));
             if (functionWordVO != null) {
                 quickPosition.put(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN), i);
             }
+        }
+        // 8.单词的注释初始化
+        List<WordNoteEntity> allWordNoteList = appDatabase.wordNoteDao()
+                .findAllWordNoteByIdList(allWordIdList);
+        for (WordNoteEntity wordNoteEntity : allWordNoteList) {
+            FunctionWordVO functionWordVO = super.getDict().get(wordNoteEntity.wordId);
+            if (functionWordVO == null) continue;
+            functionWordVO.setWordNoteEntity(wordNoteEntity);
         }
     }
 

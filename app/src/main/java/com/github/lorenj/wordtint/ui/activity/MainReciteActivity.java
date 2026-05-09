@@ -10,6 +10,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
@@ -102,7 +104,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private TextView starCurrentWord, starCreateCategory;
     private ImageView starMove;
     private AlertDialog loadingDialog = null;
-    private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionLock, functionBlueTooth;
+    private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionNote, functionLock, functionBlueTooth;
     private LinearLayout viewFlagArea, functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
     private LinearLayout lightArea;
     private CardView lightResult;
@@ -449,6 +451,38 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             } else {
                 this.functionSwitchImageView.getDrawable().setTintList(null);
             }
+        }
+        if (clickViewId == R.id.ll_recite_function_note) {
+            final EditText inputEditText = new EditText(this);
+            inputEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+            inputEditText.setMinLines(1);
+            inputEditText.setMaxLines(4);
+            inputEditText.setVerticalScrollBarEnabled(true);
+            inputEditText.setMovementMethod(ScrollingMovementMethod.getInstance());
+            inputEditText.setGravity(Gravity.TOP);
+            inputEditText.setPadding(30, 30, 30, 30);
+
+            FunctionWordVO currentWord = wordFunctionHandler.getCurrentFocusWord();
+            WordNoteEntity tempNoteEntity = currentWord.getWordNoteEntity();
+            if (tempNoteEntity == null) {
+                tempNoteEntity = new WordNoteEntity();
+                tempNoteEntity.setWordId(currentWord.getWordId());
+            }
+            inputEditText.setText(tempNoteEntity.getWordNote());
+            final WordNoteEntity wordNoteEntity = tempNoteEntity;
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.write_note))
+                    .setView(inputEditText)
+                    .setCancelable(false)
+                    .setPositiveButton(getResources().getText(R.string.save), (dialog, which) -> {
+                        String noteContext = inputEditText.getText().toString();
+                        wordNoteEntity.setWordNote(noteContext);
+                        StaticFactory.getExecutorService()
+                                .execute(() -> appDatabase.wordNoteDao().upsert(wordNoteEntity));
+                    })
+                    .setNegativeButton(getResources().getText(R.string.cancel), (dialog, which) -> {
+                    })
+                    .show();
         }
         if (clickViewId == R.id.ll_recite_function_lock) {
             wordFunctionHandler.getWordFunctionHandlerState().setLockLight(!wordFunctionHandler.getWordFunctionHandlerState().isLockLight());
@@ -976,6 +1010,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionChameleonBorder = findViewById(R.id.flb_recite_function_chameleon);
         this.functionSwitch = findViewById(R.id.ll_recite_function_switch);
         this.functionSwitchImageView = findViewById(R.id.im_recite_function_switch);
+        this.functionNote = findViewById(R.id.ll_recite_function_note);
         this.functionLock = findViewById(R.id.ll_recite_function_lock);
         this.functionLockImageView = findViewById(R.id.im_recite_function_lock);
         this.functionBlueTooth = findViewById(R.id.ll_recite_function_blue_tooth);
@@ -1047,6 +1082,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionSaveProgress.setOnClickListener(this);
         this.functionAnalysis.setOnClickListener(this);
         this.functionSwitch.setOnClickListener(this);
+        this.functionNote.setOnClickListener(this);
         this.functionLock.setOnClickListener(this);
         this.lightResult.setOnTouchListener(this);
         this.functionBlueTooth.setOnClickListener(this);

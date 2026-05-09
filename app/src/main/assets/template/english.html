@@ -112,6 +112,10 @@
         <span class="commonValue valueSelect">{{$.value.PHRASE}}</span>
     </div>
     <div class="element">
+        <div class="commonKey">注释</div>
+        <div class="commonValue valueSelect">{{$.wordNoteEntity.wordNote}}</div>
+    </div>
+    <div class="element">
         <span class="commonKey">划分</span>
         <span class="phraseValue valueSelect">{{$.from}}</span>
     </div>
@@ -119,12 +123,12 @@
 </div>
 
 <script>
-        document.querySelectorAll('.valueSelect').forEach(function (commonValue) {
-            if (commonValue.textContent.trim() === '') {
-                commonValue.parentElement.style.display = 'none';
-            }
-        });
-    </script>
+    document.querySelectorAll('.valueSelect').forEach(function (commonValue) {
+        if (commonValue.textContent.trim() === '') {
+            commonValue.parentElement.style.display = 'none';
+        }
+    });
+</script>
 </body>
 
 </html>
