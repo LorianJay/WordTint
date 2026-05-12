@@ -86,7 +86,8 @@
     <string name="sentence_translation">例句</string>
     <string name="search_word">搜索单词</string>
     <string name="lock_answer">锁定提示</string>
-    <string name="blue_open">蓝牙开启</string>
+    <string name="open_blue_tooth">开启蓝牙</string>
+    <string name="close_blue_tooth">关闭蓝牙</string>
     <string name="interrupt">暂停</string>
     <string name="exit">退出</string>
     <string name="hide_pronoun">隐藏介词</string>

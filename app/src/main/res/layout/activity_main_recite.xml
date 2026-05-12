@@ -280,14 +280,14 @@
                         android:layout_gravity="center"
                         android:background="@drawable/style_image_padding"
                         android:gravity="center"
-                        android:src="@drawable/ic_blue_tooth"
-                        app:tint="@android:color/holo_blue_dark" />
+                        android:src="@drawable/ic_blue_tooth" />
 
                     <TextView
+                        android:id="@+id/tx_recite_function_blue_tooth"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="@string/blue_open"
+                        android:text="@string/open_blue_tooth"
                         android:textColor="@color/gray_black"
                         android:textSize="14sp" />
 

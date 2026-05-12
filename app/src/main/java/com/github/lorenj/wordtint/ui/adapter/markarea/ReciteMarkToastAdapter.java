@@ -45,6 +45,10 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToast
     public void onBindViewHolder(@NonNull ToastViewHolder holder, @SuppressLint("RecyclerView") int position) {
         MarkColor markColor = MarkColor.values()[position];
         holder.toastMark.getDrawable().setTint(context.getResources().getColor(markColor.getMapColorID(), null));
+        // 重置选择框
+        holder.toastMark.setForeground(null);
+        holder.toastMark.setScaleX(1f);
+        holder.toastMark.setScaleY(1f);
         holder.viewMark.setBackgroundColor(context.getResources().getColor(markColor.getMapColorID(), null));
         if (!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
             // 如果当前状态是展开
@@ -70,7 +74,8 @@ public class ReciteMarkToastAdapter extends RecyclerView.Adapter<ReciteMarkToast
                         View.VISIBLE : View.INVISIBLE);
             }
             if (payload == Item.SWITCH_SELECT) {
-                if (position == wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusSwitchPosition()) {
+                if (position == wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusSwitchPosition()
+                        || position == wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusBlueToothPosition()) {
                     holder.toastMark.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.background_selected_border, null));
                     holder.toastMark.setScaleX(0.9f);
                     holder.toastMark.setScaleY(0.9f);

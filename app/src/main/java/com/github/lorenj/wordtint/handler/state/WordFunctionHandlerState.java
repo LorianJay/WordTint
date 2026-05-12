@@ -29,9 +29,14 @@ public class WordFunctionHandlerState {
     private WordFunctionState wordFunctionState;
 
     /**
-     * 功能区是否被折叠
+     * 功能区(右侧标记区域)是否被折叠
      */
     private boolean functionAreaFold = false;
+
+    /**
+     * 是否开启蓝牙
+     */
+    private boolean enableBlueTooth = false;
 
     /**
      * 当前是否正在选择标记颜色
@@ -65,6 +70,15 @@ public class WordFunctionHandlerState {
      * 当前正聚焦的选择位置
      */
     private int currentFocusSwitchPosition = previousFocusSwitchPosition;
+
+    /**
+     * 第一次蓝牙选择的默认位置
+     */
+    private int previousFocusBlueToothPosition = 4;
+    /**
+     * 当前蓝牙选择的默认位置
+     */
+    private int currentFocusBlueToothPosition = previousFocusBlueToothPosition;
 
     /**
      * 是否正在排序收藏夹
@@ -187,5 +201,29 @@ public class WordFunctionHandlerState {
 
     public void setSortStar(boolean sortStar) {
         this.sortStar = sortStar;
+    }
+
+    public boolean isEnableBlueTooth() {
+        return enableBlueTooth;
+    }
+
+    public void setEnableBlueTooth(boolean enableBlueTooth) {
+        this.enableBlueTooth = enableBlueTooth;
+    }
+
+    public int getPreviousFocusBlueToothPosition() {
+        return previousFocusBlueToothPosition;
+    }
+
+    public void setPreviousFocusBlueToothPosition(int previousFocusBlueToothPosition) {
+        this.previousFocusBlueToothPosition = previousFocusBlueToothPosition;
+    }
+
+    public int getCurrentFocusBlueToothPosition() {
+        return currentFocusBlueToothPosition;
+    }
+
+    public void setCurrentFocusBlueToothPosition(int currentFocusBlueToothPosition) {
+        this.currentFocusBlueToothPosition = currentFocusBlueToothPosition;
     }
 }

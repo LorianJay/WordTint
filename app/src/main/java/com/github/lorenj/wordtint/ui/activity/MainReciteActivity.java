@@ -12,6 +12,7 @@ import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,7 +24,6 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -75,6 +75,7 @@ import com.google.android.material.color.MaterialColors;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class MainReciteActivity extends AppCompatActivity implements View.OnClickListener,
         KeyEvent.Callback,
@@ -111,11 +112,11 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private TableLayout functionChangeModePopLayout;
     private ImageView functionMarkImageView, functionChameleonImageView, functionSwitchImageView, functionLockImageView;
     private ImageView functionBlueToothImageView, functionShuffleImageView, functionSectionImageView, functionQuickPositionImageView;
+    private TextView functionBlueToothTextView;
     private TextView windowListingWrite, windowEnglishChineseAudio, windowEnglishChinese;
     private TextView windowChineseEnglish, windowOnlyRecite, windowHidePhrase;
     private long exitLastTime = 0;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
-    private ImageButton currentSelectFlagButton;
     private FlowingBorderView functionChameleonBorder;
 
     /**
@@ -136,7 +137,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 滑动改变答案按钮位置
      */
     private float lightChangeDY, lightChangeDX, lightParentLayoutY = 0, lightParentLayoutX = 0;
-    private boolean enableBlueTooth = true;
     /**
      * 常量
      */
@@ -151,8 +151,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      * 蓝牙相关
      */
     private float blueToothDownX, blueToothDownY;
-    private int blueToothMoveIndex = -1;
-    private int preBlueToothMoveIndex = 0;
     /**
      * 数据库
      */
@@ -285,6 +283,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean enableBlueTooth = wordFunctionHandler.getWordFunctionHandlerState().isEnableBlueTooth();
         // 屏蔽蓝牙未开启的点击
         if (event.getSource() == 769 && !enableBlueTooth) {
             return true;
@@ -298,14 +297,15 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         return false;
     }
-    /*
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         // 屏蔽蓝牙未开启的点击
-        if (event.getSource() == InputDevice.SOURCE_MOUSE && !enableBlueTooth) {
-            return true;
+        boolean enableBlueTooth = wordFunctionHandler.getWordFunctionHandlerState().isEnableBlueTooth();
+        if (event.getSource() != InputDevice.SOURCE_MOUSE || !enableBlueTooth) {
+            return super.dispatchTouchEvent(event);
         }
-        if (event.getSource() == InputDevice.SOURCE_MOUSE && enableBlueTooth) {
+        if (event.getSource() == InputDevice.SOURCE_MOUSE) {
             int action = event.getAction();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
@@ -313,51 +313,67 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     blueToothDownY = event.getRawY();
                     break;
                 case MotionEvent.ACTION_UP:
-                    // 修改样式
                     float distinctX = event.getRawX() - blueToothDownX;
                     float distinctY = event.getRawY() - blueToothDownY;
                     if (distinctX == 0 && distinctY == 0) {
-                        if (Math.abs(blueToothDownX - 91) < 5 && Math.abs(blueToothDownY - 2322) < 5) {
-                            popMoreFunction.performClick();
-                        } else if (openFlagChange && blueToothMoveIndex >= 0 && blueToothMoveIndex <= 8) {
-                            // 如果当前正展开了旗帜
-                            this.currentSelectFlagButton.setBackground(this.getDrawable(R.drawable.style_image_padding));
-                            this.currentSelectFlagButton.performClick();
-                            clickFlag.performClick();
+                        if (!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
+                            // 如果当前正展开了旗帜-则选中当前单词
+                            FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
+                            int currentPosition = wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusBlueToothPosition();
+                            MarkColor markColor = MarkColor.values()[currentPosition];
+                            if (currentFocusWord.getMarkColorList().contains(markColor)) {
+                                currentFocusWord.getMarkColorList().remove(markColor);
+                            } else {
+                                currentFocusWord.getMarkColorList().add(markColor);
+                            }
+                            wordFunctionHandler.getWordFunctionHandlerState().setFunctionAreaFold(true);
+                            refreshMarkAreaUI();
                         } else {
-                            playWord.performClick();
+                            controlPlay.performClick();
                         }
                     } else if (distinctX == 0 && distinctY > 0) {
-                        blueToothMoveIndex--;
-                        if (!openFlagChange) clickFlag.performClick();
+                        if (wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
+                            wordFunctionHandler.getWordFunctionHandlerState()
+                                    .setFunctionAreaFold(!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold());
+                            refreshMarkAreaUI();
+                        } else {
+                            int currentPosition = wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusBlueToothPosition() - 1;
+                            wordFunctionHandler.getWordFunctionHandlerState().setCurrentFocusBlueToothPosition(currentPosition);
+                        }
                     } else if (distinctX == 0 && distinctY < 0) {
-                        blueToothMoveIndex++;
-                        if (!openFlagChange) clickFlag.performClick();
+                        if (wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
+                            wordFunctionHandler.getWordFunctionHandlerState()
+                                    .setFunctionAreaFold(!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold());
+                            refreshMarkAreaUI();
+                        } else {
+                            int currentPosition = wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusBlueToothPosition() + 1;
+                            wordFunctionHandler.getWordFunctionHandlerState().setCurrentFocusBlueToothPosition(currentPosition);
+                        }
                     } else if (distinctY == 0 && distinctX > 0) {
-                        previousWord.performClick();
+                        controlPreviousWord.performClick();
                     } else if (distinctY == 0 && distinctX < 0) {
-                        nextWord.performClick();
+                        controlNextWord.performClick();
                     }
                     // 如果当前展开了旗帜
-                    if (openFlagChange) {
-                        if (blueToothMoveIndex < 0) {
-                            blueToothMoveIndex = preBlueToothMoveIndex;
-                        } else if (blueToothMoveIndex > 8) {
-                            blueToothMoveIndex = 8;
-                        }
-                        selectList.forEach(imageButton -> imageButton.setBackground(this.getDrawable(R.drawable.style_image_padding)));
-                        this.currentSelectFlagButton = selectList.get(preBlueToothMoveIndex = blueToothMoveIndex);
-                        this.currentSelectFlagButton.setBackground(this.getDrawable(R.drawable.style_image_padding_selective));
+                    if (!wordFunctionHandler.getWordFunctionHandlerState().isFunctionAreaFold()) {
+                        int currentPosition = wordFunctionHandler.getWordFunctionHandlerState().getCurrentFocusBlueToothPosition();
+                        int previousPosition = wordFunctionHandler.getWordFunctionHandlerState().getPreviousFocusBlueToothPosition();
+                        if (currentPosition < 0) currentPosition = 0;
+                        if (currentPosition > 9) currentPosition = 9;
+                        wordFunctionHandler.getWordFunctionHandlerState().setCurrentFocusBlueToothPosition(currentPosition);
+                        wordFunctionHandler.getWordFunctionHandlerState().setPreviousFocusBlueToothPosition(currentPosition);
+                        int finalCurrentPosition = currentPosition;
+                        updateUIHandler.post(() -> {
+                            reciteMarkToastAdapter.notifyItemChanged(previousPosition, ReciteMarkToastAdapter.Item.SWITCH_DESELECT);
+                            reciteMarkToastAdapter.notifyItemChanged(finalCurrentPosition, ReciteMarkToastAdapter.Item.SWITCH_SELECT);
+                        });
                     }
                     break;
             }
             return true;
         }
         return false;
-
-        return false;
     }
-     */
 
     @Override
     public void onResume() {
@@ -498,13 +514,17 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                         Color.BLACK));
             }
         }
-        // todo 蓝牙功能
         if (clickViewId == R.id.ll_recite_function_blue_tooth) {
-            enableBlueTooth = !enableBlueTooth;
-            if (enableBlueTooth) {
+            wordFunctionHandler.getWordFunctionHandlerState().setEnableBlueTooth(!wordFunctionHandler.getWordFunctionHandlerState().isEnableBlueTooth());
+            if (wordFunctionHandler.getWordFunctionHandlerState().isEnableBlueTooth()) {
                 this.functionBlueToothImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
+                this.functionBlueToothTextView.setText(getText(R.string.close_blue_tooth));
             } else {
-                this.functionBlueToothImageView.getDrawable().setTint(getResources().getColor(R.color.dark_gray, null));
+                this.functionBlueToothImageView.getDrawable().setTint(MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorOnSurface,
+                        Color.BLACK));
+                this.functionBlueToothTextView.setText(getText(R.string.open_blue_tooth));
             }
         }
         if (clickViewId == R.id.ll_recite_function_goto) {
@@ -831,7 +851,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     currentFocusWord.getMarkColorList().add(markColor);
                 }
                 wordFunctionHandler.getWordFunctionHandlerState().setPreviousFocusSwitchPosition(currentFocusSwitchPosition);
-                reciteMarkToastAdapter.notifyItemChanged(currentFocusSwitchPosition, ReciteMarkToastAdapter.Item.SWITCH_SELECT);
                 wordFunctionHandler.getWordFunctionHandlerState().setFunctionAreaFold(true);
                 refreshMarkAreaUI();
             }
@@ -1016,6 +1035,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionLockImageView = findViewById(R.id.im_recite_function_lock);
         this.functionBlueTooth = findViewById(R.id.ll_recite_function_blue_tooth);
         this.functionBlueToothImageView = findViewById(R.id.im_recite_function_blue_tooth);
+        this.functionBlueToothTextView = findViewById(R.id.tx_recite_function_blue_tooth);
         this.functionGoto = findViewById(R.id.ll_recite_function_goto);
         this.functionStar = findViewById(R.id.ll_recite_function_star);
         this.functionShuffle = findViewById(R.id.ll_recite_function_shuffle);
