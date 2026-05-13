@@ -29,9 +29,11 @@
             android:exported="false" />
         <activity
             android:name=".ui.activity.SearchWordActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|navigation"
             android:exported="false" />
         <activity
             android:name=".ui.activity.MainReciteActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|navigation"
             android:exported="false" />
         <activity
             android:name=".ui.activity.WordReciteLaunchActivity"
