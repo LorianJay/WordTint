@@ -45,7 +45,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
     private TextView start, saveSettings, restoreDefault, tvSelectWordCount;
     private final List<LinearLayout> settingsLinearLayouts = new ArrayList<>(4);
     private LinearLayout modeParent, orderParent, filterParent;
-    private CheckBox ignore;
+    private CheckBox ignore, distinct;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private Toast toast;
     /**
@@ -93,6 +93,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
                 userSettingRepository.update(UserSettingKeyEnums.RECITE_FILTER, userRecitePreference.getReciteFilter());
                 userSettingRepository.update(UserSettingKeyEnums.RECITE_STYLE, userRecitePreference.getReciteStyle());
                 userSettingRepository.update(UserSettingKeyEnums.SKIP_PREFERENCE, userRecitePreference.isIgnore());
+                userSettingRepository.update(UserSettingKeyEnums.RECITE_DISTINCT, userRecitePreference.isReciteDistinct());
             });
             toast.show();
         } else if (itemId == R.id.tv_recite_launch_restore_default) {
@@ -103,6 +104,9 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
             updateUIByPreference(userRecitePreference);
         } else if (itemId == R.id.tv_word_recite_launch_ignore) {
             userRecitePreference.setIgnore(ignore.isChecked());
+            updateUIByPreference(userRecitePreference);
+        } else if (itemId == R.id.cb_word_recite_launch_distinct) {
+            userRecitePreference.setIgnore(distinct.isChecked());
             updateUIByPreference(userRecitePreference);
         } else if (v instanceof TextView) {
             ViewParent parent = v.getParent();
@@ -126,6 +130,7 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
         this.tvSelectWordCount = findViewById(R.id.fragment_word_credit_launch_word_count);
         this.restoreDefault = findViewById(R.id.tv_recite_launch_restore_default);
         this.ignore = findViewById(R.id.tv_word_recite_launch_ignore);
+        this.distinct = findViewById(R.id.cb_word_recite_launch_distinct);
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_mode));
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_order));
         settingsLinearLayouts.add(findViewById(R.id.fragment_word_credit_launch_filter));
@@ -170,7 +175,8 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
                     ReciteOrigin.RECITE_LIST,
                     userSettingRepository.getUserSettingValue(UserSettingKeyEnums.Recite_PREPOSITION),
                     false,
-                    allSectionIdList);
+                    allSectionIdList,
+                    userSettingRepository.getUserSettingValue(UserSettingKeyEnums.RECITE_DISTINCT));
             // 设置选词量
             int selectWordCount = Optional.ofNullable(bundle)
                     .map(p -> p.getInt(BookListFragment.SELECT_WORD_COUNT))

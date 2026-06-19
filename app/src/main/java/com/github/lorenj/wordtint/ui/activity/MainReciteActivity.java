@@ -85,7 +85,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
 
     private ImageView controlFunctionAreaFold;
 
-    private boolean moreFunctionOpen = true, markAreaFold, changingChameleon;
+    private boolean moreFunctionOpen = true;
     private WordFunctionHandler wordFunctionHandler;
     private final WordAudioHandler wordAudioHandler = StaticFactory.wordAudioHandler();
     private DrawerLayout starDrawer;
@@ -106,7 +106,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private ImageView starMove;
     private AlertDialog loadingDialog = null;
     private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionNote, functionLock, functionBlueTooth;
-    private LinearLayout viewFlagArea, functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
+    private LinearLayout functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
     private LinearLayout lightArea;
     private CardView lightResult;
     private TableLayout functionChangeModePopLayout;

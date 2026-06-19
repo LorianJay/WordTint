@@ -386,7 +386,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         wordFunctionHandlerState.setCurrentReciteMode(userRecitePreference.getReciteMode());
         wordFunctionHandlerState.setRecitePreposition(userRecitePreference.getRecitePreposition());
         wordFunctionHandlerState.setWordFunctionState(WordFunctionState.NONE);
-        // 7.快速定位(单词反查的初始化)
+        // 7.单词去重
+        allWordIdList = allWordIdList.stream()
+                .distinct()
+                .collect(Collectors.toList());
+        // 8.快速定位(单词反查的初始化)
         quickPosition = new HashMap<>(allWordIdList.size());
         for (int i = 0; i < allWordIdList.size(); i++) {
             FunctionWordVO functionWordVO = super.getDict().get(allWordIdList.get(i));
@@ -394,7 +398,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 quickPosition.put(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN), i);
             }
         }
-        // 8.单词的注释初始化
+        // 9.单词的注释初始化
         List<WordNoteEntity> allWordNoteList = appDatabase.wordNoteDao()
                 .findAllWordNoteByIdList(allWordIdList);
         for (WordNoteEntity wordNoteEntity : allWordNoteList) {

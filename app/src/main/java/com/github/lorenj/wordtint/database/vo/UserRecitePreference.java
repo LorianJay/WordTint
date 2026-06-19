@@ -33,6 +33,8 @@ public class UserRecitePreference implements Serializable {
     private List<Integer> allSectionIdList;
     // 是否跳过
     private boolean ignore = false;
+    // 背诵去重
+    private boolean reciteDistinct = true;
 
     public UserRecitePreference() {
     }
@@ -44,7 +46,8 @@ public class UserRecitePreference implements Serializable {
                                 ReciteOrigin reciteOrigin,
                                 RecitePreposition recitePreposition,
                                 boolean ignore,
-                                List<Integer> allSectionIdList) {
+                                List<Integer> allSectionIdList,
+                                boolean reciteDistinct) {
         this.reciteMode = reciteMode;
         this.reciteOrder = reciteOrder;
         this.reciteFilter = reciteFilter;
@@ -53,6 +56,7 @@ public class UserRecitePreference implements Serializable {
         this.recitePreposition = recitePreposition;
         this.ignore = ignore;
         this.allSectionIdList = allSectionIdList;
+        this.reciteDistinct = reciteDistinct;
     }
 
     public ReciteMode getReciteMode() {
@@ -117,5 +121,13 @@ public class UserRecitePreference implements Serializable {
 
     public void setRecitePreposition(RecitePreposition recitePreposition) {
         this.recitePreposition = recitePreposition;
+    }
+
+    public boolean isReciteDistinct() {
+        return reciteDistinct;
+    }
+
+    public void setReciteDistinct(boolean reciteDistinct) {
+        this.reciteDistinct = reciteDistinct;
     }
 }

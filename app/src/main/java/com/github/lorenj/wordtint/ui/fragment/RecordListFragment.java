@@ -126,7 +126,8 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                         ReciteOrigin.RECITE_RECORD,
                         currentSelectRecordVO.getRecitePreposition(),
                         false,
-                        recordIdList);
+                        recordIdList,
+                        false);
                 updateUIHandler.post(() -> {
                     loadingBar.setVisibility(View.INVISIBLE);
                     Intent intent = new Intent(requireContext(), MainReciteActivity.class);

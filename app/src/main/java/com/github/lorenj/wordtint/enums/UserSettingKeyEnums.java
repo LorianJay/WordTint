@@ -30,6 +30,10 @@ public enum UserSettingKeyEnums {
      */
     RECITE_STYLE(ReciteStyle.class, ReciteStyle.CLASSIC),
     /**
+     * 背诵去重
+     */
+    RECITE_DISTINCT(Boolean.class, true),
+    /**
      * 介词显示模式
      */
     Recite_PREPOSITION(RecitePreposition.class, RecitePreposition.VISIBLE);
