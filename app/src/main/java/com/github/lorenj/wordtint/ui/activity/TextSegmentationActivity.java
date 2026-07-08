@@ -25,7 +25,6 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         initView();
     }
 
-
     @Override
     public void onClick(View v) {
         int itemId = v.getId();
@@ -57,12 +56,10 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         resultTextView.setText(processed);
     }
 
-
     private void initView() {
         backButton.setOnClickListener(this);
         segmentationButton.setOnClickListener(this);
     }
-
 
     private void bindView() {
         backButton = findViewById(R.id.ib_text_segmentation_back);
