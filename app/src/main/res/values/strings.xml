@@ -92,7 +92,8 @@
     <string name="exit">退出</string>
     <string name="hide_pronoun">隐藏介词</string>
     <string name="quick_position">快速定位</string>
-    <string name="mock_examine">模拟考试</string>
+    <string name="mock_examine">更多功能</string>
+    <string name="text_segmentation">文字分段</string>
     <string name="mock_politician">模拟政治</string>
     <string name="mock_english">模拟英语</string>
     <string name="mock_math">模拟数学</string>
@@ -132,7 +133,7 @@
     <string name="gone">隐藏</string>
     <string name="invisible">隐藏</string>
     <string name="no_filer">不过滤</string>
-    <string name="developer_name">LorenJ</string>
+    <string name="developer_name">LorianJay</string>
     <string name="email_address">xxxxx@gmail.com</string>
     <string name="about_creator">关于作者:</string>
     <string name="donate">打赏</string>
