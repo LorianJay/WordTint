@@ -1,5 +1,6 @@
 package com.github.lorenj.wordtint.ui.activity;
 
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -25,7 +26,7 @@ public class MockExamineActivity extends AppCompatActivity implements View.OnCli
     private View backGround, selectGround;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     // 功能按钮
-    private TextView mockPolitician, mockEnglish, mockMath, mockMajor;
+    private TextView mockPolitician, mockEnglish, mockMath, mockMajor, textSegmentation;
     private TextView interrupt, exit, remove5s, add5s, remove30s, add30s;
     // 显示
     private TextView topTime, bottomTime, subTopTime, subBottomTime;
@@ -97,6 +98,11 @@ public class MockExamineActivity extends AppCompatActivity implements View.OnCli
         } else if (itemId == R.id.tv_mock_examine_add_30) {
             remainTime -= 1000 * 30;
             alreadyTime += 1000 * 30;
+            return;
+        }
+        if (itemId == R.id.tv_mock_examine_text_segmentation) {
+            Intent intent = new Intent(this, TextSegmentationActivity.class);
+            startActivity(intent);
             return;
         }
         if (itemId == R.id.tv_mock_examine_politician ||
@@ -226,6 +232,7 @@ public class MockExamineActivity extends AppCompatActivity implements View.OnCli
         this.mockEnglish.setOnClickListener(this);
         this.mockMath.setOnClickListener(this);
         this.mockMajor.setOnClickListener(this);
+        this.textSegmentation.setOnClickListener(this);
         this.backGround.setOnClickListener(this);
         this.interrupt.setOnClickListener(this);
         this.exit.setOnClickListener(this);
@@ -242,6 +249,7 @@ public class MockExamineActivity extends AppCompatActivity implements View.OnCli
         this.mockEnglish = findViewById(R.id.tv_mock_examine_english);
         this.mockMath = findViewById(R.id.tv_mock_examine_math);
         this.mockMajor = findViewById(R.id.tv_mock_examine_major);
+        this.textSegmentation = findViewById(R.id.tv_mock_examine_text_segmentation);
         this.topTime = findViewById(R.id.tv_mock_examine_top_time);
         this.subTopTime = findViewById(R.id.tv_mock_examine_sub_top_time);
         this.bottomTime = findViewById(R.id.tv_mock_examine_bottom_time);

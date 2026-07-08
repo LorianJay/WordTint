@@ -92,7 +92,8 @@
     <string name="exit">退出</string>
     <string name="hide_pronoun">隐藏介词</string>
     <string name="quick_position">快速定位</string>
-    <string name="mock_examine">模拟考试</string>
+    <string name="mock_examine">更多功能</string>
+    <string name="text_segmentation">文字分段</string>
     <string name="mock_politician">模拟政治</string>
     <string name="mock_english">模拟英语</string>
     <string name="mock_math">模拟数学</string>

@@ -28,6 +28,9 @@
             android:name=".ui.activity.MockExamineActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.activity.TextSegmentationActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activity.SearchWordActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|navigation"
             android:exported="false" />
