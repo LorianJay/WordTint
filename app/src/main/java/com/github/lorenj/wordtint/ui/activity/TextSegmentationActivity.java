@@ -48,11 +48,22 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         // 检查是否以句号结尾
         boolean endsWithPeriod = processed.endsWith(".");
         // 在每个句号后添加两个换行符
-        processed = processed.replace(".", ".\n\n");
+        processed = processed.replace(".", ".\n\n\n");
         // 如果原文不以句号结尾, 移除末尾多余的换行符
-        if (!endsWithPeriod && processed.endsWith("\n\n")) {
+        if (!endsWithPeriod && processed.endsWith("\n\n\n")) {
             processed = processed.substring(0, processed.length() - 2);
         }
+        // 去除每一行首尾空格
+        String[] lines = processed.split("\n");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < lines.length; i++) {
+            sb.append(lines[i].trim());
+            if (i < lines.length - 1) {
+                sb.append("\n");
+            }
+        }
+        sb.append("\n\n\n");
+        processed = sb.toString();
         resultTextView.setText(processed);
     }
 
