@@ -47,7 +47,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -88,21 +88,23 @@
                 android:textColor="@android:color/white"
                 android:textSize="20sp" />
 
-            <TextView
-                android:textIsSelectable="true"
-                android:id="@+id/tv_text_segmentation_result"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/background_hollow_radius_12dp"
                 android:backgroundTint="@color/gray_black"
-                android:minHeight="120dp"
-                android:padding="12dp"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:minHeight="120dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_segmentation_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:padding="12dp" />
+            </RelativeLayout>
 
         </LinearLayout>
 
-    </ScrollView>
-
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

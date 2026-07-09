@@ -7,15 +7,32 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
+import com.github.lorenj.wordtint.database.vo.TextSegmentationVO;
+import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.SegmentationListAdapter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class TextSegmentationActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ImageButton backButton;
     private EditText inputEditText;
     private TextView segmentationButton;
-    private TextView resultTextView;
+    private RecyclerView segmentationList;
+    /**
+     * 适配器
+     */
+    private SegmentationListAdapter segmentationListAdapter;
+    /**
+     * 分段正则表达式
+     */
     private final static String REGEX = "(?<!\\d|Mr|Ms|Dr|Vs|e\\.g|i\\.e)\\.(?!\\d|[a-zA-Z0-9-]+\\.[a-zA-Z])";
 
     @Override
@@ -46,20 +63,23 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         }
         // 将所有换行符转为空格
         String processed = input.replaceAll("\\r?\\n", " ");
-        String[] lines = processed.split(REGEX);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lines.length; i++) {
-            sb.append(lines[i].trim());
-            if (i < lines.length - 1) {
-                sb.append(".").append("\n\n\n");
-            }
-        }
-        sb.append("\n\n\n");
-        processed = sb.toString();
-        resultTextView.setText(processed);
+        StringBuilder format = new StringBuilder();
+        List<TextSegmentationVO> allSegmentationList = Arrays.stream(processed.split(REGEX))
+                .map(s -> {
+                    format.setLength(0);
+                    TextSegmentationVO textSegmentationVO = new TextSegmentationVO();
+                    textSegmentationVO.setSegmentationText(format.append(s.trim()).append(".").toString());
+                    return textSegmentationVO;
+                })
+                .collect(Collectors.toList());
+        segmentationListAdapter.replaceAll(allSegmentationList);
     }
 
     private void initView() {
+        LinearLayoutManager recordListLayoutManager = new LinearLayoutManager(this);
+        this.segmentationList.setLayoutManager(recordListLayoutManager);
+        this.segmentationListAdapter = new SegmentationListAdapter(this);
+        this.segmentationList.setAdapter(segmentationListAdapter);
         backButton.setOnClickListener(this);
         segmentationButton.setOnClickListener(this);
     }
@@ -68,7 +88,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         backButton = findViewById(R.id.ib_text_segmentation_back);
         inputEditText = findViewById(R.id.et_text_segmentation_input);
         segmentationButton = findViewById(R.id.btn_text_segmentation);
-        resultTextView = findViewById(R.id.tv_text_segmentation_result);
+        segmentationList = findViewById(R.id.rv_segmentation_list);
     }
 
 

@@ -150,6 +150,7 @@
     <string name="save">保存</string>
     <string name="distinct_word">去除重复单词</string>
     <string name="distinct_word_explanation">去除当前背诵列表中的所有重复的单词</string>
+    <string name="text_copied">复制成功</string>
 
 
 </resources>
