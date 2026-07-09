@@ -20,4 +20,6 @@ public interface WordSearchDao {
     @Query("SELECT count(1) FROM word_search WHERE word_origin like '%' || :wordOrigin || '%'")
     Integer countWordLikeOrigin(String wordOrigin);
 
+    @Query("SELECT * FROM word_search")
+    List<WordSearchEntity> findAll();
 }

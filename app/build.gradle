@@ -82,6 +82,7 @@ dependencies {
     implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation("org.apache.commons:commons-text:1.10.0")
     annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
 
     testImplementation 'junit:junit:4.13.2'
