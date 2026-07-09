@@ -16,6 +16,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
     private EditText inputEditText;
     private TextView segmentationButton;
     private TextView resultTextView;
+    private final static String REGEX = "(?<!\\d|Mr|Ms|Dr|Vs|e\\.g|i\\.e)\\.(?!\\d|[a-zA-Z0-9-]+\\.[a-zA-Z])";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,23 +44,14 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         if (input.isEmpty()) {
             return;
         }
-        // 删除所有换行符
-        String processed = input.replaceAll("\\r?\\n", "");
-        // 检查是否以句号结尾
-        boolean endsWithPeriod = processed.endsWith(".");
-        // 在每个句号后添加两个换行符
-        processed = processed.replace(".", ".\n\n\n");
-        // 如果原文不以句号结尾, 移除末尾多余的换行符
-        if (!endsWithPeriod && processed.endsWith("\n\n\n")) {
-            processed = processed.substring(0, processed.length() - 2);
-        }
-        // 去除每一行首尾空格
-        String[] lines = processed.split("\n");
+        // 将所有换行符转为空格
+        String processed = input.replaceAll("\\r?\\n", " ");
+        String[] lines = processed.split(REGEX);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < lines.length; i++) {
             sb.append(lines[i].trim());
             if (i < lines.length - 1) {
-                sb.append("\n");
+                sb.append(".").append("\n\n\n");
             }
         }
         sb.append("\n\n\n");
