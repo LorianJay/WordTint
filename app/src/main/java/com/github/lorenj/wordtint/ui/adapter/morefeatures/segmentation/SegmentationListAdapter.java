@@ -112,7 +112,7 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
     public void replaceAll(Collection<TextSegmentationVO> newSegmentationList) {
         this.allTextSegmentationList.clear();
         this.allTextSegmentationList.addAll(newSegmentationList);
-        notifyItemRangeChanged(0, allTextSegmentationList.size());
+        notifyDataSetChanged();
     }
 
     /**

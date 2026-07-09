@@ -11,12 +11,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.database.vo.TextSegmentationVO;
+import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.SegmentationHeaderAdapter;
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.SegmentationListAdapter;
+import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.TextSegmentationViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,17 +31,14 @@ import java.util.stream.Collectors;
 public class TextSegmentationActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ImageButton backButton;
-    private EditText inputEditText;
-    private TextView segmentationButton;
     private RecyclerView segmentationList;
     /**
      * 适配器
      */
+    private SegmentationHeaderAdapter segmentationHeaderAdapter;
     private SegmentationListAdapter segmentationListAdapter;
-    /**
-     * 分段正则表达式
-     */
-    private final static String REGEX = "(?<!\\d|Mr|Ms|Dr|Vs|e\\.g|i\\.e)\\.(?!\\d|[a-zA-Z0-9-]+\\.[a-zA-Z])";
+    private TextSegmentationViewModel textSegmentationViewModel;
+
     /**
      * 选择查词功能
      */
@@ -59,15 +60,14 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         int itemId = v.getId();
         if (itemId == R.id.ib_text_segmentation_back) {
             finish();
-        } else if (itemId == R.id.btn_text_segmentation) {
-            segmentText();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (getCurrentFocus() != inputEditText) {
+        if (getCurrentFocus() == null) return;
+        if (getCurrentFocus().getId() != R.id.et_text_segmentation_input) {
             selectionHandler.post(selectionCheckRunnable);
         }
     }
@@ -89,7 +89,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
             @Override
             public void run() {
                 View focusedView = getCurrentFocus();
-                if (focusedView instanceof TextView && focusedView != inputEditText) {
+                if (focusedView instanceof TextView && focusedView.getId() != R.id.et_text_segmentation_input) {
                     TextView tv = (TextView) focusedView;
                     int start = tv.getSelectionStart();
                     int end = tv.getSelectionEnd();
@@ -116,47 +116,31 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                 (oldFocus, newFocus) -> {
                     selectionHandler.removeCallbacks(selectionCheckRunnable);
                     // 如果新焦点移出了输入框,进入了列表,开始高频捕获
-                    if (newFocus != inputEditText) {
+                    if (newFocus.getId() != R.id.et_text_segmentation_input) {
                         selectionHandler.post(selectionCheckRunnable);
                     }
                 });
     }
 
-    /**
-     * 文字分段: 删除所有换行符, 在句号结尾的句子后添加两个换行符
-     */
-    private void segmentText() {
-        String input = inputEditText.getText().toString();
-        if (input.isEmpty()) {
-            return;
-        }
-        // 将所有换行符转为空格
-        String processed = input.replaceAll("\\r?\\n", " ");
-        StringBuilder format = new StringBuilder();
-        List<TextSegmentationVO> allSegmentationList = Arrays.stream(processed.split(REGEX))
-                .map(s -> {
-                    format.setLength(0);
-                    TextSegmentationVO textSegmentationVO = new TextSegmentationVO();
-                    textSegmentationVO.setSegmentationText(format.append(s.trim()).append(".").toString());
-                    return textSegmentationVO;
-                })
-                .collect(Collectors.toList());
-        segmentationListAdapter.replaceAll(allSegmentationList);
-    }
-
     private void initView() {
+        textSegmentationViewModel = new ViewModelProvider(this).get(TextSegmentationViewModel.class);
         LinearLayoutManager recordListLayoutManager = new LinearLayoutManager(this);
         this.segmentationList.setLayoutManager(recordListLayoutManager);
+        this.segmentationHeaderAdapter = new SegmentationHeaderAdapter(this, textSegmentationViewModel);
         this.segmentationListAdapter = new SegmentationListAdapter(this);
-        this.segmentationList.setAdapter(segmentationListAdapter);
+        ConcatAdapter concatAdapter = new ConcatAdapter(segmentationHeaderAdapter, segmentationListAdapter);
+        this.segmentationList.setAdapter(concatAdapter);
+        textSegmentationViewModel
+                .getSegmentationList()
+                .observe(this, list -> {
+                    if (list == null || list.isEmpty()) return;
+                    segmentationListAdapter.replaceAll(list);
+                });
         backButton.setOnClickListener(this);
-        segmentationButton.setOnClickListener(this);
     }
 
     private void bindView() {
         backButton = findViewById(R.id.ib_text_segmentation_back);
-        inputEditText = findViewById(R.id.et_text_segmentation_input);
-        segmentationButton = findViewById(R.id.btn_text_segmentation);
         segmentationList = findViewById(R.id.rv_segmentation_list);
     }
 
