@@ -48,8 +48,8 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:padding="20dp"
         android:id="@+id/rv_segmentation_list"
+        android:paddingBottom="20dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"

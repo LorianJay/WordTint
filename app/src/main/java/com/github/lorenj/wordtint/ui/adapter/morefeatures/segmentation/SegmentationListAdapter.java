@@ -2,6 +2,7 @@ package com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.service.autofill.TextValueSanitizer;
 import android.text.Layout;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -65,7 +67,32 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
             holder.segmentationResult.setText("");
             return;
         }
+        holder.itemView.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.dark_gray)));
+        if (position == 0) {
+            holder.itemView.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow_top,
+                    null));
+        }
+        if (position == allTextSegmentationList.size() - 1) {
+            holder.itemView.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow_bottom,
+                    null));
+        }
+        if (position == 0 && position == allTextSegmentationList.size() - 1) {
+            holder.itemView.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow,
+                    null));
+        }
 
+        if (position != 0 && position != allTextSegmentationList.size() - 1) {
+            holder.itemView.setBackground(ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.drawable.background_rounded_ripple_hollow_middle,
+                    null));
+        }
         // 1. 拼接占位空格
         String fullText = originalText + "  ";
         SpannableString spannableString = new SpannableString(fullText);
