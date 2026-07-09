@@ -65,7 +65,7 @@
                 android:id="@+id/et_text_segmentation_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/background_rounded_ripple_hollow"
+                android:background="@drawable/background_hollow_radius_12dp"
                 android:backgroundTint="@color/theme_color"
                 android:gravity="top|start"
                 android:inputType="textMultiLine"
@@ -89,11 +89,12 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:textIsSelectable="true"
                 android:id="@+id/tv_text_segmentation_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:background="@drawable/background_rounded_ripple_hollow"
+                android:background="@drawable/background_hollow_radius_12dp"
                 android:backgroundTint="@color/gray_black"
                 android:minHeight="120dp"
                 android:padding="12dp"
