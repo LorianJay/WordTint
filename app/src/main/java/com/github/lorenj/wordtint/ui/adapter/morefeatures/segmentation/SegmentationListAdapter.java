@@ -4,13 +4,21 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.service.autofill.TextValueSanitizer;
+import android.text.Layout;
+import android.text.Selection;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
+import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -77,16 +85,7 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                // 点击返回效果
-                imageSpan.setPressed(true);
-                widget.invalidate();
-
                 copyToClipboard(originalText);
-
-                widget.postDelayed(() -> {
-                    imageSpan.setPressed(false);
-                    widget.invalidate();
-                }, 150);
             }
 
             @Override
@@ -99,7 +98,6 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
 
         // 4. 允许富文本点击，并移除默认的高亮背景
         holder.segmentationResult.setMovementMethod(LinkMovementMethod.getInstance());
-        holder.segmentationResult.setHighlightColor(android.graphics.Color.TRANSPARENT);
 
         // 5. 送入渲染
         holder.segmentationResult.setText(spannableString);

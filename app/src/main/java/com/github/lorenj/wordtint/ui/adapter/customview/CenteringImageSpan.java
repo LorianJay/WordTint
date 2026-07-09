@@ -15,14 +15,8 @@ import androidx.annotation.NonNull;
  */
 public class CenteringImageSpan extends ImageSpan {
 
-    private boolean isPressed = false;
-
     public CenteringImageSpan(Drawable drawable) {
         super(drawable);
-    }
-
-    public void setPressed(boolean pressed) {
-        this.isPressed = pressed;
     }
 
     @Override
@@ -31,18 +25,11 @@ public class CenteringImageSpan extends ImageSpan {
         Drawable drawable = getDrawable();
         canvas.save();
 
-        // 完美居中计算
+        // 核心修正：基于当前文本行的 Baseline (y) 和 FontMetrics 动态计算真正的垂直中心点
         Paint.FontMetricsInt fm = paint.getFontMetricsInt();
         int transY = y + (fm.descent + fm.ascent - drawable.getBounds().bottom) / 2;
+
         canvas.translate(x, transY);
-
-        // 核心反馈：如果处于被点击状态，降低图标透明度（呈现半透明变暗反馈），松开还原
-        if (isPressed) {
-            drawable.setAlpha(120); // 0-255，120 大概是接近半透明
-        } else {
-            drawable.setAlpha(255); // 恢复全透明
-        }
-
         drawable.draw(canvas);
         canvas.restore();
     }

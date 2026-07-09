@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.AnyLanguageWord" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- 允许 ActionMode 悬浮覆盖在当前窗口上，修复 NoActionBar 带来的生命周期或绘制缺失 -->
+        <item name="windowActionModeOverlay">true</item>
+
         <item name="android:statusBarColor">@android:color/white</item>
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
