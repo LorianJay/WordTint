@@ -150,11 +150,11 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                             if (!currentWord.isEmpty() && !currentWord.equals(lastSelectedWord)) {
                                 lastSelectedWord = currentWord;
                                 // 调出查词面板
-                                WordSearchEntity bestMatch = allWordSearchList.stream()
-                                        .min(Comparator.comparingInt(word -> distance.apply(currentWord, word.wordOrigin)))
-                                        .get();
-                                currentFocusWordId = bestMatch.wordId;
                                 StaticFactory.getExecutorService().execute(() -> {
+                                    WordSearchEntity bestMatch = allWordSearchList.stream()
+                                            .min(Comparator.comparingInt(word -> distance.apply(currentWord, word.wordOrigin)))
+                                            .get();
+                                    currentFocusWordId = bestMatch.wordId;
                                     FunctionWordVO currentFocusWord = starFunctionHandler.getCurrentFocusWord();
                                     selectionHandler.post(() -> {
                                         if (currentFocusWord != null)
