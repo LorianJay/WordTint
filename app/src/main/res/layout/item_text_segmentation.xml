@@ -8,9 +8,9 @@
     android:paddingEnd="15dp"
     android:paddingTop="15dp"
     android:orientation="vertical"
-    android:paddingBottom="60dp">
+    android:paddingBottom="90dp">
 
-    <TextView
+    <com.github.lorenj.wordtint.ui.adapter.customview.CopyTextView
         android:id="@+id/tv_text_segmentation_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

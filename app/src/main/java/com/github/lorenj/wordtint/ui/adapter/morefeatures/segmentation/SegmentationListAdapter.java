@@ -60,6 +60,7 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
 
     @Override
     public void onBindViewHolder(@NonNull SegmentationViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        Log.d("SegmentationListAdapter", String.valueOf(position));
         TextSegmentationVO textSegmentationVO = allTextSegmentationList.get(position);
         String originalText = textSegmentationVO.getSegmentationText();
 
@@ -97,6 +98,7 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
         String fullText = originalText + "  ";
         SpannableString spannableString = new SpannableString(fullText);
         Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_copy);
+        drawable.setTint(context.getColor(R.color.light_blue_ff));
         // 图标尺寸契合字体大小
         int iconSize = (int) (holder.segmentationResult.getTextSize() * 1.3f);
         drawable.setBounds(0, 0, iconSize, iconSize);
