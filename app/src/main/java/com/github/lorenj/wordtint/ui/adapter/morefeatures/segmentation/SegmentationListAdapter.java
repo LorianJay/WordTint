@@ -36,6 +36,7 @@ import com.github.lorenj.wordtint.database.vo.ReciteRecordVO;
 import com.github.lorenj.wordtint.database.vo.TextSegmentationVO;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
 import com.github.lorenj.wordtint.ui.adapter.customview.CenteringImageSpan;
+import com.github.lorenj.wordtint.ui.adapter.customview.CopyTextView;
 import com.github.lorenj.wordtint.ui.adapter.history.RecordDiffCallback;
 
 import java.util.ArrayList;
@@ -60,7 +61,6 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
 
     @Override
     public void onBindViewHolder(@NonNull SegmentationViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        Log.d("SegmentationListAdapter", String.valueOf(position));
         TextSegmentationVO textSegmentationVO = allTextSegmentationList.get(position);
         String originalText = textSegmentationVO.getSegmentationText();
 
@@ -130,6 +130,13 @@ public class SegmentationListAdapter extends RecyclerView.Adapter<SegmentationLi
 
         // 5. 送入渲染
         holder.segmentationResult.setText(spannableString);
+    }
+
+    @Override
+    public void onViewAttachedToWindow(@NonNull SegmentationViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        holder.segmentationResult.setEnabled(false);
+        holder.segmentationResult.setEnabled(true);
     }
 
     @Override
