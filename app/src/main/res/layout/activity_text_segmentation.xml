@@ -61,7 +61,7 @@
     <LinearLayout
         android:id="@+id/ll_text_segmentation_search"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="180dp"
         android:background="@color/learn_back_ground"
         android:elevation="5dp"
         android:orientation="vertical"
