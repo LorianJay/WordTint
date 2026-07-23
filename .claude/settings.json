@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash(gradlew:*)",
+      "Bash(adb:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(git:*)",
+      "WebSearch",
+      "WebFetch"
+    ]
+  }
+}
