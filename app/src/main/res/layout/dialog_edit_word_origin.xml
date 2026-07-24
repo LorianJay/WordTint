@@ -14,22 +14,18 @@
         android:textSize="22sp"
         android:textStyle="bold" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_edit_origin_list"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="420dp"
         android:layout_marginTop="10dp"
-        android:nestedScrollingEnabled="false"
-        android:overScrollMode="never" />
+        android:fillViewport="false">
 
-    <Button
-        android:id="@+id/btn_restore_default"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="@android:color/holo_orange_light"
-        android:text="@string/restore_default_origin"
-        android:textColor="@color/white" />
+        <LinearLayout
+            android:id="@+id/ll_edit_origin_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
 
 </LinearLayout>

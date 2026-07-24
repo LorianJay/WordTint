@@ -75,6 +75,7 @@ import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
 import com.github.lorenj.wordtint.utils.MathUtils;
 import com.google.android.material.color.MaterialColors;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -507,46 +508,35 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         if (clickViewId == R.id.ll_recite_function_edit_origin) {
             FunctionWordVO currentWord = wordFunctionHandler.getCurrentFocusWord();
-            WordOriginEditDialog.show(MainReciteActivity.this, currentWord,
-                    new WordOriginEditDialog.OnOriginEditListener() {
-                        @Override
-                        public void onSave(FunctionWordVO word, Map<String, String> newCustomValues) {
-                            StaticFactory.getExecutorService().execute(() -> {
-                                for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                    appDatabase.wordOriginDao().updateCustomValue(
-                                            word.getWordId(), entry.getKey(), entry.getValue());
-                                    if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                                        word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
-                                    } else {
-                                        // 空值表示清除自定义,需要从数据库重新读取默认值
-                                        List<WordOriginEntity> originList = appDatabase.wordOriginDao()
-                                                .findAllOriginWordById(word.getWordId());
-                                        for (WordOriginEntity entity : originList) {
-                                            if (entity.key.equals(entry.getKey())) {
-                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), entity.value);
-                                                break;
+            StaticFactory.getExecutorService().execute(() -> {
+                // 查询默认词义用于还原
+                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
+                        .findAllOriginWordById(currentWord.getWordId());
+                Map<String, String> originalValues = new HashMap<>();
+                for (WordOriginEntity entity : originList) {
+                    originalValues.put(entity.key, entity.value);
+                }
+                updateUIHandler.post(() -> {
+                    WordOriginEditDialog.show(MainReciteActivity.this, currentWord, originalValues,
+                            (word, newCustomValues) -> {
+                                StaticFactory.getExecutorService().execute(() -> {
+                                    for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
+                                        appDatabase.wordOriginDao().updateCustomValue(
+                                                word.getWordId(), entry.getKey(), entry.getValue());
+                                        if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                            word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
+                                        } else {
+                                            String defaultValue = originalValues.get(entry.getKey());
+                                            if (defaultValue != null) {
+                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
                                             }
                                         }
                                     }
-                                }
-                                updateUIHandler.post(() -> reciteWord(wordFunctionHandler.getCurrentFocusWord()));
+                                    updateUIHandler.post(() -> reciteWord(wordFunctionHandler.getCurrentFocusWord()));
+                                });
                             });
-                        }
-
-                        @Override
-                        public void onRestore(FunctionWordVO word) {
-                            StaticFactory.getExecutorService().execute(() -> {
-                                appDatabase.wordOriginDao().resetCustomValue(word.getWordId());
-                                // 重新从数据库加载默认值
-                                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
-                                        .findAllOriginWordById(word.getWordId());
-                                for (WordOriginEntity entity : originList) {
-                                    word.getValue().put(WordStructure.valueOf(entity.key), entity.value);
-                                }
-                                updateUIHandler.post(() -> reciteWord(wordFunctionHandler.getCurrentFocusWord()));
-                            });
-                        }
-                    });
+                });
+            });
         }
         if (clickViewId == R.id.ll_recite_function_lock) {
             wordFunctionHandler.getWordFunctionHandlerState().setLockLight(!wordFunctionHandler.getWordFunctionHandlerState().isLockLight());

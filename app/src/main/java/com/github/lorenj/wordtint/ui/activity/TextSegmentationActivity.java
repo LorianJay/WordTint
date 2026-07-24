@@ -46,6 +46,7 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -116,44 +117,30 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         if (itemId == R.id.btn_text_segmentation_edit_origin) {
             StaticFactory.getExecutorService().execute(() -> {
                 FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
+                List<WordOriginEntity> originList = wordOriginDao
+                        .findAllOriginWordById(currentWord.getWordId());
+                Map<String, String> originalValues = new HashMap<>();
+                for (WordOriginEntity entity : originList) {
+                    originalValues.put(entity.key, entity.value);
+                }
                 selectionHandler.post(() -> {
-                    WordOriginEditDialog.show(TextSegmentationActivity.this, currentWord,
-                            new WordOriginEditDialog.OnOriginEditListener() {
-                                @Override
-                                public void onSave(FunctionWordVO word, Map<String, String> newCustomValues) {
-                                    StaticFactory.getExecutorService().execute(() -> {
-                                        for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                            wordOriginDao.updateCustomValue(
-                                                    word.getWordId(), entry.getKey(), entry.getValue());
-                                            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
-                                            } else {
-                                                List<WordOriginEntity> originList = wordOriginDao
-                                                        .findAllOriginWordById(word.getWordId());
-                                                for (WordOriginEntity entity : originList) {
-                                                    if (entity.key.equals(entry.getKey())) {
-                                                        word.getValue().put(WordStructure.valueOf(entry.getKey()), entity.value);
-                                                        break;
-                                                    }
-                                                }
+                    WordOriginEditDialog.show(TextSegmentationActivity.this, currentWord, originalValues,
+                            (word, newCustomValues) -> {
+                                StaticFactory.getExecutorService().execute(() -> {
+                                    for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
+                                        wordOriginDao.updateCustomValue(
+                                                word.getWordId(), entry.getKey(), entry.getValue());
+                                        if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                            word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
+                                        } else {
+                                            String defaultValue = originalValues.get(entry.getKey());
+                                            if (defaultValue != null) {
+                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
                                             }
                                         }
-                                        selectionHandler.post(() -> visibleWordAllMessage(word));
-                                    });
-                                }
-
-                                @Override
-                                public void onRestore(FunctionWordVO word) {
-                                    StaticFactory.getExecutorService().execute(() -> {
-                                        wordOriginDao.resetCustomValue(word.getWordId());
-                                        List<WordOriginEntity> originList = wordOriginDao
-                                                .findAllOriginWordById(word.getWordId());
-                                        for (WordOriginEntity entity : originList) {
-                                            word.getValue().put(WordStructure.valueOf(entity.key), entity.value);
-                                        }
-                                        selectionHandler.post(() -> visibleWordAllMessage(word));
-                                    });
-                                }
+                                    }
+                                    selectionHandler.post(() -> visibleWordAllMessage(word));
+                                });
                             });
                 });
             });

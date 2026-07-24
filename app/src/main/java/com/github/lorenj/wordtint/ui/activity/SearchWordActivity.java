@@ -51,6 +51,7 @@ import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.WordSearchViewModel;
 import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -193,44 +194,30 @@ public class SearchWordActivity extends AppCompatActivity
         if (itemId == R.id.ll_search_word_edit_origin) {
             StaticFactory.getExecutorService().execute(() -> {
                 FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
+                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
+                        .findAllOriginWordById(currentWord.getWordId());
+                Map<String, String> originalValues = new HashMap<>();
+                for (WordOriginEntity entity : originList) {
+                    originalValues.put(entity.key, entity.value);
+                }
                 updateUIHandler.post(() -> {
-                    WordOriginEditDialog.show(SearchWordActivity.this, currentWord,
-                            new WordOriginEditDialog.OnOriginEditListener() {
-                                @Override
-                                public void onSave(FunctionWordVO word, Map<String, String> newCustomValues) {
-                                    StaticFactory.getExecutorService().execute(() -> {
-                                        for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                            appDatabase.wordOriginDao().updateCustomValue(
-                                                    word.getWordId(), entry.getKey(), entry.getValue());
-                                            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
-                                            } else {
-                                                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
-                                                        .findAllOriginWordById(word.getWordId());
-                                                for (WordOriginEntity entity : originList) {
-                                                    if (entity.key.equals(entry.getKey())) {
-                                                        word.getValue().put(WordStructure.valueOf(entry.getKey()), entity.value);
-                                                        break;
-                                                    }
-                                                }
+                    WordOriginEditDialog.show(SearchWordActivity.this, currentWord, originalValues,
+                            (word, newCustomValues) -> {
+                                StaticFactory.getExecutorService().execute(() -> {
+                                    for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
+                                        appDatabase.wordOriginDao().updateCustomValue(
+                                                word.getWordId(), entry.getKey(), entry.getValue());
+                                        if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                            word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
+                                        } else {
+                                            String defaultValue = originalValues.get(entry.getKey());
+                                            if (defaultValue != null) {
+                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
                                             }
                                         }
-                                        updateUIHandler.post(() -> visibleWordAllMessage(word));
-                                    });
-                                }
-
-                                @Override
-                                public void onRestore(FunctionWordVO word) {
-                                    StaticFactory.getExecutorService().execute(() -> {
-                                        appDatabase.wordOriginDao().resetCustomValue(word.getWordId());
-                                        List<WordOriginEntity> originList = appDatabase.wordOriginDao()
-                                                .findAllOriginWordById(word.getWordId());
-                                        for (WordOriginEntity entity : originList) {
-                                            word.getValue().put(WordStructure.valueOf(entity.key), entity.value);
-                                        }
-                                        updateUIHandler.post(() -> visibleWordAllMessage(word));
-                                    });
-                                }
+                                    }
+                                    updateUIHandler.post(() -> visibleWordAllMessage(word));
+                                });
                             });
                 });
             });
