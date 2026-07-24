@@ -3,22 +3,14 @@ package com.github.lorenj.wordtint.ui.activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.BlockRunner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,7 +23,6 @@ import com.github.lorenj.wordtint.database.dao.WordOriginDao;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
-import com.github.lorenj.wordtint.database.vo.TextSegmentationVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
@@ -44,15 +35,11 @@ import com.google.android.material.appbar.AppBarLayout;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class TextSegmentationActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -89,7 +76,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 单词搜索的布局
      */
     private LinearLayout segmentationSearch;
-    private Button editOriginButton;
+    private TextView editOrigin;
     private TextView wordOrigin;
     private WebView wordResult;
     private ResultWebViewHandler resultWebViewHandler;
@@ -114,7 +101,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         if (itemId == R.id.ib_text_segmentation_back) {
             finish();
         }
-        if (itemId == R.id.btn_text_segmentation_edit_origin) {
+        if (itemId == R.id.tv_text_segmentation_edit_origin) {
             StaticFactory.getExecutorService().execute(() -> {
                 FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
                 List<WordOriginEntity> originList = wordOriginDao
@@ -275,8 +262,8 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         this.segmentationSearch = findViewById(R.id.ll_text_segmentation_search);
         this.wordOrigin = findViewById(R.id.tv_text_segmentation_origin);
         this.wordResult = findViewById(R.id.wv_text_segmentation_result);
-        this.editOriginButton = findViewById(R.id.btn_text_segmentation_edit_origin);
-        this.editOriginButton.setOnClickListener(this);
+        this.editOrigin = findViewById(R.id.tv_text_segmentation_edit_origin);
+        this.editOrigin.setOnClickListener(this);
         this.resultWebViewHandler = new ResultWebViewHandler(this, wordResult);
     }
 
