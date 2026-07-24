@@ -521,14 +521,26 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                             (word, newCustomValues) -> {
                                 StaticFactory.getExecutorService().execute(() -> {
                                     for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                        appDatabase.wordOriginDao().updateCustomValue(
+                                        int rows = appDatabase.wordOriginDao().updateCustomValue(
                                                 word.getWordId(), entry.getKey(), entry.getValue());
                                         if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                            if (rows == 0) {
+                                                // 行不存在，插入新行
+                                                WordOriginEntity newEntity = new WordOriginEntity();
+                                                newEntity.wordId = word.getWordId();
+                                                newEntity.key = entry.getKey();
+                                                newEntity.value = "";
+                                                newEntity.customValue = entry.getValue();
+                                                appDatabase.wordOriginDao().insert(newEntity);
+                                            }
                                             word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
                                         } else {
+                                            // 还原为默认值
                                             String defaultValue = originalValues.get(entry.getKey());
                                             if (defaultValue != null) {
                                                 word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
+                                            } else {
+                                                word.getValue().remove(WordStructure.valueOf(entry.getKey()));
                                             }
                                         }
                                     }

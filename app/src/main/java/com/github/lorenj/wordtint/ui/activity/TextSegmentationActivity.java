@@ -128,14 +128,24 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                             (word, newCustomValues) -> {
                                 StaticFactory.getExecutorService().execute(() -> {
                                     for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                        wordOriginDao.updateCustomValue(
+                                        int rows = wordOriginDao.updateCustomValue(
                                                 word.getWordId(), entry.getKey(), entry.getValue());
                                         if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                            if (rows == 0) {
+                                                WordOriginEntity newEntity = new WordOriginEntity();
+                                                newEntity.wordId = word.getWordId();
+                                                newEntity.key = entry.getKey();
+                                                newEntity.value = "";
+                                                newEntity.customValue = entry.getValue();
+                                                wordOriginDao.insert(newEntity);
+                                            }
                                             word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
                                         } else {
                                             String defaultValue = originalValues.get(entry.getKey());
                                             if (defaultValue != null) {
                                                 word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
+                                            } else {
+                                                word.getValue().remove(WordStructure.valueOf(entry.getKey()));
                                             }
                                         }
                                     }

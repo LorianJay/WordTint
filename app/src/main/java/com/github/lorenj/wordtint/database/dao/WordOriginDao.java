@@ -1,6 +1,7 @@
 package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
@@ -20,8 +21,11 @@ public interface WordOriginDao {
     List<WordOriginEntity> findAllOriginWordById(int wordId);
 
     @Query("UPDATE word_origin SET custom_value = :customValue WHERE word_id = :wordId AND key = :key")
-    void updateCustomValue(int wordId, String key, String customValue);
+    int updateCustomValue(int wordId, String key, String customValue);
 
     @Query("UPDATE word_origin SET custom_value = NULL WHERE word_id = :wordId")
     void resetCustomValue(int wordId);
+
+    @Insert
+    long insert(WordOriginEntity entity);
 }

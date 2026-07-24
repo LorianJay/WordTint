@@ -83,9 +83,16 @@ public class WordOriginEditDialog {
             Map<String, String> newCustomValues = new HashMap<>();
             for (int i = 0; i < items.size(); i++) {
                 String newValue = editTexts.get(i).getText().toString().trim();
-                String originalValue = items.get(i).currentValue;
-                if (!newValue.equals(originalValue != null ? originalValue : "")) {
-                    newCustomValues.put(items.get(i).key, newValue.isEmpty() ? null : newValue);
+                String effectiveOldValue = items.get(i).currentValue;
+                String defaultOriginal = originalValues.get(items.get(i).key);
+                // 仅保存与对话框打开时不同的字段
+                if (!newValue.equals(effectiveOldValue != null ? effectiveOldValue : "")) {
+                    if (newValue.equals(defaultOriginal != null ? defaultOriginal : "")) {
+                        // 还原为默认词义 — 用 null 清除 custom_value
+                        newCustomValues.put(items.get(i).key, null);
+                    } else {
+                        newCustomValues.put(items.get(i).key, newValue.isEmpty() ? null : newValue);
+                    }
                 }
             }
             listener.onSave(word, newCustomValues);
