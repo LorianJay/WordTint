@@ -135,6 +135,7 @@ public abstract class APPDatabase extends RoomDatabase {
                         callback.onProgress(progress);
                     }
                 }
+                db.execSQL("UPDATE word_origin SET value = REPLACE(value, '\\n', char(10))");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
