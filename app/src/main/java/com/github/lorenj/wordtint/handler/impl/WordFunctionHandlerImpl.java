@@ -341,7 +341,10 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 super.getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key),
+                    wordOriginEntity.customValue != null && !wordOriginEntity.customValue.isEmpty()
+                            ? wordOriginEntity.customValue
+                            : wordOriginEntity.value);
         }
         // 3.背诵过滤
         if (userRecitePreference.getReciteFilter() == ReciteFilter.PHRASE) {

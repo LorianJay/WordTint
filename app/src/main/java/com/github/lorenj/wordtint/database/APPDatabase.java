@@ -44,7 +44,7 @@ import java.util.Optional;
         WordBookEntity.class, WordBookSectionEntity.class, WordBookSectionWordIdEntity.class,
         UserSettingEntity.class, WordOriginEntity.class, WordStarEntity.class,
         WordStarWordIdEntity.class, WordSearchEntity.class, ReciteRecordEntity.class,
-        ReciteRecordWordEntity.class, ReciteRecordWordMarkEntity.class, WordNoteEntity.class}, version = 6)
+        ReciteRecordWordEntity.class, ReciteRecordWordMarkEntity.class, WordNoteEntity.class}, version = 7)
 public abstract class APPDatabase extends RoomDatabase {
 
     private static int total = 0, completed = 0;

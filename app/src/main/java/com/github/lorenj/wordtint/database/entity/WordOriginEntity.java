@@ -25,4 +25,7 @@ public class WordOriginEntity {
 
     @ColumnInfo(name = "value")
     public String value;
+
+    @ColumnInfo(name = "custom_value")
+    public String customValue;
 }

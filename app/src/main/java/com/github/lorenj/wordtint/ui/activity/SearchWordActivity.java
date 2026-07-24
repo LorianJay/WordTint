@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
@@ -48,8 +49,10 @@ import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.WordSearchViewModel;
+import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -71,6 +74,7 @@ public class SearchWordActivity extends AppCompatActivity
     private TextView starCreateCategory;
     private ImageView controlPlay;
     private LinearLayout resultArea;
+    private LinearLayout editOriginButton;
     // 收藏夹列表单词显示适配器
     private StarResultAdapter chineseAnswerAdapterDrawer;
     private StarListAdapter starListAdapter;
@@ -185,6 +189,51 @@ public class SearchWordActivity extends AppCompatActivity
             starDrawer.openDrawer(GravityCompat.END);
         } else if (itemId == R.id.iv_search_word_control_play) {
             wordAudioHandler.playWordAudio(starFunctionHandler.getCurrentFocusWord(), this);
+        }
+        if (itemId == R.id.ll_search_word_edit_origin) {
+            StaticFactory.getExecutorService().execute(() -> {
+                FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
+                updateUIHandler.post(() -> {
+                    WordOriginEditDialog.show(SearchWordActivity.this, currentWord,
+                            new WordOriginEditDialog.OnOriginEditListener() {
+                                @Override
+                                public void onSave(FunctionWordVO word, Map<String, String> newCustomValues) {
+                                    StaticFactory.getExecutorService().execute(() -> {
+                                        for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
+                                            appDatabase.wordOriginDao().updateCustomValue(
+                                                    word.getWordId(), entry.getKey(), entry.getValue());
+                                            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
+                                            } else {
+                                                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
+                                                        .findAllOriginWordById(word.getWordId());
+                                                for (WordOriginEntity entity : originList) {
+                                                    if (entity.key.equals(entry.getKey())) {
+                                                        word.getValue().put(WordStructure.valueOf(entry.getKey()), entity.value);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        updateUIHandler.post(() -> visibleWordAllMessage(word));
+                                    });
+                                }
+
+                                @Override
+                                public void onRestore(FunctionWordVO word) {
+                                    StaticFactory.getExecutorService().execute(() -> {
+                                        appDatabase.wordOriginDao().resetCustomValue(word.getWordId());
+                                        List<WordOriginEntity> originList = appDatabase.wordOriginDao()
+                                                .findAllOriginWordById(word.getWordId());
+                                        for (WordOriginEntity entity : originList) {
+                                            word.getValue().put(WordStructure.valueOf(entity.key), entity.value);
+                                        }
+                                        updateUIHandler.post(() -> visibleWordAllMessage(word));
+                                    });
+                                }
+                            });
+                });
+            });
         }
         if (itemId == R.id.iv_recite_star_move) {
             sortStar = !sortStar;
@@ -395,6 +444,7 @@ public class SearchWordActivity extends AppCompatActivity
 
         this.controlPlay = findViewById(R.id.iv_search_word_control_play);
         this.searchInput = findViewById(R.id.sv_search_word_control);
+        this.editOriginButton = findViewById(R.id.ll_search_word_edit_origin);
 
         this.searchInput.setOnClickListener(this);
         this.searchInput.setOnQueryTextListener(this);
@@ -404,5 +454,6 @@ public class SearchWordActivity extends AppCompatActivity
         this.starMove.setOnClickListener(this);
         this.starCreateCategory.setOnClickListener(this);
         this.controlPlay.setOnClickListener(this);
+        this.editOriginButton.setOnClickListener(this);
     }
 }

@@ -88,6 +88,14 @@
             android:background="@color/theme_color"
             android:scrollbars="none" />
 
+        <Button
+            android:id="@+id/btn_text_segmentation_edit_origin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text="@string/edit_origin"
+            android:textSize="14sp" />
 
     </LinearLayout>
 

@@ -66,8 +66,12 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         List<WordOriginEntity> allOriginWordList = appDatabase.wordOriginDao().findAllOriginWordById(currentSelectWordId);
         functionWordVO = new FunctionWordVO();
         functionWordVO.setWordId(currentSelectWordId);
+        // 将词义重置为用户自定义的词义
         for (WordOriginEntity wordOriginEntity : allOriginWordList) {
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key),
+                    wordOriginEntity.customValue != null && !wordOriginEntity.customValue.isEmpty()
+                            ? wordOriginEntity.customValue
+                            : wordOriginEntity.value);
         }
         getDict().put(currentSelectWordId, functionWordVO);
         return functionWordVO;
@@ -110,7 +114,10 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
                 getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity.value);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key),
+                    wordOriginEntity.customValue != null && !wordOriginEntity.customValue.isEmpty()
+                            ? wordOriginEntity.customValue
+                            : wordOriginEntity.value);
         }
     }
 

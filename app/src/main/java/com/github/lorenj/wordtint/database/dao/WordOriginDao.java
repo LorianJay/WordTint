@@ -18,4 +18,10 @@ public interface WordOriginDao {
 
     @Query("SELECT * FROM word_origin WHERE word_id in(:wordId)")
     List<WordOriginEntity> findAllOriginWordById(int wordId);
+
+    @Query("UPDATE word_origin SET custom_value = :customValue WHERE word_id = :wordId AND key = :key")
+    void updateCustomValue(int wordId, String key, String customValue);
+
+    @Query("UPDATE word_origin SET custom_value = NULL WHERE word_id = :wordId")
+    void resetCustomValue(int wordId);
 }

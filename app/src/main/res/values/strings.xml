@@ -147,6 +147,8 @@
     <string name="execute_succeed">执行成功</string>
     <string name="execute_fail">执行失败</string>
     <string name="write_note">编写注释</string>
+    <string name="edit_origin">编辑词义</string>
+    <string name="restore_default_origin">还原为默认词义</string>
     <string name="save">保存</string>
     <string name="distinct_word">去除重复单词</string>
     <string name="distinct_word_explanation">去除当前背诵列表中的所有重复的单词</string>

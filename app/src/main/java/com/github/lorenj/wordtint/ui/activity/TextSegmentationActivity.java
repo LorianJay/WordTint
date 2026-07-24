@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -38,6 +39,7 @@ import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.Segmentat
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.SegmentationListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.TextSegmentationViewModel;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
+import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
 import com.google.android.material.appbar.AppBarLayout;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
@@ -46,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -85,6 +88,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 单词搜索的布局
      */
     private LinearLayout segmentationSearch;
+    private Button editOriginButton;
     private TextView wordOrigin;
     private WebView wordResult;
     private ResultWebViewHandler resultWebViewHandler;
@@ -108,6 +112,51 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         int itemId = v.getId();
         if (itemId == R.id.ib_text_segmentation_back) {
             finish();
+        }
+        if (itemId == R.id.btn_text_segmentation_edit_origin) {
+            StaticFactory.getExecutorService().execute(() -> {
+                FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
+                selectionHandler.post(() -> {
+                    WordOriginEditDialog.show(TextSegmentationActivity.this, currentWord,
+                            new WordOriginEditDialog.OnOriginEditListener() {
+                                @Override
+                                public void onSave(FunctionWordVO word, Map<String, String> newCustomValues) {
+                                    StaticFactory.getExecutorService().execute(() -> {
+                                        for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
+                                            wordOriginDao.updateCustomValue(
+                                                    word.getWordId(), entry.getKey(), entry.getValue());
+                                            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
+                                            } else {
+                                                List<WordOriginEntity> originList = wordOriginDao
+                                                        .findAllOriginWordById(word.getWordId());
+                                                for (WordOriginEntity entity : originList) {
+                                                    if (entity.key.equals(entry.getKey())) {
+                                                        word.getValue().put(WordStructure.valueOf(entry.getKey()), entity.value);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        selectionHandler.post(() -> visibleWordAllMessage(word));
+                                    });
+                                }
+
+                                @Override
+                                public void onRestore(FunctionWordVO word) {
+                                    StaticFactory.getExecutorService().execute(() -> {
+                                        wordOriginDao.resetCustomValue(word.getWordId());
+                                        List<WordOriginEntity> originList = wordOriginDao
+                                                .findAllOriginWordById(word.getWordId());
+                                        for (WordOriginEntity entity : originList) {
+                                            word.getValue().put(WordStructure.valueOf(entity.key), entity.value);
+                                        }
+                                        selectionHandler.post(() -> visibleWordAllMessage(word));
+                                    });
+                                }
+                            });
+                });
+            });
         }
     }
 
@@ -229,6 +278,8 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         this.segmentationSearch = findViewById(R.id.ll_text_segmentation_search);
         this.wordOrigin = findViewById(R.id.tv_text_segmentation_origin);
         this.wordResult = findViewById(R.id.wv_text_segmentation_result);
+        this.editOriginButton = findViewById(R.id.btn_text_segmentation_edit_origin);
+        this.editOriginButton.setOnClickListener(this);
         this.resultWebViewHandler = new ResultWebViewHandler(this, wordResult);
     }
 

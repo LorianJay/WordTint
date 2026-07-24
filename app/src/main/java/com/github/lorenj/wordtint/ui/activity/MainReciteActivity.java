@@ -48,6 +48,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
+import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
@@ -70,9 +71,12 @@ import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.utils.AnimationUtil;
+import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
 import com.github.lorenj.wordtint.utils.MathUtils;
 import com.google.android.material.color.MaterialColors;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -105,7 +109,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private TextView starCurrentWord, starCreateCategory;
     private ImageView starMove;
     private AlertDialog loadingDialog = null;
-    private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionNote, functionLock, functionBlueTooth;
+    private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionNote, functionEditOrigin, functionLock, functionBlueTooth;
     private LinearLayout functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
     private LinearLayout lightArea;
     private CardView lightResult;
@@ -500,6 +504,49 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     .setNegativeButton(getResources().getText(R.string.cancel), (dialog, which) -> {
                     })
                     .show();
+        }
+        if (clickViewId == R.id.ll_recite_function_edit_origin) {
+            FunctionWordVO currentWord = wordFunctionHandler.getCurrentFocusWord();
+            WordOriginEditDialog.show(MainReciteActivity.this, currentWord,
+                    new WordOriginEditDialog.OnOriginEditListener() {
+                        @Override
+                        public void onSave(FunctionWordVO word, Map<String, String> newCustomValues) {
+                            StaticFactory.getExecutorService().execute(() -> {
+                                for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
+                                    appDatabase.wordOriginDao().updateCustomValue(
+                                            word.getWordId(), entry.getKey(), entry.getValue());
+                                    if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                        word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
+                                    } else {
+                                        // 空值表示清除自定义,需要从数据库重新读取默认值
+                                        List<WordOriginEntity> originList = appDatabase.wordOriginDao()
+                                                .findAllOriginWordById(word.getWordId());
+                                        for (WordOriginEntity entity : originList) {
+                                            if (entity.key.equals(entry.getKey())) {
+                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), entity.value);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                updateUIHandler.post(() -> reciteWord(wordFunctionHandler.getCurrentFocusWord()));
+                            });
+                        }
+
+                        @Override
+                        public void onRestore(FunctionWordVO word) {
+                            StaticFactory.getExecutorService().execute(() -> {
+                                appDatabase.wordOriginDao().resetCustomValue(word.getWordId());
+                                // 重新从数据库加载默认值
+                                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
+                                        .findAllOriginWordById(word.getWordId());
+                                for (WordOriginEntity entity : originList) {
+                                    word.getValue().put(WordStructure.valueOf(entity.key), entity.value);
+                                }
+                                updateUIHandler.post(() -> reciteWord(wordFunctionHandler.getCurrentFocusWord()));
+                            });
+                        }
+                    });
         }
         if (clickViewId == R.id.ll_recite_function_lock) {
             wordFunctionHandler.getWordFunctionHandlerState().setLockLight(!wordFunctionHandler.getWordFunctionHandlerState().isLockLight());
@@ -1031,6 +1078,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionSwitch = findViewById(R.id.ll_recite_function_switch);
         this.functionSwitchImageView = findViewById(R.id.im_recite_function_switch);
         this.functionNote = findViewById(R.id.ll_recite_function_note);
+        this.functionEditOrigin = findViewById(R.id.ll_recite_function_edit_origin);
         this.functionLock = findViewById(R.id.ll_recite_function_lock);
         this.functionLockImageView = findViewById(R.id.im_recite_function_lock);
         this.functionBlueTooth = findViewById(R.id.ll_recite_function_blue_tooth);
@@ -1104,6 +1152,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionAnalysis.setOnClickListener(this);
         this.functionSwitch.setOnClickListener(this);
         this.functionNote.setOnClickListener(this);
+        this.functionEditOrigin.setOnClickListener(this);
         this.functionLock.setOnClickListener(this);
         this.lightResult.setOnTouchListener(this);
         this.functionBlueTooth.setOnClickListener(this);
