@@ -23,7 +23,7 @@ public class WordAudioHandlerImpl implements WordAudioHandler {
 
     @Override
     public void playWordAudio(FunctionWordVO functionWordVO, Context context) {
-        String wordOrigin = Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+        String wordOrigin = Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN).getValue())
                 .orElse("");
         File audioFile = new File(context.getFilesDir() + "/audio", wordOrigin + ".mp3");
         if (!audioFile.exists()) {

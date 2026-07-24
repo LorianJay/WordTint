@@ -33,7 +33,7 @@ public class FunctionWordVO {
     /**
      * 当前单词存储的意思
      */
-    private Map<WordStructure, String> value = new HashMap<>(2);
+    private Map<WordStructure, WordOriginVO> value = new HashMap<>(2);
 
     /**
      * 单词注释
@@ -69,11 +69,11 @@ public class FunctionWordVO {
         this.markColorList = markColorList;
     }
 
-    public Map<WordStructure, String> getValue() {
+    public Map<WordStructure, WordOriginVO> getValue() {
         return value;
     }
 
-    public void setValue(Map<WordStructure, String> value) {
+    public void setValue(Map<WordStructure, WordOriginVO> value) {
         this.value = value;
     }
 

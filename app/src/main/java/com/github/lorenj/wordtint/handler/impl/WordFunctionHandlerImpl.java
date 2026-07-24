@@ -14,6 +14,7 @@ import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
+import com.github.lorenj.wordtint.database.vo.WordOriginVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
@@ -341,10 +342,10 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 super.getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key),
-                    wordOriginEntity.customValue != null && !wordOriginEntity.customValue.isEmpty()
-                            ? wordOriginEntity.customValue
-                            : wordOriginEntity.value);
+            WordOriginVO wordOriginVO = new WordOriginVO();
+            wordOriginVO.setValue(wordOriginEntity.value);
+            wordOriginVO.setCustomValue(wordOriginEntity.customValue);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginVO);
         }
         // 3.背诵过滤
         if (userRecitePreference.getReciteFilter() == ReciteFilter.PHRASE) {
@@ -358,11 +359,13 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
             Collections.shuffle(allWordIdList);
         } else if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_LIST
                 && userRecitePreference.getReciteOrder() == ReciteOrder.LEXICOGRAPHIC) {
+
             allWordIdList = allWordIdList.stream()
                     .sorted((o1, o2) -> super.getDict().get(o1)
                             .getValue()
-                            .getOrDefault(WordStructure.WORD_ORIGIN, "")
-                            .compareTo(super.getDict().get(o2).getValue().getOrDefault(WordStructure.WORD_ORIGIN, "")))
+                            .getOrDefault(WordStructure.WORD_ORIGIN, new WordOriginVO())
+                            .getValue()
+                            .compareTo(String.valueOf(super.getDict().get(o2).getValue().getOrDefault(WordStructure.WORD_ORIGIN, new WordOriginVO()))))
                     .collect(Collectors.toList());
         }
         // 5.如果是历史记录,则根据历史记录设置MarkColor
@@ -398,7 +401,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         for (int i = 0; i < allWordIdList.size(); i++) {
             FunctionWordVO functionWordVO = super.getDict().get(allWordIdList.get(i));
             if (functionWordVO != null) {
-                quickPosition.put(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN), i);
+                quickPosition.put(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN).getValue(), i);
             }
         }
         // 9.单词的注释初始化

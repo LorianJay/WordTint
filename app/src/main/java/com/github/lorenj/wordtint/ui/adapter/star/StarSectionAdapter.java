@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -96,7 +97,13 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
         WordStarWordIdEntity wordStarWordIdEntity = wordStarWordIdEntityList.get(position);
         FunctionWordVO currentSectionWord = starFunctionHandler.getWordDetailByWordId(wordStarWordIdEntity);
         holder.starResultAdapter.addItem(currentSectionWord);
-        holder.wordOrigin.setText(currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN));
+        String value = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).getValue();
+        String customValue = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).getCustomValue();
+        if (customValue != null && !customValue.isEmpty()) {
+            holder.wordOrigin.setText(customValue);
+        }else {
+            holder.wordOrigin.setText(value);
+        }
     }
 
     @Override

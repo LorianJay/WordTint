@@ -9,6 +9,7 @@ import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
+import com.github.lorenj.wordtint.database.vo.WordOriginVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 
@@ -68,10 +69,10 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         functionWordVO.setWordId(currentSelectWordId);
         // 将词义重置为用户自定义的词义
         for (WordOriginEntity wordOriginEntity : allOriginWordList) {
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key),
-                    wordOriginEntity.customValue != null && !wordOriginEntity.customValue.isEmpty()
-                            ? wordOriginEntity.customValue
-                            : wordOriginEntity.value);
+            WordOriginVO wordOriginVO = new WordOriginVO();
+            wordOriginVO.setValue(wordOriginEntity.value);
+            wordOriginVO.setCustomValue(wordOriginEntity.customValue);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginVO);
         }
         getDict().put(currentSelectWordId, functionWordVO);
         return functionWordVO;
@@ -114,10 +115,10 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
                 getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key),
-                    wordOriginEntity.customValue != null && !wordOriginEntity.customValue.isEmpty()
-                            ? wordOriginEntity.customValue
-                            : wordOriginEntity.value);
+            WordOriginVO wordOriginVO = new WordOriginVO();
+            wordOriginVO.setValue(wordOriginEntity.value);
+            wordOriginVO.setCustomValue(wordOriginEntity.customValue);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginVO);
         }
     }
 
@@ -259,7 +260,8 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
                 .map(wordStarWordIdEntity -> Optional.ofNullable(getDict().get(wordStarWordIdEntity.wordId))
                         .orElse(new FunctionWordVO())
                         .getValue()
-                        .get(WordStructure.WORD_ORIGIN))
+                        .get(WordStructure.WORD_ORIGIN)
+                        .getValue())
                 .collect(Collectors.joining("、"));
     }
 
