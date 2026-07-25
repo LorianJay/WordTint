@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.github.lorenj.wordtint.R;
@@ -47,6 +48,8 @@ public class AdvancedSettingActivity extends AppCompatActivity implements View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_advanced_setting);
+        // 边到边适配
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         bindView();
     }
 

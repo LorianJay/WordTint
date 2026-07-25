@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.github.lorenj.wordtint.R;
@@ -38,6 +39,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+        // 边到边适配
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         this.assetManager = this.getAssets();
         bindView();
         initView();

@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.WindowCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
@@ -98,6 +99,8 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_text_segmentation);
+        // 边到边适配
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         bindView();
         initView();
         initGlobalSelectionListener();

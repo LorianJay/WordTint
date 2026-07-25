@@ -48,6 +48,8 @@ public class MockExamineActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mock_examine);
+        // 边到边适配
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         bindView();
         initView();
     }

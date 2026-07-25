@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
@@ -65,7 +66,8 @@ public class WordReciteLaunchActivity extends AppCompatActivity implements View.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_word_recite_launch);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        // 边到边适配
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         bindView();
         initView();
     }
