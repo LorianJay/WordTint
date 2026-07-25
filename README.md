@@ -22,7 +22,7 @@
     <img width="200" src="./image/page2.jpg" alt="WordTint page2" />
 </p>
 <p align="center">
-    <img width="400" src="./image/page3.jpg" alt="WordTint page3" />
+    <img width="600" src="./image/page3.jpg" alt="WordTint page3" />
 </p>
 
 
