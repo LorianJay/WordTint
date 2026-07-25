@@ -7,12 +7,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
@@ -159,6 +162,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                         nowSelectMenuItem = viewPageChangeNavigationView.getMenu().getItem(position);
                         nowSelectMenuItem.setChecked(true);
+                        // SettingFragment 沉浸式，其余页面正常显示
+                        View root = findViewById(R.id.cl_main_root);
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                            WindowInsetsController controller = getWindow().getInsetsController();
+                            if (controller != null) {
+                                if (position == 3) {
+                                    controller.hide(WindowInsets.Type.statusBars());
+                                    controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                                    root.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.background_settings_gradient));
+                                } else {
+                                    controller.show(WindowInsets.Type.statusBars());
+                                    root.setBackgroundColor(getColor(R.color.white));
+                                }
+                            }
+                        }
                     }
                 });
                 viewPager.beginFakeDrag();
