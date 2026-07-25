@@ -14,10 +14,12 @@
 
     <application
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AnyLanguageWord">
+        android:theme="@style/Theme.AnyLanguageWord"
+        tools:targetApi="37">
         <activity
             android:name=".ui.activity.AdvancedSettingActivity"
             android:exported="false" />
