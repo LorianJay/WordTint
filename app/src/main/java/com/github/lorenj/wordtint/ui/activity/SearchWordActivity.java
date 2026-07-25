@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.EditText;
@@ -22,8 +23,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -121,7 +125,7 @@ public class SearchWordActivity extends AppCompatActivity
      */
     private StarFunctionHandler starFunctionHandler = null;
     private WordSearchViewModel wordSearchViewModel;
-    private int currentFocusWordId = 0;
+    private Integer currentFocusWordId = null;
     private boolean textChange = false;
     private long searchDelay = 500;
     /**
@@ -137,8 +141,14 @@ public class SearchWordActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_word);
-        // 边到边适配,让内容延伸至系统栏后面
+        // 键盘适配
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        View bottomControlArea = findViewById(R.id.cl_search_word_control_area);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomControlArea, (v, insets) -> {
+            Insets bottomInsets = insets.getInsets(WindowInsetsCompat.Type.ime() | WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottomInsets.bottom);
+            return insets;
+        });
         bindView();
         initView();
     }
@@ -191,9 +201,11 @@ public class SearchWordActivity extends AppCompatActivity
         } else if (itemId == R.id.ll_search_word_star) {
             starDrawer.openDrawer(GravityCompat.END);
         } else if (itemId == R.id.iv_search_word_control_play) {
+            if (starFunctionHandler.getCurrentFocusWordId() == null) return;
             wordAudioHandler.playWordAudio(starFunctionHandler.getCurrentFocusWord(), this);
         }
         if (itemId == R.id.ll_search_word_edit_origin) {
+            if (starFunctionHandler.getCurrentFocusWordId() == null) return;
             FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
             starFunctionHandler.getWordOriginEditHandler().edit(currentWord,
                     () -> updateUIHandler.post(() -> visibleWordAllMessage(currentWord)));
@@ -281,7 +293,8 @@ public class SearchWordActivity extends AppCompatActivity
                 .setView(LayoutInflater.from(this).inflate(R.layout.dialog_loading, null))
                 .setCancelable(false)
                 .show();
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        // 键盘由 WindowInsets 处理，不依赖窗口缩放
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         starDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         this.appDatabase = APPDatabase.getInstance(this);
         // 隐藏单词的附加显示内容、隐藏收藏界面的答案信息

@@ -35,6 +35,7 @@
         <activity
             android:name=".ui.activity.SearchWordActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|navigation"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".ui.activity.MainReciteActivity"

@@ -147,8 +147,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
             @Override
             public void run() {
                 View focusedView = getCurrentFocus();
-                if (focusedView instanceof TextView && focusedView.getId() != R.id.et_text_segmentation_input) {
-                    TextView tv = (TextView) focusedView;
+                if (focusedView instanceof TextView tv && focusedView.getId() != R.id.et_text_segmentation_input) {
                     int start = tv.getSelectionStart();
                     int end = tv.getSelectionEnd();
                     if (start != end && start != -1 && end != -1) {
