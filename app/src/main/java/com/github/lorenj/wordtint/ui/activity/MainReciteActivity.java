@@ -111,7 +111,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private LinearLayout lightArea;
     private CardView lightResult;
     private TableLayout functionChangeModePopLayout;
-    private ImageView functionMarkImageView, functionChameleonImageView, functionSwitchImageView, functionLockImageView;
+    private ImageView functionChameleonImageView, functionSwitchImageView, functionLockImageView;
     private ImageView functionBlueToothImageView, functionShuffleImageView, functionSectionImageView, functionQuickPositionImageView;
     private TextView functionBlueToothTextView;
     private TextView windowListingWrite, windowEnglishChineseAudio, windowEnglishChinese;
@@ -1032,7 +1032,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionAreaHorizontalScrollView = findViewById(R.id.hs_main_recite_function_area);
         this.reciteMarkArea = findViewById(R.id.rc_recite_mark_area);
         this.functionMark = findViewById(R.id.ll_recite_function_mark);
-        this.functionMarkImageView = findViewById(R.id.iv_recite_function_mark);
         this.functionChameleon = findViewById(R.id.ll_recite_function_chameleon);
         this.functionChameleonImageView = findViewById(R.id.im_recite_function_chameleon);
         this.functionChameleonBorder = findViewById(R.id.flb_recite_function_chameleon);
