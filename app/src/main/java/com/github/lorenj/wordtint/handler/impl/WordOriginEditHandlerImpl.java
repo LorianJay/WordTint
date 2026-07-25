@@ -92,7 +92,7 @@ public class WordOriginEditHandlerImpl implements WordOriginEditHandler {
                 .create();
 
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         }
 
         dialog.show();
