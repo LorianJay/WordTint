@@ -1,5 +1,6 @@
 package com.github.lorenj.wordtint.ui.activity;
 
+import android.hardware.lights.LightState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,9 +9,12 @@ import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,20 +29,20 @@ import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
+import com.github.lorenj.wordtint.handler.WordOriginEditHandler;
 import com.github.lorenj.wordtint.handler.impl.AbstractStarFunctionHandler;
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.SegmentationHeaderAdapter;
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.SegmentationListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.TextSegmentationViewModel;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
-import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
+import com.github.lorenj.wordtint.handler.impl.WordOriginEditHandlerImpl;
 import com.google.android.material.appbar.AppBarLayout;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class TextSegmentationActivity extends AppCompatActivity implements View.OnClickListener {
@@ -55,14 +59,18 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
     /**
      * 选择查词功能
      */
-    private final Handler selectionHandler = new Handler(Looper.getMainLooper());
+    private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private Runnable selectionCheckRunnable;
     private String lastSelectedWord = "";
     /**
      * 所有单词列表
      */
     private List<WordSearchEntity> allWordSearchList;
-    LevenshteinDistance distance = LevenshteinDistance.getDefaultInstance();
+    private final LevenshteinDistance distance = LevenshteinDistance.getDefaultInstance();
+    /**
+     * 单词编辑处理器
+     */
+    private WordOriginEditHandler wordOriginEditHandler;
     /**
      * 数据库
      */
@@ -75,7 +83,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
     /**
      * 单词搜索的布局
      */
-    private LinearLayout segmentationSearch;
+    private RelativeLayout segmentationSearch;
     private TextView editOrigin;
     private TextView wordOrigin;
     private WebView wordResult;
@@ -104,42 +112,8 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         if (itemId == R.id.tv_text_segmentation_edit_origin) {
             StaticFactory.getExecutorService().execute(() -> {
                 FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
-                List<WordOriginEntity> originList = wordOriginDao
-                        .findAllOriginWordById(currentWord.getWordId());
-                Map<String, String> originalValues = new HashMap<>();
-                for (WordOriginEntity entity : originList) {
-                    originalValues.put(entity.key, entity.value);
-                }
-                selectionHandler.post(() -> {
-                    WordOriginEditDialog.show(TextSegmentationActivity.this, currentWord, originalValues,
-                            (word, newCustomValues) -> {
-                                StaticFactory.getExecutorService().execute(() -> {
-                                    for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                        int rows = wordOriginDao.updateCustomValue(
-                                                word.getWordId(), entry.getKey(), entry.getValue());
-                                        if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                                            if (rows == 0) {
-                                                WordOriginEntity newEntity = new WordOriginEntity();
-                                                newEntity.wordId = word.getWordId();
-                                                newEntity.key = entry.getKey();
-                                                newEntity.value = "";
-                                                newEntity.customValue = entry.getValue();
-                                                wordOriginDao.insert(newEntity);
-                                            }
-                                            word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
-                                        } else {
-                                            String defaultValue = originalValues.get(entry.getKey());
-                                            if (defaultValue != null) {
-                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
-                                            } else {
-                                                word.getValue().remove(WordStructure.valueOf(entry.getKey()));
-                                            }
-                                        }
-                                    }
-                                    selectionHandler.post(() -> visibleWordAllMessage(word));
-                                });
-                            });
-                });
+                updateUIHandler.post(() -> wordOriginEditHandler.edit(currentWord,
+                        () -> updateUIHandler.post(() -> visibleWordAllMessage(currentWord))));
             });
         }
     }
@@ -149,20 +123,20 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         super.onResume();
         if (getCurrentFocus() == null) return;
         if (getCurrentFocus().getId() != R.id.et_text_segmentation_input) {
-            selectionHandler.post(selectionCheckRunnable);
+            updateUIHandler.post(selectionCheckRunnable);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        selectionHandler.removeCallbacks(selectionCheckRunnable);
+        updateUIHandler.removeCallbacks(selectionCheckRunnable);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        selectionHandler.removeCallbacks(selectionCheckRunnable);
+        updateUIHandler.removeCallbacks(selectionCheckRunnable);
     }
 
     private void initGlobalSelectionListener() {
@@ -189,7 +163,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                                             .get();
                                     currentFocusWordId = bestMatch.wordId;
                                     FunctionWordVO currentFocusWord = starFunctionHandler.getCurrentFocusWord();
-                                    selectionHandler.post(() -> {
+                                    updateUIHandler.post(() -> {
                                         if (currentFocusWord != null)
                                             visibleWordAllMessage(currentFocusWord);
                                     });
@@ -203,16 +177,16 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                     }
                 }
                 // 每 150 毫秒微调轮询一次,保障拖动时能有极高的响应速度
-                selectionHandler.postDelayed(this, 300);
+                updateUIHandler.postDelayed(this, 300);
             }
         };
         // 当页面布局渲染或焦点改变时,确保启动/恢复轮询器
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener(
                 (oldFocus, newFocus) -> {
-                    selectionHandler.removeCallbacks(selectionCheckRunnable);
+                    updateUIHandler.removeCallbacks(selectionCheckRunnable);
                     // 如果新焦点移出了输入框,进入了列表,开始高频捕获
                     if (newFocus.getId() != R.id.et_text_segmentation_input) {
-                        selectionHandler.post(selectionCheckRunnable);
+                        updateUIHandler.post(selectionCheckRunnable);
                     }
                 });
     }
@@ -220,12 +194,17 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
     private void visibleWordAllMessage(FunctionWordVO functionWordVO) {
         segmentationSearch.setVisibility(View.VISIBLE);
         // 设置主界面的单词全部信息
-        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
-                .ifPresent(wordDTOS -> wordOrigin.setText(wordDTOS));
+        String wordOriginText = Optional.ofNullable(functionWordVO)
+                .map(FunctionWordVO::getValue)
+                .map(map -> map.get(WordStructure.WORD_ORIGIN))
+                .map(wordOriginEntity -> wordOriginEntity.value)
+                .orElse("");
+        wordOrigin.setText(wordOriginText);
         resultWebViewHandler.displayWordResult(functionWordVO);
     }
 
     private void initView() {
+        wordOriginEditHandler = new WordOriginEditHandlerImpl(this);
         textSegmentationViewModel = new ViewModelProvider(this).get(TextSegmentationViewModel.class);
         LinearLayoutManager recordListLayoutManager = new LinearLayoutManager(this);
         this.segmentationList.setLayoutManager(recordListLayoutManager);

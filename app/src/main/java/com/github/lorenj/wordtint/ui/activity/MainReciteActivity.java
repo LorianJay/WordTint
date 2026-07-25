@@ -71,16 +71,12 @@ import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.fragment.BookListFragment;
 import com.github.lorenj.wordtint.utils.AnimationUtil;
-import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
+import com.github.lorenj.wordtint.handler.impl.WordOriginEditHandlerImpl;
 import com.github.lorenj.wordtint.utils.MathUtils;
 import com.google.android.material.color.MaterialColors;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class MainReciteActivity extends AppCompatActivity implements View.OnClickListener,
         KeyEvent.Callback,
@@ -436,12 +432,12 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.cv_main_recite_light) {
             // 是否要隐藏介词的处理
             FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
-            String value = currentFocusWord.getValue().get(WordStructure.PHRASE);
+            WordOriginEntity phraseVO = currentFocusWord.getValue().get(WordStructure.PHRASE);
             if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE)
                 currentFocusWord.getValue().remove(WordStructure.PHRASE);
             visibleWordAllMessage(currentFocusWord);
-            if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE)
-                currentFocusWord.getValue().put(WordStructure.PHRASE, value);
+            if (wordFunctionHandler.getWordFunctionHandlerState().getRecitePreposition() == RecitePreposition.INVISIBLE && phraseVO != null)
+                currentFocusWord.getValue().put(WordStructure.PHRASE, phraseVO);
         }
         // 功能区域
         if (clickViewId == R.id.ll_recite_function_mark) {
@@ -508,48 +504,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         }
         if (clickViewId == R.id.ll_recite_function_edit_origin) {
             FunctionWordVO currentWord = wordFunctionHandler.getCurrentFocusWord();
-            StaticFactory.getExecutorService().execute(() -> {
-                // 查询默认词义用于还原
-                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
-                        .findAllOriginWordById(currentWord.getWordId());
-                Map<String, String> originalValues = new HashMap<>();
-                for (WordOriginEntity entity : originList) {
-                    originalValues.put(entity.key, entity.value);
-                }
-                updateUIHandler.post(() -> {
-                    WordOriginEditDialog.show(MainReciteActivity.this, currentWord, originalValues,
-                            (word, newCustomValues) -> {
-                                StaticFactory.getExecutorService().execute(() -> {
-                                    for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                        int rows = appDatabase.wordOriginDao().updateCustomValue(
-                                                word.getWordId(), entry.getKey(), entry.getValue());
-                                        if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                                            if (rows == 0) {
-                                                // 行不存在，插入新行
-                                                WordOriginEntity newEntity = new WordOriginEntity();
-                                                newEntity.wordId = word.getWordId();
-                                                newEntity.key = entry.getKey();
-                                                newEntity.value = "";
-                                                newEntity.customValue = entry.getValue();
-                                                appDatabase.wordOriginDao().insert(newEntity);
-                                            }
-                                            word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
-                                        } else {
-                                            // 还原为默认值
-                                            String defaultValue = originalValues.get(entry.getKey());
-                                            if (defaultValue != null) {
-                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
-                                            } else {
-                                                word.getValue().remove(WordStructure.valueOf(entry.getKey()));
-                                            }
-                                        }
-                                    }
-                                    updateUIHandler.post(() -> reciteWord(wordFunctionHandler.getCurrentFocusWord()));
-                                });
-                            });
-                });
-            });
+            wordFunctionHandler.getWordOriginEditHandler().edit(currentWord,
+                    () -> updateUIHandler.post(() -> visibleWordAllMessage(currentWord)));
         }
+
         if (clickViewId == R.id.ll_recite_function_lock) {
             wordFunctionHandler.getWordFunctionHandlerState().setLockLight(!wordFunctionHandler.getWordFunctionHandlerState().isLockLight());
             if (wordFunctionHandler.getWordFunctionHandlerState().isLockLight()) {
@@ -976,7 +934,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         // 更新UI相关
         updateUIHandler.post(() -> {
             // 如果隐藏了介词信息,必须在visible之前处理
-            String prepositionPhrase = currentWord.getValue().get(WordStructure.PHRASE);
+            WordOriginEntity prepositionPhrase = currentWord.getValue().get(WordStructure.PHRASE);
             if (userRecitePreference.getRecitePreposition() == RecitePreposition.INVISIBLE)
                 currentWord.getValue().remove(WordStructure.PHRASE);
             ReciteMode currentReciteMode = wordFunctionHandler.getWordFunctionHandlerState().getCurrentReciteMode();
@@ -1048,15 +1006,16 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
      */
     private void visibleWordAllMessage(FunctionWordVO functionWordVO) {
         // 设置主界面的单词全部信息
-        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
-                .ifPresent(wordDTOS -> originWord.setText(wordDTOS));
+        String wordOriginText = Optional.ofNullable(functionWordVO)
+                .map(FunctionWordVO::getValue)
+                .map(map -> map.get(WordStructure.WORD_ORIGIN))
+                .map(wordOriginEntity -> wordOriginEntity.value)
+                .orElse("");
+        originWord.setText(wordOriginText);
+        starCurrentWord.setText(wordOriginText);
         resultWebViewHandler.displayWordResult(functionWordVO);
         // 设置收藏夹信息
         starResultWebViewHandler.displayWordResult(functionWordVO);
-        // 设置右侧展开列表单词的原文
-        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
-                .ifPresent(wordDTOS -> starCurrentWord
-                        .setText(wordDTOS));
     }
 
     private void bindView() {

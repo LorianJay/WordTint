@@ -1,7 +1,9 @@
 package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
@@ -20,12 +22,10 @@ public interface WordOriginDao {
     @Query("SELECT * FROM word_origin WHERE word_id in(:wordId)")
     List<WordOriginEntity> findAllOriginWordById(int wordId);
 
-    @Query("UPDATE word_origin SET custom_value = :customValue WHERE word_id = :wordId AND key = :key")
-    int updateCustomValue(int wordId, String key, String customValue);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void upsertAll(List<WordOriginEntity> entity);
 
-    @Query("UPDATE word_origin SET custom_value = NULL WHERE word_id = :wordId")
-    void resetCustomValue(int wordId);
+    @Query("DELETE FROM word_origin WHERE word_id = :wordId and `key` in (:keyList)")
+    void deleteAllByWordIdAndKey(int wordId, List<String> keyList);
 
-    @Insert
-    long insert(WordOriginEntity entity);
 }

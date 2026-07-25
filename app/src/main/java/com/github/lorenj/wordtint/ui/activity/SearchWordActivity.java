@@ -49,17 +49,17 @@ import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.SelectWordListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.WordSearchViewModel;
-import com.github.lorenj.wordtint.ui.dialog.WordOriginEditDialog;
+import com.github.lorenj.wordtint.handler.impl.WordOriginEditHandlerImpl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class SearchWordActivity extends AppCompatActivity
         implements View.OnClickListener, SearchView.OnQueryTextListener {
@@ -192,45 +192,9 @@ public class SearchWordActivity extends AppCompatActivity
             wordAudioHandler.playWordAudio(starFunctionHandler.getCurrentFocusWord(), this);
         }
         if (itemId == R.id.ll_search_word_edit_origin) {
-            StaticFactory.getExecutorService().execute(() -> {
-                FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
-                List<WordOriginEntity> originList = appDatabase.wordOriginDao()
-                        .findAllOriginWordById(currentWord.getWordId());
-                Map<String, String> originalValues = new HashMap<>();
-                for (WordOriginEntity entity : originList) {
-                    originalValues.put(entity.key, entity.value);
-                }
-                updateUIHandler.post(() -> {
-                    WordOriginEditDialog.show(SearchWordActivity.this, currentWord, originalValues,
-                            (word, newCustomValues) -> {
-                                StaticFactory.getExecutorService().execute(() -> {
-                                    for (Map.Entry<String, String> entry : newCustomValues.entrySet()) {
-                                        int rows = appDatabase.wordOriginDao().updateCustomValue(
-                                                word.getWordId(), entry.getKey(), entry.getValue());
-                                        if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                                            if (rows == 0) {
-                                                WordOriginEntity newEntity = new WordOriginEntity();
-                                                newEntity.wordId = word.getWordId();
-                                                newEntity.key = entry.getKey();
-                                                newEntity.value = "";
-                                                newEntity.customValue = entry.getValue();
-                                                appDatabase.wordOriginDao().insert(newEntity);
-                                            }
-                                            word.getValue().put(WordStructure.valueOf(entry.getKey()), entry.getValue());
-                                        } else {
-                                            String defaultValue = originalValues.get(entry.getKey());
-                                            if (defaultValue != null) {
-                                                word.getValue().put(WordStructure.valueOf(entry.getKey()), defaultValue);
-                                            } else {
-                                                word.getValue().remove(WordStructure.valueOf(entry.getKey()));
-                                            }
-                                        }
-                                    }
-                                    updateUIHandler.post(() -> visibleWordAllMessage(word));
-                                });
-                            });
-                });
-            });
+            FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
+            starFunctionHandler.getWordOriginEditHandler().edit(currentWord,
+                    () -> updateUIHandler.post(() -> visibleWordAllMessage(currentWord)));
         }
         if (itemId == R.id.iv_recite_star_move) {
             sortStar = !sortStar;
@@ -408,15 +372,16 @@ public class SearchWordActivity extends AppCompatActivity
 
     private void visibleWordAllMessage(FunctionWordVO functionWordVO) {
         // 设置主界面的单词全部信息
-        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
-                .ifPresent(wordDTOS -> originWord.setText(wordDTOS));
+        String wordOriginText = Optional.ofNullable(functionWordVO)
+                .map(FunctionWordVO::getValue)
+                .map(map -> map.get(WordStructure.WORD_ORIGIN))
+                .map(wordOriginEntity -> wordOriginEntity.value)
+                .orElse("");
+        originWord.setText(wordOriginText);
+        starCurrentWord.setText(wordOriginText);
         resultWebViewHandler.displayWordResult(functionWordVO);
         // 设置收藏夹信息
         starResultWebViewHandler.displayWordResult(functionWordVO);
-        // 设置右侧展开列表单词的原文
-        Optional.ofNullable(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
-                .ifPresent(wordDTOS -> starCurrentWord
-                        .setText(wordDTOS));
         // 刷新相关UI
         resultArea.setVisibility(View.VISIBLE);
         selectWordList.setVisibility(View.GONE);

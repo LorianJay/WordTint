@@ -97,11 +97,11 @@ public class StarSectionAdapter extends RecyclerView.Adapter<StarSectionAdapter.
         WordStarWordIdEntity wordStarWordIdEntity = wordStarWordIdEntityList.get(position);
         FunctionWordVO currentSectionWord = starFunctionHandler.getWordDetailByWordId(wordStarWordIdEntity);
         holder.starResultAdapter.addItem(currentSectionWord);
-        String value = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).getValue();
-        String customValue = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).getCustomValue();
+        String value = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).value;
+        String customValue = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).customValue;
         if (customValue != null && !customValue.isEmpty()) {
             holder.wordOrigin.setText(customValue);
-        }else {
+        } else {
             holder.wordOrigin.setText(value);
         }
     }

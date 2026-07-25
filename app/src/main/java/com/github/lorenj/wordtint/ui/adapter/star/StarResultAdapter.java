@@ -47,8 +47,8 @@ public class StarResultAdapter extends RecyclerView.Adapter<StarResultAdapter.Re
             holder.parent.setOrientation(LinearLayout.HORIZONTAL);
         }
         String displayValue;
-        String value = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).getValue();
-        String customValue = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).getCustomValue();
+        String value = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).value;
+        String customValue = currentSectionWord.getValue().get(WordStructure.WORD_ORIGIN).customValue;
         if (customValue != null && !customValue.isEmpty()) {
             displayValue = customValue;
         } else {

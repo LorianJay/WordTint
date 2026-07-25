@@ -9,9 +9,9 @@ import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.relation.WordStarWithWordIdEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
-import com.github.lorenj.wordtint.database.vo.WordOriginVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
+import com.github.lorenj.wordtint.handler.WordOriginEditHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -45,10 +46,15 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
      * 字典信息
      */
     private final Map<Integer, FunctionWordVO> dict = new HashMap<>();
+    /**
+     * 单词编辑的处理器
+     */
+    private final WordOriginEditHandler wordOriginEditHandler;
 
     public AbstractStarFunctionHandler(Context context) {
         this.context = context;
         this.appDatabase = APPDatabase.getInstance(context);
+        this.wordOriginEditHandler = new WordOriginEditHandlerImpl(context);
         reloadStar();
     }
 
@@ -69,10 +75,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         functionWordVO.setWordId(currentSelectWordId);
         // 将词义重置为用户自定义的词义
         for (WordOriginEntity wordOriginEntity : allOriginWordList) {
-            WordOriginVO wordOriginVO = new WordOriginVO();
-            wordOriginVO.setValue(wordOriginEntity.value);
-            wordOriginVO.setCustomValue(wordOriginEntity.customValue);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginVO);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity);
         }
         getDict().put(currentSelectWordId, functionWordVO);
         return functionWordVO;
@@ -115,10 +118,7 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
                 getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
-            WordOriginVO wordOriginVO = new WordOriginVO();
-            wordOriginVO.setValue(wordOriginEntity.value);
-            wordOriginVO.setCustomValue(wordOriginEntity.customValue);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginVO);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity);
         }
     }
 
@@ -245,6 +245,11 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         toWord.order = fromOrder;
     }
 
+    @Override
+    public WordOriginEditHandler getWordOriginEditHandler() {
+        return this.wordOriginEditHandler;
+    }
+
     /**
      * 计算名称
      *
@@ -258,10 +263,9 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
                 .stream()
                 .limit(3)
                 .map(wordStarWordIdEntity -> Optional.ofNullable(getDict().get(wordStarWordIdEntity.wordId))
-                        .orElse(new FunctionWordVO())
-                        .getValue()
-                        .get(WordStructure.WORD_ORIGIN)
-                        .getValue())
+                        .map(functionWordVO -> functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+                        .map(wordOriginEntity -> wordOriginEntity.value)
+                        .orElse(""))
                 .collect(Collectors.joining("、"));
     }
 

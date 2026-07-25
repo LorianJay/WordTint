@@ -16,6 +16,7 @@ import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author cnsukidayo
@@ -52,7 +53,17 @@ public class ResultWebViewHandler {
                     .replace("}}", "");
             String readValue = "";
             try {
-                readValue = documentContext.read(jsonPath);
+                Object rawValue = documentContext.read(jsonPath);
+                if (rawValue instanceof Map) {
+                    // WordOriginVO 序列化为嵌套对象，提取有效值
+                    Map<?, ?> map = (Map<?, ?>) rawValue;
+                    Object customValue = map.get("customValue");
+                    readValue = (customValue != null && !customValue.toString().isEmpty())
+                            ? customValue.toString()
+                            : String.valueOf(map.get("value"));
+                } else if (rawValue != null) {
+                    readValue = rawValue.toString();
+                }
             } catch (Exception e) {
                 Log.e("ResultWebViewHandler", e.getMessage(), e);
             }

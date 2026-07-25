@@ -105,4 +105,9 @@ public interface StarFunctionHandler extends StarSectionFunctionHandler {
      */
     void moveStar(WordStarWithWordIdEntity fromStar, WordStarWithWordIdEntity toStar);
 
+    /**
+     * 得到单词编辑的实现
+     */
+    WordOriginEditHandler getWordOriginEditHandler();
+
 }

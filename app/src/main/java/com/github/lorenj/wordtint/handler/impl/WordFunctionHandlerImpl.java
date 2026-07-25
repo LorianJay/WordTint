@@ -1,6 +1,7 @@
 package com.github.lorenj.wordtint.handler.impl;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
@@ -14,7 +15,6 @@ import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.database.vo.UserRecitePreference;
-import com.github.lorenj.wordtint.database.vo.WordOriginVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ReciteFilter;
 import com.github.lorenj.wordtint.enums.ReciteOrder;
@@ -342,10 +342,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 super.getDict().put(wordOriginEntity.wordId, functionWordVO);
             }
             functionWordVO.setWordId(wordOriginEntity.wordId);
-            WordOriginVO wordOriginVO = new WordOriginVO();
-            wordOriginVO.setValue(wordOriginEntity.value);
-            wordOriginVO.setCustomValue(wordOriginEntity.customValue);
-            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginVO);
+            functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity);
         }
         // 3.背诵过滤
         if (userRecitePreference.getReciteFilter() == ReciteFilter.PHRASE) {
@@ -359,13 +356,18 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
             Collections.shuffle(allWordIdList);
         } else if (userRecitePreference.getReciteOrigin() == ReciteOrigin.RECITE_LIST
                 && userRecitePreference.getReciteOrder() == ReciteOrder.LEXICOGRAPHIC) {
-
             allWordIdList = allWordIdList.stream()
-                    .sorted((o1, o2) -> super.getDict().get(o1)
-                            .getValue()
-                            .getOrDefault(WordStructure.WORD_ORIGIN, new WordOriginVO())
-                            .getValue()
-                            .compareTo(String.valueOf(super.getDict().get(o2).getValue().getOrDefault(WordStructure.WORD_ORIGIN, new WordOriginVO()))))
+                    .sorted((o1, o2) -> {
+                        String compare1 = Optional.ofNullable(WordFunctionHandlerImpl.super.getDict().get(o1))
+                                .map(functionWordVO -> functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+                                .map(wordOriginEntity -> wordOriginEntity.value)
+                                .orElse("");
+                        String compare2 = Optional.ofNullable(WordFunctionHandlerImpl.super.getDict().get(o2))
+                                .map(functionWordVO -> functionWordVO.getValue().get(WordStructure.WORD_ORIGIN))
+                                .map(wordOriginEntity -> wordOriginEntity.value)
+                                .orElse("");
+                        return compare1.compareTo(compare2);
+                    })
                     .collect(Collectors.toList());
         }
         // 5.如果是历史记录,则根据历史记录设置MarkColor
@@ -397,12 +399,16 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 .distinct()
                 .collect(Collectors.toList());
         // 8.快速定位(单词反查的初始化)
-        quickPosition = new HashMap<>(allWordIdList.size());
+        quickPosition = new HashMap<>();
         for (int i = 0; i < allWordIdList.size(); i++) {
             FunctionWordVO functionWordVO = super.getDict().get(allWordIdList.get(i));
-            if (functionWordVO != null) {
-                quickPosition.put(functionWordVO.getValue().get(WordStructure.WORD_ORIGIN).getValue(), i);
-            }
+            final int index = i;
+            Optional.ofNullable(functionWordVO)
+                    .map(FunctionWordVO::getValue)
+                    .map(map -> map.get(WordStructure.WORD_ORIGIN))
+                    .map(wordOriginEntity -> wordOriginEntity.value)
+                    .filter(s -> !TextUtils.isEmpty(s))
+                    .ifPresent(key -> quickPosition.put(key, index));
         }
         // 9.单词的注释初始化
         List<WordNoteEntity> allWordNoteList = appDatabase.wordNoteDao()
