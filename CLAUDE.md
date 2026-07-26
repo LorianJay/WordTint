@@ -10,12 +10,12 @@ WordTint 是一款极简英语背单词 Android 应用，理念是"回归基本�
 
 | 类别 | 技术 |
 |------|------|
-| 语言 | Java 8 |
-| 构建 | Gradle (Groovy DSL) + AGP 7.4.2 |
-| 数据库 | Room 2.5.2 |
+| 语言 | Java 17 |
+| 构建 | Gradle (Groovy DSL) + AGP 9.2.1 |
+| 数据库 | Room 2.8.4 |
 | Markdown 渲染 | Markwon 4.6.2 + 自定义插件 |
-| 图片加载 | Glide 4.15.1 |
-| JSON | Gson 2.10.1 + json-path 2.8.0 |
+| 图片加载 | Glide 5.0.9 |
+| JSON | Gson 2.14.0 + json-path 3.0.0 |
 | UI | AndroidX, ViewBinding, ViewPager2, Navigation, Material Design, Flexbox |
 
 ## 架构
