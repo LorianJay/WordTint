@@ -12,5 +12,10 @@
         <item name="android:textColorSecondary">@color/black</item>
         <item name="android:colorControlNormal">@color/gray_black</item>
     </style>
+    <!--只有style支持百分比解析-->
+    <style name="CircleImageViewStyle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">35%</item>
+    </style>
 
 </resources>

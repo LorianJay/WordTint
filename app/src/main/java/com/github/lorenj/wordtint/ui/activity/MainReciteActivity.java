@@ -31,6 +31,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -188,7 +189,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_recite);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        WindowInsetsController controller = null;
+        WindowInsetsController controller;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             controller = getWindow().getInsetsController();
             if (controller != null) {
@@ -200,6 +201,8 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             getWindow().setAttributes(lp);
         }
+        // 注册返回事件回调
+        getOnBackPressedDispatcher().addCallback(this, getOnBackPressedCallBack());
         bindView();
         initView();
     }
@@ -259,27 +262,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             });
         });
 
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-            if (starDrawer.isDrawerOpen(GravityCompat.END)) {
-                starDrawer.closeDrawer(GravityCompat.END);
-                return true;
-            }
-            if (System.currentTimeMillis() - exitLastTime > 2000) {
-                globalToast = Toast.makeText(this, "再按一次退出", Toast.LENGTH_SHORT);
-                globalToast.setGravity(Gravity.CENTER, 0, 500);
-                globalToast.show();
-                exitLastTime = System.currentTimeMillis();
-            } else {
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-            }
-        }
-        return true;
     }
 
     @Override
@@ -877,6 +859,35 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
             vibrator.vibrate(waveform);
         }
         return false;
+    }
+
+    /**
+     * 新版本返回事件回调
+     *
+     */
+    private OnBackPressedCallback getOnBackPressedCallBack() {
+        return new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // 优先关闭抽屉
+                if (starDrawer != null && starDrawer.isDrawerOpen(GravityCompat.END)) {
+                    starDrawer.closeDrawer(GravityCompat.END);
+                    return;
+                }
+                // 二次点击
+                if (System.currentTimeMillis() - exitLastTime > 2000) {
+                    globalToast = Toast.makeText(MainReciteActivity.this, getString(R.string.click_to_exit), Toast.LENGTH_SHORT);
+                    globalToast.setGravity(Gravity.CENTER, 0, 500);
+                    globalToast.show();
+                    exitLastTime = System.currentTimeMillis();
+                } else {
+                    Intent intent = new Intent(MainReciteActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
     }
 
     /**
