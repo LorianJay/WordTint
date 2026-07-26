@@ -12,8 +12,8 @@ android {
         minSdk 26
         // 承诺当前app可以在哪个版本下完美运行,target不能大于compileSdk
         targetSdk 37
-        versionCode 170
-        versionName "1.7.0"
+        versionCode 180
+        versionName "1.8.0"
 
         javaCompileOptions {
             annotationProcessorOptions {
