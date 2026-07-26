@@ -56,11 +56,22 @@
             android:layout_width="match_parent"
             android:layout_height="0dp">
 
+            <ImageView
+                android:id="@+id/tv_record_nothing"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                android:padding="30dp"
+                android:src="@drawable/ic_nothing"
+                android:visibility="visible"
+                app:tint="@color/dark_gray" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_record_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="5dp" />
+                android:paddingBottom="5dp"
+                android:visibility="visible" />
         </RelativeLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

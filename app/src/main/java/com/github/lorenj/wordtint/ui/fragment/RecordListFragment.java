@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -60,6 +61,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
 
     private final Handler updateUIHandler = new Handler();
     private TextView startLearn;
+    private ImageView nothing;
     private ProgressBar loadingBar;
     private UserRecitePreference userRecitePreference;
     /**
@@ -155,20 +157,26 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
             public void run() {
                 StaticFactory.getExecutorService().submit(() -> {
                     int countWord = appDatabase.reciteRecordDao().countReciteRecord();
+                    updateUIHandler.post(() -> {
+                        if (countWord == 0) {
+                            nothing.setVisibility(View.VISIBLE);
+                            recordList.setVisibility(View.GONE);
+                        } else {
+                            nothing.setVisibility(View.GONE);
+                            recordList.setVisibility(View.VISIBLE);
+                        }
+                    });
                     lastPage = (page + 1) * PAGE_SIZE >= countWord;
                     List<ReciteRecordVO> reciteRecordVOList = appDatabase.reciteRecordDao()
                             .findReciteRecordWithLimit(page * PAGE_SIZE, PAGE_SIZE)
                             .stream()
-                            .map(reciteRecordEntity -> {
-                                ReciteRecordVO reciteRecordVO = new ReciteRecordVO(
-                                        reciteRecordEntity,
-                                        ReciteMode.valueOf(reciteRecordEntity.reciteMode),
-                                        ReciteOrder.valueOf(reciteRecordEntity.reciteOrder),
-                                        ReciteFilter.valueOf(reciteRecordEntity.reciteFiler),
-                                        RecitePreposition.valueOf(reciteRecordEntity.recitePreposition)
-                                );
-                                return reciteRecordVO;
-                            })
+                            .map(reciteRecordEntity -> new ReciteRecordVO(
+                                    reciteRecordEntity,
+                                    ReciteMode.valueOf(reciteRecordEntity.reciteMode),
+                                    ReciteOrder.valueOf(reciteRecordEntity.reciteOrder),
+                                    ReciteFilter.valueOf(reciteRecordEntity.reciteFiler),
+                                    RecitePreposition.valueOf(reciteRecordEntity.recitePreposition)
+                            ))
                             .collect(Collectors.toList());
                     updateUIHandler.post(() -> {
                         loadMoreAdapter.setVisible(lastPage ? View.GONE : View.VISIBLE);
@@ -231,6 +239,9 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
                 reciteRecordWordDao.deleteByRecordId(reciteRecordEntity.id);
                 // 删除背诵记录
                 reciteRecordDao.delete(reciteRecordEntity);
+                // 查询删除后是否只有0条记录
+                int countWord = appDatabase.reciteRecordDao().countReciteRecord();
+                if (countWord == 0) onRefresh();
             });
         }));
     }
@@ -241,6 +252,7 @@ public class RecordListFragment extends Fragment implements NavigationItemSelect
         this.startLearn = rootView.findViewById(R.id.tv_record_list_start);
         this.refreshLayout = rootView.findViewById(R.id.sRl_record_list);
         this.recordList = rootView.findViewById(R.id.rv_record_list);
+        this.nothing = rootView.findViewById(R.id.tv_record_nothing);
     }
 
     @Override
