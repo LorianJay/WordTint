@@ -308,7 +308,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 List<WordBookSectionWordIdEntity> sectionWordIdEntityList = appDatabase.wordBookSectionDao()
                         .findAllBySectionId(sectionId);
                 List<Integer> orderWordIdList = sectionWordIdEntityList.stream()
-                        .sorted((o1, o2) -> o1.order - o2.order)
+                        .sorted(Comparator.comparingInt(o -> o.order))
                         .map(wordBookSectionWordIdEntity -> wordBookSectionWordIdEntity.wordId)
                         .collect(Collectors.toList());
                 allWordIdList.addAll(orderWordIdList);
@@ -386,7 +386,6 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 FunctionWordVO functionWordVO = getDict().get(entity.wordId);
                 List<MarkColor> markColor = markMap.get(entity.id);
                 if (functionWordVO == null) return;
-                functionWordVO.getMarkColorList().remove(MarkColor.GREEN);
                 if (markColor != null) functionWordVO.getMarkColorList().addAll(markColor);
             });
         }

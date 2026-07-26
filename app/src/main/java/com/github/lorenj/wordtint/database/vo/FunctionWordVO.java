@@ -42,7 +42,6 @@ public class FunctionWordVO {
     private WordNoteEntity wordNoteEntity;
 
     public FunctionWordVO() {
-        markColorList.add(MarkColor.GREEN);
         markColorList.add(MarkColor.BROWN);
     }
 

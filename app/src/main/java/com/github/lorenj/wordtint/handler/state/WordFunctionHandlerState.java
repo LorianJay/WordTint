@@ -47,7 +47,7 @@ public class WordFunctionHandlerState {
      * 当前变色龙的颜色
      */
     private final MutableLiveData<MarkColor> currentChameleon =
-            new MutableLiveData<>(MarkColor.GREEN);
+            new MutableLiveData<>(MarkColor.BROWN);
 
     /**
      * 当前是否锁定了light的位置
