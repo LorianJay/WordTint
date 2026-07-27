@@ -8,12 +8,15 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.AnimatorRes;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.database.vo.WordMarkCountVO;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
+import com.github.lorenj.wordtint.ui.adapter.book.BookSectionDiffCallback;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 
 import java.util.ArrayList;
@@ -72,13 +75,14 @@ public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.
 
     @Override
     public void replaceAll(Collection<WordMarkCountVO> replaceAll) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new RankWordDiffCallback(this.allWordMarkCountList, new ArrayList<>(replaceAll)));
         allWordMarkCountList.clear();
         allWordMarkCountList.addAll(replaceAll);
         maxCount = allWordMarkCountList.stream()
                 .min(Comparator.comparingInt(WordMarkCountVO::getCount))
                 .map(WordMarkCountVO::getCount)
                 .orElse(1);
-        notifyItemRangeChanged(0, getItemCount());
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @Override

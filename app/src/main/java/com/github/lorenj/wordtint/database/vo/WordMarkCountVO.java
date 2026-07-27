@@ -1,5 +1,7 @@
 package com.github.lorenj.wordtint.database.vo;
 
+import java.util.Objects;
+
 /**
  * 单词标记统计值对象
  *
@@ -58,5 +60,25 @@ public class WordMarkCountVO {
 
     public void setWordText(String wordText) {
         this.wordText = wordText;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WordMarkCountVO that = (WordMarkCountVO) o;
+        return markWordId == that.markWordId
+                && count == that.count
+                && Double.compare(avgStayTime, that.avgStayTime) == 0
+                && Objects.equals(wordText, that.wordText);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = markWordId;
+        result = 31 * result + count;
+        result = 31 * result + Double.hashCode(avgStayTime);
+        result = 31 * result + Objects.hashCode(wordText);
+        return result;
     }
 }

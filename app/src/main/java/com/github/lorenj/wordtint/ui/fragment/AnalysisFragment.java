@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,7 +23,6 @@ import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.WordMarkLogDao;
 import com.github.lorenj.wordtint.database.dao.WordOriginDao;
 import com.github.lorenj.wordtint.database.entity.WordMarkLogEntity;
-import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.WordMarkCountVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ChartTime;
@@ -53,16 +51,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import kotlinx.serialization.descriptors.StructureKind;
 
 /**
  * 单词标记分析页面
@@ -154,21 +147,19 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     private void refreshAllData() {
         StaticFactory.getExecutorService().execute(() -> {
             WordMarkLogDao dao = appDatabase.wordMarkLogDao();
-            String colorName = selectedColor.name();
-
             // 查询折线图数据
             List<WordMarkLogEntity> chartLogs;
             if (isSingleWordMode && selectedWordId != null) {
-                chartLogs = dao.findByWordIdAndColor(selectedWordId, colorName,
+                chartLogs = dao.findByWordIdAndColor(selectedWordId, selectedColor.name(),
                         chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
             } else {
-                chartLogs = dao.findByColorAndTimeRange(colorName, chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
+                chartLogs = dao.findByColorAndTimeRange(selectedColor.name(), chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
             }
             List<ChartPoint> chartData = aggregateByTime(chartLogs, chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
 
             updateUIHandler.post(() -> {
                 updateChart(chartData);
-                refreshLeaderboardOnly();
+                updateRankingList();
             });
         });
     }
@@ -177,7 +168,7 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     /**
      * 排行榜更新
      */
-    private void refreshLeaderboardOnly() {
+    private void updateRankingList() {
         StaticFactory.getExecutorService().execute(() -> {
             // 查询排行榜数据
             List<WordMarkCountVO> currentMarkCountList = appDatabase.wordMarkLogDao().findWordMarkCounts(selectedColor.name(),
@@ -414,7 +405,7 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
                 .observe(this.getViewLifecycleOwner(), rankingCount -> {
                     countLimit = rankingCount;
                     resetToAllWords();
-                    refreshLeaderboardOnly();
+                    updateRankingList();
                 });
         // 排行榜点击
         rankingListAdapter.setRecycleViewItemClickCallBack(item -> {
