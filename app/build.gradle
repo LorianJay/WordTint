@@ -75,6 +75,7 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:3.0.0'
     implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
     implementation 'com.github.bumptech.glide:glide:5.0.9'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'org.slf4j:slf4j-api:2.0.18'
     implementation("org.apache.commons:commons-text:1.15.0")
     annotationProcessor 'com.github.bumptech.glide:compiler:5.0.9'

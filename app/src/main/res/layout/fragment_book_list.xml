@@ -60,6 +60,7 @@
     <!--书籍列表的显示,这里是二级列表-->
 
     <androidx.recyclerview.widget.RecyclerView
+        tools:listitem="@layout/item_book_parent"
         android:id="@+id/rv_book_list_parent"
         android:layout_width="match_parent"
         android:layout_height="0dp"

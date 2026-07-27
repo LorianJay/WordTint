@@ -13,6 +13,7 @@ import com.github.lorenj.wordtint.database.dao.ReciteRecordWordDao;
 import com.github.lorenj.wordtint.database.dao.UserSettingDao;
 import com.github.lorenj.wordtint.database.dao.WordBookDao;
 import com.github.lorenj.wordtint.database.dao.WordBookSectionDao;
+import com.github.lorenj.wordtint.database.dao.WordMarkLogDao;
 import com.github.lorenj.wordtint.database.dao.WordNoteDao;
 import com.github.lorenj.wordtint.database.dao.WordOriginDao;
 import com.github.lorenj.wordtint.database.dao.WordSearchDao;
@@ -25,6 +26,7 @@ import com.github.lorenj.wordtint.database.entity.UserSettingEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
+import com.github.lorenj.wordtint.database.entity.WordMarkLogEntity;
 import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
@@ -44,7 +46,8 @@ import java.util.Optional;
         WordBookEntity.class, WordBookSectionEntity.class, WordBookSectionWordIdEntity.class,
         UserSettingEntity.class, WordOriginEntity.class, WordStarEntity.class,
         WordStarWordIdEntity.class, WordSearchEntity.class, ReciteRecordEntity.class,
-        ReciteRecordWordEntity.class, ReciteRecordWordMarkEntity.class, WordNoteEntity.class}, version = 7)
+        ReciteRecordWordEntity.class, ReciteRecordWordMarkEntity.class, WordNoteEntity.class,
+        WordMarkLogEntity.class}, version = 8)
 public abstract class APPDatabase extends RoomDatabase {
 
     private static int total = 0, completed = 0;
@@ -72,6 +75,8 @@ public abstract class APPDatabase extends RoomDatabase {
     public abstract ReciteRecordMarkDao reciteRecordMarkDao();
 
     public abstract WordNoteDao wordNoteDao();
+
+    public abstract WordMarkLogDao wordMarkLogDao();
 
     public static APPDatabase getInstance(Context context) {
         if (INSTANCE == null) {

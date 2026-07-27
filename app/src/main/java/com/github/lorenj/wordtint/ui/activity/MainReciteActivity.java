@@ -701,9 +701,13 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_search) {
             searchLauncher.launch(new Intent(MainReciteActivity.this, SearchWordActivity.class));
         }
-        // todo 单词分析
-        if (clickViewId == R.id.ll_recite_function_analysis) {
-        }
+        // 单词分析 - 跳转到主页分析 Tab
+        //if (clickViewId == R.id.ll_recite_function_analysis) {
+        //    Intent intent = new Intent(this, MainActivity.class);
+        //    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        //    intent.putExtra(MainActivity.EXTRA_SHOW_ANALYSIS, true);
+        //    startActivity(intent);
+        //}
         // 收藏夹区域
         if (clickViewId == R.id.ll_recite_function_star) {
             starDrawer.openDrawer(GravityCompat.END);

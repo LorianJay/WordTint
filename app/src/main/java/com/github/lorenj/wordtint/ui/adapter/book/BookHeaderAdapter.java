@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
+import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class BookHeaderAdapter extends RecyclerView.Adapter<BookHeaderAdapter.Bo
                 .map(wordBookSectionEntityVO -> wordBookSectionEntityVO.tagColor)
                 .distinct()
                 .collect(Collectors.toList());
-        holder.tagSelectionListAdapter.replaceAll(allSectionTag);
+        holder.markSelectionListAdapter.replaceAll(allSectionTag);
     }
 
     @Override
@@ -83,7 +84,7 @@ public class BookHeaderAdapter extends RecyclerView.Adapter<BookHeaderAdapter.Bo
         private final RelativeLayout bookItem;
         private final TextView bookName, count;
         private final RecyclerView bookTagSelection;
-        private TagSelectionListAdapter tagSelectionListAdapter;
+        private MarkSelectionListAdapter markSelectionListAdapter;
 
         public BookHeaderViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
@@ -96,12 +97,13 @@ public class BookHeaderAdapter extends RecyclerView.Adapter<BookHeaderAdapter.Bo
             LinearLayoutManager tagSelectionLm = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
             bookTagSelection.setLayoutManager(tagSelectionLm);
             // 当标签选择列表点击了一个标签后会回调,这里用回调而不是viewModel
-            tagSelectionListAdapter = new TagSelectionListAdapter(context, markColor -> {
+            markSelectionListAdapter = new MarkSelectionListAdapter(context);
+            markSelectionListAdapter.setRecycleViewItemClickCallBack(markColor -> {
                 BookHeaderAdapter bookHeaderAdapter = (BookHeaderAdapter) getBindingAdapter();
                 if (bookHeaderAdapter == null) return;
                 bookHeaderAdapter.bookSectionAdapter.batchSelectSection(markColor);
             });
-            bookTagSelection.setAdapter(tagSelectionListAdapter);
+            bookTagSelection.setAdapter(markSelectionListAdapter);
         }
 
         @Override

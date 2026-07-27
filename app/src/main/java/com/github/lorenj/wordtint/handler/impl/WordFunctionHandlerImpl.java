@@ -2,7 +2,9 @@ package com.github.lorenj.wordtint.handler.impl;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordMarkDao;
@@ -11,6 +13,7 @@ import com.github.lorenj.wordtint.database.entity.ReciteRecordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordEntity;
 import com.github.lorenj.wordtint.database.entity.ReciteRecordWordMarkEntity;
 import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
+import com.github.lorenj.wordtint.database.entity.WordMarkLogEntity;
 import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
@@ -29,9 +32,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -87,6 +94,20 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
      * 现在正在背诵的区间 start:19 end:29 -> [20,30]
      */
     private int start = 0, end = 0;
+    /**
+     * 进入当前单词时的标记状态快照（离开时比较差异用）
+     */
+    private Set<MarkColor> enterMarkSet = new HashSet<>();
+    /**
+     * 当前单词的进入时间，用于计算停留时长
+     */
+    private long currentWordEnterTime;
+    /**
+     * 时间单位
+     */
+    private final Integer ONE_SECOND = 1000;
+    private final Integer THIRTY_SECOND = 30 * ONE_SECOND;
+
 
     public WordFunctionHandlerImpl(Context context,
                                    UserRecitePreference userRecitePreference) {
@@ -98,20 +119,22 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         this.saveList = allWordIdList;
         this.start = 0;
         this.end = allWordIdList.size() - 1;
+        snapshotCurrentWordMark();
     }
 
     @Override
     public Integer getCurrentFocusWordId() {
-        return this.allWordIdList.get(currentIndex);
+        return getWordByIndex(currentIndex).getWordId();
     }
 
     @Override
     public FunctionWordVO getWordByIndex(int index) {
-        return super.getDict().get(allWordIdList.get(currentIndex));
+        return super.getDict().get(allWordIdList.get(index));
     }
 
     @Override
     public FunctionWordVO gotoPreviousWord() {
+        insertMarkLogOnLeave();
         for (int tempIndex = currentIndex - 1; tempIndex != currentIndex; tempIndex--) {
             boolean flag = false;
             if (tempIndex < start) {
@@ -126,11 +149,13 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 tempIndex++;
             }
         }
+        snapshotCurrentWordMark();
         return getWordByIndex(currentIndex);
     }
 
     @Override
     public FunctionWordVO gotoNextWord() {
+        insertMarkLogOnLeave();
         for (int tempIndex = currentIndex + 1; tempIndex != currentIndex; tempIndex++) {
             boolean flag = false;
             if (tempIndex > end) {
@@ -145,17 +170,24 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
                 tempIndex--;
             }
         }
+        snapshotCurrentWordMark();
         return getWordByIndex(currentIndex);
     }
 
     @Override
     public FunctionWordVO gotoWordWithIndex(int currentIndex) {
-        return getWordByIndex(this.currentIndex = findColorCursor(currentIndex));
+        insertMarkLogOnLeave();
+        FunctionWordVO result = getWordByIndex(this.currentIndex = findColorCursor(currentIndex));
+        snapshotCurrentWordMark();
+        return result;
     }
 
     @Override
     public FunctionWordVO forceGotoWordWithOutMarkColor(int index) {
-        return getWordByIndex(this.currentIndex = index);
+        insertMarkLogOnLeave();
+        FunctionWordVO result = getWordByIndex(this.currentIndex = index);
+        snapshotCurrentWordMark();
+        return result;
     }
 
     @Override
@@ -170,6 +202,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
 
     @Override
     public void shuffle() {
+        insertMarkLogOnLeave();
         getWordFunctionHandlerState().setWordFunctionState(WordFunctionState.SHUFFLE);
         this.dummyWordIdList = new ArrayList<>(allWordIdList.size());
         for (int i = 0; i < allWordIdList.size(); i++) {
@@ -186,10 +219,12 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         this.end = allWordIdList.size() - 1;
         this.dummyIndex = currentIndex;
         this.currentIndex = 0;
+        snapshotCurrentWordMark();
     }
 
     @Override
     public void shuffleRange(int start, int end) {
+        insertMarkLogOnLeave();
         getWordFunctionHandlerState().setWordFunctionState(WordFunctionState.RANGE);
         this.dummyWordIdList = new ArrayList<>(end - start + 1);
         // 要找到对应颜色的区间
@@ -210,6 +245,7 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
         this.end = allWordIdList.size() - 1;
         this.dummyIndex = currentIndex;
         this.currentIndex = 0;
+        snapshotCurrentWordMark();
     }
 
     @Override
@@ -417,6 +453,62 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
             if (functionWordVO == null) continue;
             functionWordVO.setWordNoteEntity(wordNoteEntity);
         }
+    }
+
+    /**
+     * 离开当前单词时处理标记记录逻辑<br>
+     * 比较进入时和离开时的标记差异：<br>
+     * - 新增的标记：记录到 word_mark_log 表<br>
+     * - 移除的标记：若在 1 分钟内被记录过，则删除该记录<br>
+     * 棕色标记始终被排除在外
+     */
+    private void insertMarkLogOnLeave() {
+        FunctionWordVO currentFocusWord = getCurrentFocusWord();
+        // 当前单词的状态
+        Set<MarkColor> currentMarkSet = new HashSet<>(currentFocusWord.getMarkColorList());
+
+        // 新增标记
+        Set<MarkColor> needAddMark = new HashSet<>(currentMarkSet);
+        needAddMark.removeAll(enterMarkSet);
+
+        // 移除标记
+        Set<MarkColor> needRemovedMark = new HashSet<>(enterMarkSet);
+        needRemovedMark.removeAll(currentMarkSet);
+
+        long nowTime = System.currentTimeMillis();
+        long stayTime = nowTime - currentWordEnterTime;
+        StaticFactory.getExecutorService().execute(() -> {
+            List<WordMarkLogEntity> insertList = needAddMark.stream()
+                    .filter(markColor -> markColor != MarkColor.BROWN)
+                    .map(markColor -> {
+                        WordMarkLogEntity result = new WordMarkLogEntity();
+                        result.markWordId = currentFocusWord.getWordId();
+                        result.markColor = markColor.name();
+                        result.timestamp = nowTime;
+                        result.stayTime = stayTime;
+                        return result;
+                    })
+                    .collect(Collectors.toList());
+            appDatabase.wordMarkLogDao().insert(insertList);
+            long oneMinuteAgo = nowTime - THIRTY_SECOND;
+            // 删除上一个一分钟内被标记的单词
+            needRemovedMark.stream()
+                    .filter(markColor -> markColor != MarkColor.BROWN)
+                    .map(markColor -> appDatabase.wordMarkLogDao()
+                            .findRecentByWordIdAndColor(currentFocusWord.getWordId(), markColor.name(), oneMinuteAgo))
+                    .forEach(wordMarkLogEntity -> appDatabase.wordMarkLogDao().delete(wordMarkLogEntity));
+        });
+    }
+
+    /**
+     * 快照当前单词的标记状态（进入单词时调用）
+     */
+    private void snapshotCurrentWordMark() {
+        Set<MarkColor> markColorSet = Optional.ofNullable(getCurrentFocusWord())
+                .map(FunctionWordVO::getMarkColorList)
+                .orElse(new HashSet<>());
+        enterMarkSet = new HashSet<>(markColorSet);
+        currentWordEnterTime = System.currentTimeMillis();
     }
 
     /**

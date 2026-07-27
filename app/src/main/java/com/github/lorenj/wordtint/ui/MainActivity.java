@@ -43,6 +43,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         View.OnLongClickListener, NavigationBarView.OnItemSelectedListener {
 
+    public static final String EXTRA_SHOW_ANALYSIS = "EXTRA_SHOW_ANALYSIS";
+
     private BottomNavigationView viewPageChangeNavigationView;
     private ViewPager2 viewPager;
     private MenuItem nowSelectMenuItem;
@@ -184,6 +186,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     viewPager.endFakeDrag();
                 }
                 viewPageChangeNavigationView.setOnItemSelectedListener(MainActivity.this);
+                // 如果来自分析按钮跳转，切换到分析 Tab
+                if (getIntent().getBooleanExtra(EXTRA_SHOW_ANALYSIS, false)) {
+                    viewPager.setCurrentItem(2, false);
+                }
             });
         });
     }

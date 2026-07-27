@@ -154,6 +154,21 @@
     <string name="distinct_word_explanation">去除当前背诵列表中的所有重复的单词</string>
     <string name="text_copied">复制成功</string>
     <string name="click_to_exit">再按一次退出</string>
-
+    <string name="mark_trend_title">📈 标记趋势</string>
+    <string name="current_color">当前颜色:</string>
+    <string name="number_filter">筛选:</string>
+    <string name="time">时间:</string>
+    <string name="count">数量:</string>
+    <string name="number_ten">10个</string>
+    <string name="number_twenty_five">25个</string>
+    <string name="number_fifty">50个</string>
+    <string name="all">全部</string>
+    <string name="custom">自定义</string>
+    <string name="today">今天</string>
+    <string name="recent_week">最近一周</string>
+    <string name="recent_month">最近一个月</string>
+    <string name="tv_analysis_chart_title">📈 标记趋势</string>
+    <string name="tv_analysis_word_list_title">🏆 标记排行榜</string>
+    <string name="reset_select">重置选择</string>
 
 </resources>

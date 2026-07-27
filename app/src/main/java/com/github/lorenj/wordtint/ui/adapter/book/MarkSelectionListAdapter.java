@@ -25,16 +25,15 @@ import java.util.List;
 /**
  * 书籍旁边的标签选择
  */
-public class TagSelectionListAdapter extends RecyclerView.Adapter<TagSelectionListAdapter.RecyclerViewHolder>
+public class MarkSelectionListAdapter extends RecyclerView.Adapter<MarkSelectionListAdapter.RecyclerViewHolder>
         implements RecyclerViewAdapterItemChange<MarkColor> {
 
     private final Context context;
     private final List<MarkColor> markColorList = new ArrayList<>();
-    private final RecycleViewItemClickCallBack<MarkColor> tagSelectionCallBak;
+    private RecycleViewItemClickCallBack<MarkColor> markColorSelectionCallBak;
 
-    public TagSelectionListAdapter(Context context, RecycleViewItemClickCallBack<MarkColor> tagSelectionCallBak) {
+    public MarkSelectionListAdapter(Context context) {
         this.context = context;
-        this.tagSelectionCallBak = tagSelectionCallBak;
     }
 
     @NonNull
@@ -64,6 +63,11 @@ public class TagSelectionListAdapter extends RecyclerView.Adapter<TagSelectionLi
         notifyItemRangeChanged(0, wordBookSectionEntityCollection.size());
     }
 
+    @Override
+    public void setRecycleViewItemClickCallBack(RecycleViewItemClickCallBack<MarkColor> recycleViewItemClickCallBack) {
+        markColorSelectionCallBak = recycleViewItemClickCallBack;
+    }
+
     public static class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final View itemView;
         private final ImageView tagToast;
@@ -78,9 +82,9 @@ public class TagSelectionListAdapter extends RecyclerView.Adapter<TagSelectionLi
         @Override
         public void onClick(View v) {
             int position = getBindingAdapterPosition();
-            TagSelectionListAdapter tagSelectionListAdapter = (TagSelectionListAdapter) getBindingAdapter();
+            MarkSelectionListAdapter tagSelectionListAdapter = (MarkSelectionListAdapter) getBindingAdapter();
             if (tagSelectionListAdapter == null) return;
-            tagSelectionListAdapter.tagSelectionCallBak.viewClickCallBack(tagSelectionListAdapter.markColorList.get(position));
+            tagSelectionListAdapter.markColorSelectionCallBak.viewClickCallBack(tagSelectionListAdapter.markColorList.get(position));
         }
     }
 

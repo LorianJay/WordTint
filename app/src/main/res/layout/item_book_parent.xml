@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rl_item_book"
     android:layout_width="match_parent"
     android:layout_height="50dp"
+    android:layout_marginBottom="5dp"
     android:background="@color/light_blue_ff"
     android:clickable="true"
-    android:layout_marginBottom="5dp"
     android:foreground="?attr/selectableItemBackground">
 
     <ImageView
@@ -40,7 +41,10 @@
         android:layout_marginStart="10dp"
         android:layout_marginEnd="80dp"
         android:layout_toStartOf="@id/tv_item_book_count"
-        android:layout_toEndOf="@id/tv_item_book" />
+        android:layout_toEndOf="@id/tv_item_book"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_tag_toast" />
 
     <TextView
         android:id="@+id/tv_item_book_count"
