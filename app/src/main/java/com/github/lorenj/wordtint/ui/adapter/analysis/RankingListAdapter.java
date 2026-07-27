@@ -13,10 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.database.vo.WordMarkCountVO;
+import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
+import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 标记分析排行榜 Adapter
@@ -24,17 +27,15 @@ import java.util.Map;
  * @author cnsukidayo
  * @date 2026/7/26
  */
-public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.ViewHolder> {
+public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.ViewHolder> implements RecyclerViewAdapterItemChange<WordMarkCountVO> {
 
     private final Context context;
-    private final List<WordMarkCountVO> dataList = new ArrayList<>();
-    private final Map<Integer, String> wordTextMap;
+    private final List<WordMarkCountVO> allWordMarkCountList = new ArrayList<>();
     private int maxCount = 1;
-    private OnItemClickListener onItemClickListener;
+    private RecycleViewItemClickCallBack<WordMarkCountVO> onItemClickListener;
 
-    public RankingListAdapter(Context context, Map<Integer, String> wordTextMap) {
+    public RankingListAdapter(Context context) {
         this.context = context;
-        this.wordTextMap = wordTextMap;
     }
 
     @NonNull
@@ -46,53 +47,43 @@ public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        WordMarkCountVO item = dataList.get(position);
-        String wordText = wordTextMap.getOrDefault(item.markWordId, String.valueOf(item.markWordId));
+        WordMarkCountVO wordMarkCountVO = allWordMarkCountList.get(position);
+        String wordText = wordMarkCountVO.getWordText();
         holder.tvWordOrigin.setText(wordText);
-        holder.tvMarkCount.setText(item.count + "次");
-
-        // 平均停留时间格式化
-        double avgStaySec = item.avgStayTime / 1000.0;
-        holder.tvAvgStay.setText(String.format("平均:%.1fs", avgStaySec));
+        holder.tvMarkCount.setText(context.getString(R.string.mark_count, String.valueOf(wordMarkCountVO.getCount())));
+        double avgStaySec = wordMarkCountVO.getAvgStayTime() / 1000.0;
+        holder.tvAvgStay.setText(String.format(context.getString(R.string.avg_time_format), avgStaySec));
 
         // 柱状图宽度按比例计算
-        int barWeight = (int) (item.count * 1000L / maxCount);
+        int barWeight = (int) (wordMarkCountVO.getCount() * 1000L / maxCount);
         ViewGroup.LayoutParams params = holder.vBar.getLayoutParams();
         if (params instanceof LinearLayout.LayoutParams) {
             ((LinearLayout.LayoutParams) params).weight = barWeight;
         }
         holder.vBar.setLayoutParams(params);
 
-        holder.itemView.setOnClickListener(v -> {
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(item);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> onItemClickListener.viewClickCallBack(wordMarkCountVO));
     }
 
     @Override
     public int getItemCount() {
-        return dataList.size();
+        return allWordMarkCountList.size();
     }
 
-    public void setData(List<WordMarkCountVO> newData) {
-        dataList.clear();
-        if (newData != null) {
-            dataList.addAll(newData);
-            maxCount = 1;
-            for (WordMarkCountVO vo : dataList) {
-                if (vo.count > maxCount) maxCount = vo.count;
-            }
-        }
-        notifyDataSetChanged();
+    @Override
+    public void replaceAll(Collection<WordMarkCountVO> replaceAll) {
+        allWordMarkCountList.clear();
+        allWordMarkCountList.addAll(replaceAll);
+        maxCount = allWordMarkCountList.stream()
+                .min(Comparator.comparingInt(WordMarkCountVO::getCount))
+                .map(WordMarkCountVO::getCount)
+                .orElse(1);
+        notifyItemRangeChanged(0, getItemCount());
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.onItemClickListener = listener;
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(WordMarkCountVO item);
+    @Override
+    public void setRecycleViewItemClickCallBack(RecycleViewItemClickCallBack<WordMarkCountVO> recycleViewItemClickCallBack) {
+        this.onItemClickListener = recycleViewItemClickCallBack;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

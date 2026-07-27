@@ -6,17 +6,17 @@ import com.github.lorenj.wordtint.R;
  * @author lorianjay
  * @date 2026/7/27 16:53
  */
-public enum AnalysisCountEnum {
+public enum RankingCount {
 
     TEN(10, R.string.number_ten),
     TWENTY_FIVE(25, R.string.number_twenty_five),
-    FIFTY(50, R.string.number_filter),
+    FIFTY(50, R.string.number_fifty),
     ALL(Integer.MAX_VALUE, R.string.all),
     CUSTOM(-1, R.string.custom);
-    public final int count;
-    public final int textId;
+    private final int count;
+    private final int textId;
 
-    AnalysisCountEnum(int count, int textId) {
+    RankingCount(int count, int textId) {
         this.count = count;
         this.textId = textId;
     }

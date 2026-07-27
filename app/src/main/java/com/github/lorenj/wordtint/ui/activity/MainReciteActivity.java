@@ -539,6 +539,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                                     Toast.LENGTH_SHORT);
                             globalToast.setGravity(Gravity.CENTER, 0, 500);
                             globalToast.show();
+                            return;
                         }
                         final int index = i;
                         // 异步跳转单词,可能查找时间较长
