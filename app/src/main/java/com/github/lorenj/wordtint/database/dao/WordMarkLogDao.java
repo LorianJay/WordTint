@@ -31,8 +31,8 @@ public interface WordMarkLogDao {
      */
     @Query("SELECT mark_word_id AS markWordId, COUNT(*) AS count, AVG(stay_time) AS avgStayTime " +
             "FROM word_mark_log WHERE mark_color = :color AND timestamp BETWEEN :start AND :end " +
-            "GROUP BY mark_word_id ORDER BY count DESC")
-    List<WordMarkCountVO> findWordMarkCounts(String color, long start, long end);
+            "GROUP BY mark_word_id ORDER BY count DESC limit :limit")
+    List<WordMarkCountVO> findWordMarkCounts(String color, long start, long end, int limit);
 
     /**
      * 获取指定单词在时间范围内的标记记录

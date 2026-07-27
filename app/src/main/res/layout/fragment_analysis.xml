@@ -91,23 +91,6 @@
 
             </com.google.android.flexbox.FlexboxLayout>
 
-            <!-- 第三行：数量 -->
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/fbl_analysis_count_select"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:alignItems="center"
-                app:flexWrap="wrap">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/count"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="13sp" />
-            </com.google.android.flexbox.FlexboxLayout>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
@@ -194,6 +177,26 @@
                     android:textSize="12sp" />
 
             </LinearLayout>
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/fbl_analysis_count_select"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                app:alignItems="center"
+                app:flexWrap="wrap">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/count"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="13sp" />
+            </com.google.android.flexbox.FlexboxLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rc_analysis_leaderboard"

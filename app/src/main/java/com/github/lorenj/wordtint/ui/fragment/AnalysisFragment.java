@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -44,6 +45,10 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.flexbox.FlexboxLayout;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -56,6 +61,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import kotlinx.serialization.descriptors.StructureKind;
 
 /**
  * 单词标记分析页面
@@ -73,7 +80,6 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     private int countLimit = 50;
     private boolean isSingleWordMode = false;
     private Integer selectedWordId = null;
-    private int customTimeDays = 30; // 自定义时间范围（天数）
 
     /**
      * UI相关
@@ -107,7 +113,6 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     // ========== 数据 ==========
     private APPDatabase appDatabase;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
-    private List<WordMarkCountVO> currentMarkCountList = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -151,23 +156,6 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
             WordMarkLogDao dao = appDatabase.wordMarkLogDao();
             String colorName = selectedColor.name();
 
-            // 查询排行榜数据
-            currentMarkCountList = dao.findWordMarkCounts(colorName,
-                    chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
-
-            // 查询单词的文本
-            currentMarkCountList = currentMarkCountList.stream()
-                    .peek(wordMarkCountVO -> {
-                        WordOriginDao originDao = appDatabase.wordOriginDao();
-                        String wordText = originDao.findAllOriginWordById(wordMarkCountVO.getMarkWordId())
-                                .stream()
-                                .filter(wordOriginEntity -> WordStructure.valueOf(wordOriginEntity.key) == WordStructure.WORD_ORIGIN)
-                                .findFirst()
-                                .map(wordOriginEntity -> wordOriginEntity.value)
-                                .orElse("");
-                        wordMarkCountVO.setWordText(wordText);
-                    })
-                    .collect(Collectors.toList());
             // 查询折线图数据
             List<WordMarkLogEntity> chartLogs;
             if (isSingleWordMode && selectedWordId != null) {
@@ -180,17 +168,33 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
 
             updateUIHandler.post(() -> {
                 updateChart(chartData);
-                updateLeaderboard(currentMarkCountList);
+                refreshLeaderboardOnly();
             });
         });
     }
 
+
+    /**
+     * 排行榜更新
+     */
     private void refreshLeaderboardOnly() {
         StaticFactory.getExecutorService().execute(() -> {
-            List<WordMarkCountVO> countList = appDatabase.wordMarkLogDao()
-                    .findWordMarkCounts(selectedColor.name(), chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
-            currentMarkCountList = countList;
-            updateUIHandler.post(() -> updateLeaderboard(countList));
+            // 查询排行榜数据
+            List<WordMarkCountVO> currentMarkCountList = appDatabase.wordMarkLogDao().findWordMarkCounts(selectedColor.name(),
+                            chartTimeRange.getStartTime(), chartTimeRange.getEndTime(), countLimit)
+                    .stream()
+                    .peek(wordMarkCountVO -> {
+                        WordOriginDao originDao = appDatabase.wordOriginDao();
+                        String wordText = originDao.findAllOriginWordById(wordMarkCountVO.getMarkWordId())
+                                .stream()
+                                .filter(wordOriginEntity -> WordStructure.valueOf(wordOriginEntity.key) == WordStructure.WORD_ORIGIN)
+                                .findFirst()
+                                .map(wordOriginEntity -> wordOriginEntity.value)
+                                .orElse("");
+                        wordMarkCountVO.setWordText(wordText);
+                    })
+                    .collect(Collectors.toList());
+            updateUIHandler.post(() -> rankingListAdapter.replaceAll(currentMarkCountList));
         });
     }
 
@@ -241,15 +245,9 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
         lineChart.invalidate();
     }
 
-
-    // ========== 排行榜更新 ==========
-    private void updateLeaderboard(List<WordMarkCountVO> countList) {
-        int limit = Math.min(countLimit, countList.size());
-        List<WordMarkCountVO> limited = countList.subList(0, Math.max(0, limit));
-        rankingListAdapter.replaceAll(limited);
-    }
-
-    // ========== 时间聚合 ==========
+    /**
+     * 时间聚合
+     */
     private List<ChartPoint> aggregateByTime(List<WordMarkLogEntity> logs, long startTime, long endTime) {
         Map<String, Integer> aggregated = new LinkedHashMap<>();
         SimpleDateFormat sdf;
@@ -390,7 +388,19 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
                     resetToAllWords();
                     refreshAllData();
                 });
-
+        chartTimeRange = new ChartTimeRange();
+        chartTimeRange.setChartTime(ChartTime.MONTH);
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDate today = LocalDate.now(zone);
+        long startTime = today.minusDays(chartTimeRange.getChartTime().getRange() - 1)
+                .atStartOfDay(zone)
+                .toInstant()
+                .toEpochMilli();
+        long todayEndTime = ZonedDateTime.of(today, LocalTime.of(23, 59, 59, 999_000_000), zone)
+                .toInstant()
+                .toEpochMilli();
+        chartTimeRange.setStartTime(startTime);
+        chartTimeRange.setEndTime(todayEndTime);
         // 排行榜列表
         rankingListAdapter = new RankingListAdapter(requireContext());
         rcLeaderboard.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -413,6 +423,7 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
             tvChartTitle.setText(item.getWordText());
             refreshChartForSingleWord();
         });
+        refreshAllData();
     }
 
 

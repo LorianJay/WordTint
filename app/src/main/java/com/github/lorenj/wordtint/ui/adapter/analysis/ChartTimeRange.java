@@ -10,7 +10,7 @@ public class ChartTimeRange {
 
     private long startTime;
     private long endTime;
-    private ChartTime chartTime;
+    private ChartTime chartTime = ChartTime.MONTH;
 
     public ChartTimeRange() {
     }

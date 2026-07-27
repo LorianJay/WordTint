@@ -46,7 +46,7 @@ public class RankingCountAdapter implements View.OnClickListener {
                     viewGroup.addView(textView);
                     allSelectTextView.add(textView);
                     // 默认50个
-                    if (rankingCountEnum == RankingCount.FIFTY) textView.performClick();
+                    if (rankingCountEnum == RankingCount.FIFTY) textView.setSelected(true);
                 });
     }
 

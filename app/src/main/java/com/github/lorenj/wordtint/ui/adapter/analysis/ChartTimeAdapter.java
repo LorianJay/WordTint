@@ -14,6 +14,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.enums.ChartTime;
 import com.github.lorenj.wordtint.enums.RankingCount;
 import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointBackward;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
@@ -56,7 +57,7 @@ public class ChartTimeAdapter implements View.OnClickListener {
                     viewGroup.addView(textView);
                     allSelectTextView.add(textView);
                     // 默认一个月
-                    if (chartTime == ChartTime.MONTH) textView.performClick();
+                    if (chartTime == ChartTime.MONTH) textView.setSelected(true);
                 });
     }
 
@@ -86,7 +87,7 @@ public class ChartTimeAdapter implements View.OnClickListener {
         MaterialDatePicker.Builder<androidx.core.util.Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
         builder.setTitleText("选择日期范围");
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
-        constraintsBuilder.setValidator(DateValidatorPointForward.now());
+        constraintsBuilder.setValidator(DateValidatorPointBackward.now());
         builder.setCalendarConstraints(constraintsBuilder.build());
 
         MaterialDatePicker<Pair<Long, Long>> dateRangePicker = builder.build();
@@ -94,6 +95,7 @@ public class ChartTimeAdapter implements View.OnClickListener {
         dateRangePicker.show(((AppCompatActivity) context).getSupportFragmentManager(), "DATE_RANGE_PICKER_TAG");
 
         dateRangePicker.addOnPositiveButtonClickListener(selection -> {
+            clearSelectedStatus();
             v.setSelected(true);
             ChartTimeRange chartTimeRange = new ChartTimeRange(selection.first, selection.second, ChartTime.CUSTOM);
             chartTimeViewModel.getSelectChartTime().setValue(chartTimeRange);
