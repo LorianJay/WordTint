@@ -177,5 +177,6 @@
     <string name="recent_six_month">最近六个月</string>
     <string name="recent_year">最近一年</string>
     <string name="recent_five_year">最近五年</string>
+    <string name="right_diamond"><![CDATA[>]]></string>
 
 </resources>

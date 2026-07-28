@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="green_gradient">
+        <item>@color/theme_color</item>
+        <item>#6FCF97</item>
+    </array>
+</resources>

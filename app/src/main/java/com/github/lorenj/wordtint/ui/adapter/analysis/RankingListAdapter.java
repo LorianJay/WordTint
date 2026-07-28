@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.AnimatorRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.database.vo.WordMarkCountVO;
 import com.github.lorenj.wordtint.handler.RecyclerViewAdapterItemChange;
-import com.github.lorenj.wordtint.ui.adapter.book.BookSectionDiffCallback;
 import com.github.lorenj.wordtint.ui.adapter.listener.RecycleViewItemClickCallBack;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,13 +58,8 @@ public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.
         holder.tvAvgStay.setText(String.format(context.getString(R.string.avg_time_format), avgStaySec));
 
         // 柱状图宽度按比例计算
-        int barWeight = (int) (wordMarkCountVO.getCount() * 1000L / maxCount);
-        ViewGroup.LayoutParams params = holder.vBar.getLayoutParams();
-        if (params instanceof LinearLayout.LayoutParams) {
-            ((LinearLayout.LayoutParams) params).weight = barWeight;
-        }
-        holder.vBar.setLayoutParams(params);
-
+        int barProgress = (int) ( wordMarkCountVO.getCount() / (float) maxCount * 100);
+        holder.progressBar.setProgress(barProgress);
         holder.itemView.setOnClickListener(v -> onItemClickListener.viewClickCallBack(wordMarkCountVO));
     }
 
@@ -79,7 +74,7 @@ public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.
         allWordMarkCountList.clear();
         allWordMarkCountList.addAll(replaceAll);
         maxCount = allWordMarkCountList.stream()
-                .min(Comparator.comparingInt(WordMarkCountVO::getCount))
+                .max(Comparator.comparingInt(WordMarkCountVO::getCount))
                 .map(WordMarkCountVO::getCount)
                 .orElse(1);
         diffResult.dispatchUpdatesTo(this);
@@ -94,14 +89,14 @@ public class RankingListAdapter extends RecyclerView.Adapter<RankingListAdapter.
         final TextView tvWordOrigin;
         final TextView tvMarkCount;
         final TextView tvAvgStay;
-        final View vBar;
+        final LinearProgressIndicator progressBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvWordOrigin = itemView.findViewById(R.id.tv_word_origin);
             tvMarkCount = itemView.findViewById(R.id.tv_mark_count);
             tvAvgStay = itemView.findViewById(R.id.tv_avg_stay);
-            vBar = itemView.findViewById(R.id.v_bar);
+            progressBar = itemView.findViewById(R.id.pb_analysis_bar);
         }
     }
 }
