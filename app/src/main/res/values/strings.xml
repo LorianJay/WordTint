@@ -168,10 +168,14 @@
     <string name="today">今天</string>
     <string name="recent_week">最近一周</string>
     <string name="recent_month">最近一个月</string>
+    <string name="recent_three_month">最近三个月</string>
     <string name="tv_analysis_chart_title">📈 标记趋势</string>
     <string name="tv_analysis_word_list_title">🏆 标记排行榜</string>
     <string name="reset_select">重置选择</string>
     <string name="mark_count">%1$s次</string>
     <string name="avg_time_format">平均:%1$.1fs</string>
+    <string name="recent_six_month">最近六个月</string>
+    <string name="recent_year">最近一年</string>
+    <string name="recent_five_year">最近五年</string>
 
 </resources>

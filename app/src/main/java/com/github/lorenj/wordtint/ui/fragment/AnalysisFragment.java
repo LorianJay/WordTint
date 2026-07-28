@@ -27,6 +27,7 @@ import com.github.lorenj.wordtint.database.vo.WordMarkCountVO;
 import com.github.lorenj.wordtint.enums.MarkColor;
 import com.github.lorenj.wordtint.enums.ChartTime;
 import com.github.lorenj.wordtint.enums.WordStructure;
+import com.github.lorenj.wordtint.ui.adapter.analysis.ChartPoint;
 import com.github.lorenj.wordtint.ui.adapter.analysis.ChartTimeAdapter;
 import com.github.lorenj.wordtint.ui.adapter.analysis.ChartTimeRange;
 import com.github.lorenj.wordtint.ui.adapter.analysis.ChartTimeViewModel;
@@ -42,18 +43,17 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.flexbox.FlexboxLayout;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -73,7 +73,7 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     private int countLimit = 50;
     private boolean isSingleWordMode = false;
     private Integer selectedWordId = null;
-
+    ZoneId zone = ZoneId.systemDefault();
     /**
      * UI相关
      */
@@ -101,9 +101,9 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
      */
     private FlexboxLayout timeSelectLayout;
     private ChartTimeViewModel chartTimeViewModel;
-
-
-    // ========== 数据 ==========
+    /**
+     * 数据库
+     */
     private APPDatabase appDatabase;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
 
@@ -122,48 +122,48 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        // 重置选择
         if (id == R.id.tv_reset_select) {
-            resetToAllWords();
-            refreshAllData();
+            resetSelectedWord();
+            updateChart();
         }
     }
 
     /**
-     * 重置单词选择,不选择任何单词
+     * 折线图更新
      */
-    private void resetToAllWords() {
-        if (isSingleWordMode || selectedWordId != null) {
-            isSingleWordMode = false;
-            selectedWordId = null;
-            tvChartTitle.setText(R.string.mark_trend_title);
-        }
-    }
-
-
-    /**
-     * 刷新数据
-     */
-    private void refreshAllData() {
+    private void updateChart() {
         StaticFactory.getExecutorService().execute(() -> {
-            WordMarkLogDao dao = appDatabase.wordMarkLogDao();
-            // 查询折线图数据
-            List<WordMarkLogEntity> chartLogs;
-            if (isSingleWordMode && selectedWordId != null) {
-                chartLogs = dao.findByWordIdAndColor(selectedWordId, selectedColor.name(),
+            WordMarkLogDao wordMarkLogDao = appDatabase.wordMarkLogDao();
+            List<WordMarkLogEntity> wordMarkLogEntityList;
+            // 查询折线图数据-判断是全局还是局部单词
+            if (isSingleWordMode) {
+                wordMarkLogEntityList = wordMarkLogDao.findByWordIdAndColor(selectedWordId, selectedColor.name(),
                         chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
             } else {
-                chartLogs = dao.findByColorAndTimeRange(selectedColor.name(), chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
+                wordMarkLogEntityList = wordMarkLogDao.findByColorAndTimeRange(selectedColor.name(),
+                        chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
             }
-            List<ChartPoint> chartData = aggregateByTime(chartLogs, chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
-
-            updateUIHandler.post(() -> {
-                updateChart(chartData);
-                updateRankingList();
-            });
+            // 构建出坐标数据
+            Map<String, Integer> timeCount = new LinkedHashMap<>();
+            DateTimeFormatter timeSpaceFormatter = chartTimeRange.getChartTime().getDateTimeFormatter();
+            LocalDateTime start = Instant.ofEpochMilli(chartTimeRange.getStartTime()).atZone(zone).toLocalDateTime();
+            LocalDateTime end = Instant.ofEpochMilli(chartTimeRange.getEndTime()).atZone(zone).toLocalDateTime();
+            for (LocalDateTime point = start; !point.isAfter(end); point = point.plus(chartTimeRange.getChartTime().getAddDuration())) {
+                timeCount.put(timeSpaceFormatter.format(point), 0);
+            }
+            // 按时间分类且存放到map中保存
+            wordMarkLogEntityList.stream()
+                    .map(wordMarkLogEntity -> timeSpaceFormatter.format(Instant.ofEpochMilli(wordMarkLogEntity.timestamp)
+                            .atZone(zone)
+                            .toLocalDateTime()))
+                    .forEach(time -> timeCount.merge(time, 1, Integer::sum));
+            List<ChartPoint> chartPointList = timeCount.entrySet()
+                    .stream()
+                    .map(entry -> new ChartPoint(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+            updateUIHandler.post(() -> updateChart(chartPointList));
         });
     }
-
 
     /**
      * 排行榜更新
@@ -189,130 +189,42 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
         });
     }
 
-    private void refreshChartForSingleWord() {
-        StaticFactory.getExecutorService().execute(() -> {
-            List<WordMarkLogEntity> chartLogs = appDatabase.wordMarkLogDao()
-                    .findByWordIdAndColor(selectedWordId, selectedColor.name(),
-                            chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
-            List<ChartPoint> chartData = aggregateByTime(chartLogs, chartTimeRange.getStartTime(), chartTimeRange.getEndTime());
-            updateUIHandler.post(() -> updateChart(chartData));
-        });
-    }
-
-
-    // ========== 折线图更新 ==========
-    private void updateChart(List<ChartPoint> chartData) {
-        List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-
-        for (int i = 0; i < chartData.size(); i++) {
-            ChartPoint point = chartData.get(i);
-            entries.add(new Entry(i, point.count));
-            labels.add(point.label);
-        }
-
-        LineDataSet dataSet;
-        if (lineChart.getData() != null && lineChart.getData().getDataSetCount() > 0) {
-            dataSet = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
-            dataSet.setValues(entries);
-        } else {
-            dataSet = new LineDataSet(entries, "");
-            dataSet.setColor(ContextCompat.getColor(requireContext(), selectedColor.getMapColorID()));
-            dataSet.setCircleColor(ContextCompat.getColor(requireContext(), selectedColor.getMapColorID()));
-            dataSet.setLineWidth(2f);
-            dataSet.setCircleRadius(3f);
-            dataSet.setDrawValues(false);
-            dataSet.setMode(LineDataSet.Mode.LINEAR);
-        }
-
-        LineData lineData = new LineData(dataSet);
-        lineChart.setData(lineData);
-
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-        xAxis.setLabelCount(Math.min(labels.size(), 10), true);
-
-        lineChart.animateX(300);
-        lineChart.invalidate();
+    /**
+     * 重置单词选择,不选择任何单词
+     */
+    private void resetSelectedWord() {
+        isSingleWordMode = false;
+        tvChartTitle.setText(R.string.mark_trend_title);
     }
 
     /**
-     * 时间聚合
+     * 更新折线图
      */
-    private List<ChartPoint> aggregateByTime(List<WordMarkLogEntity> logs, long startTime, long endTime) {
-        Map<String, Integer> aggregated = new LinkedHashMap<>();
-        SimpleDateFormat sdf;
+    private void updateChart(List<ChartPoint> chartPointList) {
+        List<Entry> entryList = new ArrayList<>();
+        List<String> labelList = new ArrayList<>();
 
-        switch (chartTimeRange.getChartTime()) {
-            case TODAY:
-                // 按小时：0-23
-                sdf = new SimpleDateFormat("HH:00", Locale.getDefault());
-                Calendar cal = Calendar.getInstance();
-                cal.setTimeInMillis(startTime);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                for (int h = 0; h < 24; h++) {
-                    cal.set(Calendar.HOUR_OF_DAY, h);
-                    String key = sdf.format(new Date(cal.getTimeInMillis()));
-                    aggregated.put(key, 0);
-                }
-                break;
-            case WEEK:
-            case MONTH:
-            case CUSTOM:
-                // 按天：MM-dd
-                sdf = new SimpleDateFormat("MM-dd", Locale.getDefault());
-                Calendar cal2 = Calendar.getInstance();
-                cal2.setTimeInMillis(startTime);
-                cal2.set(Calendar.HOUR_OF_DAY, 0);
-                for (long t = startTime; t <= endTime; t += 86400000L) {
-                    String key = sdf.format(new Date(t));
-                    aggregated.put(key, 0);
-                }
-                break;
-            case ALL:
-                // 按月：yyyy-MM
-                sdf = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
-                // 动态构建月份槽位
-                break;
+        for (int i = 0; i < chartPointList.size(); i++) {
+            ChartPoint point = chartPointList.get(i);
+            entryList.add(new Entry(i, point.getCount()));
+            labelList.add(point.getLabel());
         }
 
-        // 填充数据
-        if (chartTimeRange.getChartTime() == ChartTime.ALL) {
-            sdf = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
-            // 先收集所有月份
-            for (WordMarkLogEntity log : logs) {
-                String key = sdf.format(new Date(log.timestamp));
-                aggregated.putIfAbsent(key, 0);
-            }
-        }
+        LineDataSet dataSet = new LineDataSet(entryList, "");
+        dataSet.setLineWidth(2f);
+        dataSet.setCircleRadius(3f);
+        dataSet.setDrawValues(false);
+        dataSet.setMode(LineDataSet.Mode.LINEAR);
+        dataSet.setColor(ContextCompat.getColor(requireContext(), selectedColor.getMapColorID()));
+        dataSet.setCircleColor(ContextCompat.getColor(requireContext(), selectedColor.getMapColorID()));
+        lineChart.setData(new LineData(dataSet));
 
-        sdf = chartTimeRange.getChartTime() == ChartTime.TODAY
-                ? new SimpleDateFormat("HH:00", Locale.getDefault())
-                : chartTimeRange.getChartTime() == ChartTime.ALL
-                  ? new SimpleDateFormat("yyyy-MM", Locale.getDefault())
-                  : new SimpleDateFormat("MM-dd", Locale.getDefault());
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labelList));
+        xAxis.setLabelCount(Math.min(labelList.size(), 7), true);
 
-        for (WordMarkLogEntity log : logs) {
-            String key = sdf.format(new Date(log.timestamp));
-            aggregated.merge(key, 1, Integer::sum);
-        }
-
-        List<ChartPoint> result = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : aggregated.entrySet()) {
-            ChartPoint point = new ChartPoint();
-            point.label = entry.getKey();
-            point.count = entry.getValue();
-            result.add(point);
-        }
-        return result;
-    }
-
-    // ========== 内部类 ==========
-    private static class ChartPoint {
-        String label;
-        int count;
+        lineChart.animateX(300);
+        lineChart.invalidate();
     }
 
     private void bindView() {
@@ -330,6 +242,7 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
     }
 
     private void initView() {
+        // 颜色选择
         List<MarkColor> selectColorList = Arrays.stream(MarkColor.values())
                 .filter(markColor -> markColor != MarkColor.BROWN)
                 .collect(Collectors.toList());
@@ -344,10 +257,10 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
                     ContextCompat.getColor(requireContext(), selectedColor.getMapColorID()));
             tvSelectedColorName.setText(selectedColor.name());
 
-            resetToAllWords();
-            refreshAllData();
+            resetSelectedWord();
+            updateChart();
+            updateRankingList();
         });
-        // 颜色选择
         Drawable drawable = currentSelectColor.getBackground().mutate();
         DrawableCompat.setTint(drawable,
                 ContextCompat.getColor(requireContext(), selectedColor.getMapColorID()));
@@ -376,22 +289,22 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
         chartTimeViewModel.getSelectChartTime()
                 .observe(this.getViewLifecycleOwner(), observe -> {
                     chartTimeRange = observe;
-                    resetToAllWords();
-                    refreshAllData();
+                    resetSelectedWord();
+                    updateChart();
+                    updateRankingList();
                 });
         chartTimeRange = new ChartTimeRange();
         chartTimeRange.setChartTime(ChartTime.MONTH);
-        ZoneId zone = ZoneId.systemDefault();
         LocalDate today = LocalDate.now(zone);
         long startTime = today.minusDays(chartTimeRange.getChartTime().getRange() - 1)
                 .atStartOfDay(zone)
                 .toInstant()
                 .toEpochMilli();
-        long todayEndTime = ZonedDateTime.of(today, LocalTime.of(23, 59, 59, 999_000_000), zone)
+        long endTime = ZonedDateTime.of(today, LocalTime.of(23, 59, 59, 999_000_000), zone)
                 .toInstant()
                 .toEpochMilli();
         chartTimeRange.setStartTime(startTime);
-        chartTimeRange.setEndTime(todayEndTime);
+        chartTimeRange.setEndTime(endTime);
         // 排行榜列表
         rankingListAdapter = new RankingListAdapter(requireContext());
         rcLeaderboard.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -404,7 +317,7 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
         rankingCountViewModel.getSelectCountEnum()
                 .observe(this.getViewLifecycleOwner(), rankingCount -> {
                     countLimit = rankingCount;
-                    resetToAllWords();
+                    resetSelectedWord();
                     updateRankingList();
                 });
         // 排行榜点击
@@ -412,9 +325,10 @@ public class AnalysisFragment extends Fragment implements View.OnClickListener {
             isSingleWordMode = true;
             selectedWordId = item.getMarkWordId();
             tvChartTitle.setText(item.getWordText());
-            refreshChartForSingleWord();
+            updateChart();
         });
-        refreshAllData();
+        updateChart();
+        updateRankingList();
     }
 
 
