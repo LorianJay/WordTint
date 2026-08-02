@@ -4,6 +4,8 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.ReciteRecordDao;
@@ -107,6 +109,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
      */
     private final Integer ONE_SECOND = 1000;
     private final Integer THIRTY_SECOND = 30 * ONE_SECOND;
+    /**
+     * 单词手写是否匹配的监听器
+     */
+    private final MutableLiveData<Boolean> handwritingMatch =
+            new MutableLiveData<>(Boolean.FALSE);
 
 
     public WordFunctionHandlerImpl(Context context,
@@ -329,6 +336,11 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
     public int getIndexByWordOrigin(String origin) {
         Integer result = quickPosition.get(origin.toLowerCase());
         return result == null ? -1 : result;
+    }
+
+    @Override
+    public MutableLiveData<Boolean> getHandwritingMatch() {
+        return handwritingMatch;
     }
 
     /**

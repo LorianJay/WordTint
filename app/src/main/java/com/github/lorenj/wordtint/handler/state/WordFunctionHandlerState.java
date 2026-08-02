@@ -41,7 +41,8 @@ public class WordFunctionHandlerState {
     /**
      * 是否开启手写拼写
      */
-    private boolean enableHandwriting = false;
+    private final MutableLiveData<Boolean> enableHandwriting =
+            new MutableLiveData<>(Boolean.FALSE);
 
     /**
      * 当前是否正在选择标记颜色
@@ -216,12 +217,8 @@ public class WordFunctionHandlerState {
         this.enableBlueTooth = enableBlueTooth;
     }
 
-    public boolean isEnableHandwriting() {
+    public MutableLiveData<Boolean> getEnableHandwriting() {
         return enableHandwriting;
-    }
-
-    public void setEnableHandwriting(boolean enableHandwriting) {
-        this.enableHandwriting = enableHandwriting;
     }
 
     public int getPreviousFocusBlueToothPosition() {

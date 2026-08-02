@@ -1,5 +1,7 @@
 package com.github.lorenj.wordtint.handler;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordFunctionState;
 import com.github.lorenj.wordtint.handler.state.WordFunctionHandlerState;
@@ -115,5 +117,11 @@ public interface WordFunctionHandler extends StarFunctionHandler {
      * @return 单词索引, 若没找到返回-1
      */
     int getIndexByWordOrigin(String origin);
+
+    /**
+     * 单词手写是否成功的监听器
+     *
+     */
+    MutableLiveData<Boolean> getHandwritingMatch();
 
 }
