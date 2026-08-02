@@ -520,7 +520,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_blue_tooth) {
             wordFunctionHandler.getWordFunctionHandlerState().setEnableBlueTooth(!wordFunctionHandler.getWordFunctionHandlerState().isEnableBlueTooth());
             if (wordFunctionHandler.getWordFunctionHandlerState().isEnableBlueTooth()) {
-                this.functionBlueToothImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_purple, null));
+                this.functionBlueToothImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_blue_dark, null));
                 this.functionBlueToothTextView.setText(getText(R.string.close_blue_tooth));
             } else {
                 this.functionBlueToothImageView.getDrawable().setTint(MaterialColors.getColor(
@@ -535,7 +535,7 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                     .getEnableHandwriting()
                     .setValue(Boolean.FALSE.equals(wordFunctionHandler.getWordFunctionHandlerState().getEnableHandwriting().getValue()));
             if (Boolean.TRUE.equals(wordFunctionHandler.getWordFunctionHandlerState().getEnableHandwriting().getValue())) {
-                this.functionHandwritingImageView.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
+                this.functionHandwritingImageView.getDrawable().setTint(getResources().getColor(android.R.color.holo_purple, null));
                 this.functionHandwritingTextView.setText(getText(R.string.close_handwriting));
             } else {
                 this.functionHandwritingImageView.getDrawable().setTint(MaterialColors.getColor(
@@ -731,13 +731,6 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         if (clickViewId == R.id.ll_recite_function_search) {
             searchLauncher.launch(new Intent(MainReciteActivity.this, SearchWordActivity.class));
         }
-        // 单词分析 - 跳转到主页分析 Tab
-        //if (clickViewId == R.id.ll_recite_function_analysis) {
-        //    Intent intent = new Intent(this, MainActivity.class);
-        //    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        //    intent.putExtra(MainActivity.EXTRA_SHOW_ANALYSIS, true);
-        //    startActivity(intent);
-        //}
         // 收藏夹区域
         if (clickViewId == R.id.ll_recite_function_star) {
             starDrawer.openDrawer(GravityCompat.END);
