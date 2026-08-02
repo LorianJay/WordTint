@@ -56,18 +56,30 @@ public class HandwritingView extends View {
     private final Path currentPath = new Path();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    /** 后台识别是否正在进行中 */
+    /**
+     * 后台识别是否正在进行中
+     */
     private volatile boolean recognizing;
-    /** 后台识别任务的 Future，用于取消 */
+    /**
+     * 后台识别任务的 Future，用于取消
+     */
     private Future<?> pendingRecognition;
 
-    // ---- ML Kit（static — 所有 HandwritingView 实例共享同一个识别器） ----
-
-    private static volatile DigitalInkRecognizer recognizer;
-    private static volatile boolean mlKitReady;
-    private static final Object MLKIT_LOCK = new Object();
+    private volatile DigitalInkRecognizer recognizer;
+    private volatile boolean mlKitReady;
+    private final Object MLKIT_LOCK = new Object();
 
     private WordFunctionHandler wordFunctionHandler;
+    /**
+     * 提笔延迟后触发的识别任务
+     */
+    private final Runnable recognitionRunnable = () -> {
+        if (!allStrokes.isEmpty() && !recognizing) doRecognition();
+    };
+    /**
+     * 识别的文本
+     */
+    private String recognizedText = "";
 
     public HandwritingView(Context context) {
         this(context, null);
@@ -137,6 +149,7 @@ public class HandwritingView extends View {
                     allStrokes.add(new ArrayList<>(currentStroke));
                     currentStroke.clear();
                 }
+                // 延迟一段时间触发识别任务
                 mainHandler.postDelayed(recognitionRunnable, RECOGNITION_DELAY_MS);
                 return true;
         }
@@ -151,6 +164,15 @@ public class HandwritingView extends View {
         super.onDraw(canvas);
         for (List<StrokePoint> stroke : allStrokes) drawStroke(canvas, stroke);
         drawStroke(canvas, currentStroke);
+    }
+
+    /**
+     * View 从窗口分离时取消所有待处理任务，防止内存泄漏。
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        cancelPending();
     }
 
     /**
@@ -181,13 +203,6 @@ public class HandwritingView extends View {
         canvas.drawPath(path, strokePaint);
     }
 
-    // ---- 识别调度 ----
-
-    /** 提笔延迟后触发的识别任务 */
-    private final Runnable recognitionRunnable = () -> {
-        if (!allStrokes.isEmpty() && !recognizing) doRecognition();
-    };
-
     /**
      * 取消所有待处理的后台识别任务（延迟定时器 + 正在执行中的 Future）。
      */
@@ -205,7 +220,7 @@ public class HandwritingView extends View {
      * 匹配结果写入 {@code WordFunctionHandler.getHandwritingMatch()}。
      */
     private void doRecognition() {
-        if (!mlKitReady) {
+        if (!mlKitReady || recognizer == null) {
             recognizing = false;
             return;
         }
@@ -216,7 +231,26 @@ public class HandwritingView extends View {
 
         pendingRecognition = StaticFactory.getExecutorService().submit(() -> {
             if (Thread.currentThread().isInterrupted()) return;
-            String recognizedText = recognize(strokesCopy);
+            // 构建 Ink 并识别
+            Ink.Builder inkBuilder = Ink.builder();
+            for (List<StrokePoint> stroke : strokesCopy) {
+                if (stroke.isEmpty()) continue;
+                Ink.Stroke.Builder sb = Ink.Stroke.builder();
+                for (StrokePoint pt : stroke)
+                    sb.addPoint(Ink.Point.create(pt.x, pt.y, pt.timestamp));
+                inkBuilder.addStroke(sb.build());
+            }
+            try {
+                RecognitionResult result = Tasks.await(recognizer.recognize(inkBuilder.build()));
+                List<RecognitionCandidate> candidates = result.getCandidates();
+                if (!candidates.isEmpty()) {
+                    String text = candidates.get(0).getText();
+                    recognizedText = text.replaceAll("\\s+", "");
+                }
+            } catch (Exception ignored) {
+            }
+            if (Thread.currentThread().isInterrupted()) return;
+            // 获取原单词
             FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
             String wordOrigin = Optional.ofNullable(currentFocusWord)
                     .map(FunctionWordVO::getValue)
@@ -236,20 +270,11 @@ public class HandwritingView extends View {
     }
 
     /**
-     * View 从窗口分离时取消所有待处理任务，防止内存泄漏。
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        cancelPending();
-    }
-
-    /**
      * 异步初始化 ML Kit 手写识别引擎。
      * 首次调用时自动下载英语手写模型（需联网，约 20MB），之后从缓存加载。
      * 线程安全——多次调用不会重复初始化。
      */
-    private static void initMlKit() {
+    private void initMlKit() {
         if (mlKitReady) return;
         StaticFactory.getExecutorService().execute(() -> {
             synchronized (MLKIT_LOCK) {
@@ -274,35 +299,8 @@ public class HandwritingView extends View {
     }
 
     /**
-     * 将笔画列表转换为 {@link Ink} 格式并调用 ML Kit 进行识别。
-     *
-     * @param strokes 笔画点列表（含时间戳）
-     * @return 识别出的单词文本（仅保留字母，去除空格）；失败或未就绪返回空字符串
+     * 单点笔迹，包含坐标和时间戳。
      */
-    private static String recognize(List<List<StrokePoint>> strokes) {
-        DigitalInkRecognizer rec = recognizer;
-        if (!mlKitReady || rec == null || strokes.isEmpty()) return "";
-
-        Ink.Builder inkBuilder = Ink.builder();
-        for (List<StrokePoint> stroke : strokes) {
-            if (stroke.isEmpty()) continue;
-            Ink.Stroke.Builder sb = Ink.Stroke.builder();
-            for (StrokePoint pt : stroke) sb.addPoint(Ink.Point.create(pt.x, pt.y, pt.timestamp));
-            inkBuilder.addStroke(sb.build());
-        }
-
-        try {
-            RecognitionResult result = Tasks.await(rec.recognize(inkBuilder.build()));
-            List<RecognitionCandidate> candidates = result.getCandidates();
-            if (candidates == null || candidates.isEmpty()) return "";
-            String text = candidates.get(0).getText();
-            return text != null ? text.replaceAll("\\s+", "") : "";
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    /** 单点笔迹，包含坐标和时间戳。 */
     static class StrokePoint {
         final float x, y;
         final long timestamp;

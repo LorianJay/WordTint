@@ -465,8 +465,6 @@ public class WordFunctionHandlerImpl extends AbstractStarFunctionHandler
             if (functionWordVO == null) continue;
             functionWordVO.setWordNoteEntity(wordNoteEntity);
         }
-        // 10.手写识别模型初始化
-
     }
 
     /**
