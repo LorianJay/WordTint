@@ -39,6 +39,11 @@ public class WordFunctionHandlerState {
     private boolean enableBlueTooth = false;
 
     /**
+     * 是否开启手写拼写
+     */
+    private boolean enableHandwriting = false;
+
+    /**
      * 当前是否正在选择标记颜色
      */
     private boolean selectChameleon = false;
@@ -209,6 +214,14 @@ public class WordFunctionHandlerState {
 
     public void setEnableBlueTooth(boolean enableBlueTooth) {
         this.enableBlueTooth = enableBlueTooth;
+    }
+
+    public boolean isEnableHandwriting() {
+        return enableHandwriting;
+    }
+
+    public void setEnableHandwriting(boolean enableHandwriting) {
+        this.enableHandwriting = enableHandwriting;
     }
 
     public int getPreviousFocusBlueToothPosition() {

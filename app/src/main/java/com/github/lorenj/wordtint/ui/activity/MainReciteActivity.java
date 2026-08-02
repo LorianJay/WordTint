@@ -66,6 +66,7 @@ import com.github.lorenj.wordtint.handler.impl.WordFunctionHandlerImpl;
 import com.github.lorenj.wordtint.ui.MainActivity;
 import com.github.lorenj.wordtint.ui.adapter.common.SimpleItemTouchHelperCallback;
 import com.github.lorenj.wordtint.ui.adapter.customview.FlowingBorderView;
+import com.github.lorenj.wordtint.ui.adapter.customview.HandwritingView;
 import com.github.lorenj.wordtint.ui.adapter.markarea.ReciteMarkToastAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarListAdapter;
 import com.github.lorenj.wordtint.ui.adapter.star.StarSimpleAdapter;
@@ -109,17 +110,20 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private AlertDialog loadingDialog = null;
     private LinearLayout functionGoto, functionMark, functionChameleon, functionSwitch, functionNote, functionEditOrigin, functionLock, functionBlueTooth;
     private LinearLayout functionShuffle, functionSection, functionMode, functionQuickPosition, functionStar, functionSearchWord, functionSaveProgress, functionAnalysis;
+    private LinearLayout functionHandwriting;
     private LinearLayout lightArea;
     private CardView lightResult;
     private TableLayout functionChangeModePopLayout;
     private ImageView functionChameleonImageView, functionSwitchImageView, functionLockImageView;
     private ImageView functionBlueToothImageView, functionShuffleImageView, functionSectionImageView, functionQuickPositionImageView;
-    private TextView functionBlueToothTextView;
+    private ImageView functionHandwritingImageView;
+    private TextView functionBlueToothTextView, functionHandwritingTextView;
     private TextView windowListingWrite, windowEnglishChineseAudio, windowEnglishChinese;
     private TextView windowChineseEnglish, windowOnlyRecite, windowHidePhrase;
     private long exitLastTime = 0;
     private final Handler updateUIHandler = new Handler(Looper.getMainLooper());
     private FlowingBorderView functionChameleonBorder;
+    private HandwritingView handwritingView;
 
     /**
      * 用户的背词风格
@@ -514,6 +518,22 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
                         com.google.android.material.R.attr.colorOnSurface,
                         Color.BLACK));
                 this.functionBlueToothTextView.setText(getText(R.string.open_blue_tooth));
+            }
+        }
+        if (clickViewId == R.id.ll_recite_function_handwriting) {
+            wordFunctionHandler.getWordFunctionHandlerState()
+                    .setEnableHandwriting(!wordFunctionHandler.getWordFunctionHandlerState().isEnableHandwriting());
+            if (wordFunctionHandler.getWordFunctionHandlerState().isEnableHandwriting()) {
+                this.functionHandwritingImageView.getDrawable().setTint(getResources().getColor(R.color.theme_color, null));
+                this.functionHandwritingTextView.setText(getText(R.string.close_handwriting));
+                this.handwritingView.setHandwritingEnabled(true);
+            } else {
+                this.functionHandwritingImageView.getDrawable().setTint(MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorOnSurface,
+                        Color.BLACK));
+                this.functionHandwritingTextView.setText(getText(R.string.open_handwriting));
+                this.handwritingView.setHandwritingEnabled(false);
             }
         }
         if (clickViewId == R.id.ll_recite_function_goto) {
@@ -949,6 +969,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
     private void reciteWord(FunctionWordVO currentWord) {
         // 更新UI相关
         updateUIHandler.post(() -> {
+            // 切换单词时清除手写笔迹
+            if (handwritingView != null && handwritingView.isHandwritingEnabled()) {
+                handwritingView.clear();
+            }
             // 如果隐藏了介词信息,必须在visible之前处理
             WordOriginEntity prepositionPhrase = currentWord.getValue().get(WordStructure.PHRASE);
             if (userRecitePreference.getRecitePreposition() == RecitePreposition.INVISIBLE)
@@ -1060,6 +1084,10 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionBlueTooth = findViewById(R.id.ll_recite_function_blue_tooth);
         this.functionBlueToothImageView = findViewById(R.id.im_recite_function_blue_tooth);
         this.functionBlueToothTextView = findViewById(R.id.tx_recite_function_blue_tooth);
+        this.functionHandwriting = findViewById(R.id.ll_recite_function_handwriting);
+        this.functionHandwritingImageView = findViewById(R.id.im_recite_function_handwriting);
+        this.functionHandwritingTextView = findViewById(R.id.tx_recite_function_handwriting);
+        this.handwritingView = findViewById(R.id.hw_recite_handwriting);
         this.functionGoto = findViewById(R.id.ll_recite_function_goto);
         this.functionStar = findViewById(R.id.ll_recite_function_star);
         this.functionShuffle = findViewById(R.id.ll_recite_function_shuffle);
@@ -1132,7 +1160,43 @@ public class MainReciteActivity extends AppCompatActivity implements View.OnClic
         this.functionLock.setOnClickListener(this);
         this.lightResult.setOnTouchListener(this);
         this.functionBlueTooth.setOnClickListener(this);
+        this.functionHandwriting.setOnClickListener(this);
         this.lightResult.setOnLongClickListener(this);
+        // 手写识别结果监听
+        this.handwritingView.setOnRecognitionListener(recognizedText -> {
+            updateUIHandler.post(() -> {
+                if (recognizedText == null || recognizedText.isEmpty()) {
+                    showSpellingErrorToast();
+                    return;
+                }
+                // 获取当前单词的原文
+                FunctionWordVO currentFocusWord = wordFunctionHandler.getCurrentFocusWord();
+                String wordOrigin = java.util.Optional.ofNullable(currentFocusWord)
+                        .map(FunctionWordVO::getValue)
+                        .map(map -> map.get(com.github.lorenj.wordtint.enums.WordStructure.WORD_ORIGIN))
+                        .map(wordOriginEntity -> wordOriginEntity.value)
+                        .orElse("");
+                // 忽略大小写和空格进行比较
+                if (recognizedText.trim().equalsIgnoreCase(wordOrigin.trim())) {
+                    // 匹配成功，模拟点击灯泡
+                    lightResult.performClick();
+                } else {
+                    showSpellingErrorToast();
+                }
+            });
+        });
+    }
+
+    /**
+     * 显示拼写错误 Toast，不允许重复显示
+     */
+    private void showSpellingErrorToast() {
+        if (globalToast != null) {
+            globalToast.cancel();
+        }
+        globalToast = Toast.makeText(this, R.string.spelling_error, Toast.LENGTH_SHORT);
+        globalToast.setGravity(Gravity.CENTER, 0, 0);
+        globalToast.show();
     }
 
 

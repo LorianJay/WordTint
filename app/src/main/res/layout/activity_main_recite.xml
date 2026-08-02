@@ -88,6 +88,14 @@
                     android:overScrollMode="never" />
             </RelativeLayout>
 
+            <!--手写覆盖层-->
+            <com.github.lorenj.wordtint.ui.adapter.customview.HandwritingView
+                android:id="@+id/hw_recite_handwriting"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/semi_transparent"
+                android:visibility="gone" />
+
         </RelativeLayout>
         <!--功能区-->
         <HorizontalScrollView
@@ -315,6 +323,35 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="@string/open_blue_tooth"
+                        android:textColor="@color/gray_black"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+                <!--手写拼写-->
+                <LinearLayout
+                    android:id="@+id/ll_recite_function_handwriting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/im_recite_function_handwriting"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/style_image_padding"
+                        android:gravity="center"
+                        android:src="@drawable/ic_handwriting" />
+
+                    <TextView
+                        android:id="@+id/tx_recite_function_handwriting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/open_handwriting"
                         android:textColor="@color/gray_black"
                         android:textSize="14sp" />
 
@@ -754,6 +791,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <include layout="@layout/layout_star" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

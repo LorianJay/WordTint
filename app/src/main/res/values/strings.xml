@@ -88,6 +88,10 @@
     <string name="lock_answer">锁定提示</string>
     <string name="open_blue_tooth">开启蓝牙</string>
     <string name="close_blue_tooth">关闭蓝牙</string>
+    <string name="open_handwriting">开启手写</string>
+    <string name="close_handwriting">关闭手写</string>
+    <string name="handwriting_spelling">手写拼写</string>
+    <string name="spelling_error">拼写错误</string>
     <string name="interrupt">暂停</string>
     <string name="exit">退出</string>
     <string name="hide_pronoun">隐藏介词</string>

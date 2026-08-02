@@ -78,6 +78,7 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'org.slf4j:slf4j-api:2.0.18'
     implementation("org.apache.commons:commons-text:1.15.0")
+    implementation 'com.google.mlkit:digital-ink-recognition:19.0.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:5.0.9'
 
     testImplementation 'junit:junit:4.13.2'
