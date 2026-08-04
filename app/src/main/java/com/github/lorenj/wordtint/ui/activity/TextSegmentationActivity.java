@@ -4,14 +4,19 @@ import android.hardware.lights.LightState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
+import android.text.method.ScrollingMovementMethod;
+import android.view.Gravity;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.WindowCompat;
@@ -25,6 +30,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.WordOriginDao;
+import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
 import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
@@ -85,7 +91,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 单词搜索的布局
      */
     private RelativeLayout segmentationSearch;
-    private TextView editOrigin;
+    private LinearLayout editOrigin, editNote;
     private TextView wordOrigin;
     private WebView wordResult;
     private ResultWebViewHandler resultWebViewHandler;
@@ -93,7 +99,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 顶部栏
      */
     private AppBarLayout appBarLayout;
-    private PopupWindow changeModePopupWindow;
+    private APPDatabase appDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +118,41 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         if (itemId == R.id.ib_text_segmentation_back) {
             finish();
         }
-        if (itemId == R.id.tv_text_segmentation_edit_origin) {
+        if (itemId == R.id.ll_text_segmentation_note) {
+            final EditText inputEditText = new EditText(this);
+            inputEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+            inputEditText.setMinLines(4);
+            inputEditText.setMaxLines(4);
+            inputEditText.setVerticalScrollBarEnabled(true);
+            inputEditText.setMovementMethod(ScrollingMovementMethod.getInstance());
+            inputEditText.setGravity(Gravity.TOP);
+            inputEditText.setPadding(30, 30, 30, 30);
+
+            FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
+            WordNoteEntity tempNoteEntity = currentWord.getWordNoteEntity();
+            if (tempNoteEntity == null) {
+                tempNoteEntity = new WordNoteEntity();
+                tempNoteEntity.setWordId(currentWord.getWordId());
+            }
+            inputEditText.setText(tempNoteEntity.getWordNote());
+            final WordNoteEntity wordNoteEntity = tempNoteEntity;
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.write_note))
+                    .setView(inputEditText)
+                    .setCancelable(false)
+                    .setPositiveButton(getResources().getText(R.string.save), (dialog, which) -> {
+                        String noteContext = inputEditText.getText().toString();
+                        wordNoteEntity.setWordNote(noteContext);
+                        currentWord.setWordNoteEntity(wordNoteEntity);
+                        updateUIHandler.post(() -> visibleWordAllMessage(currentWord));
+                        StaticFactory.getExecutorService()
+                                .execute(() -> appDatabase.wordNoteDao().upsert(wordNoteEntity));
+                    })
+                    .setNegativeButton(getResources().getText(R.string.cancel), (dialog, which) -> {
+                    })
+                    .show();
+        }
+        if (itemId == R.id.ll_text_segmentation_edit_origin) {
             StaticFactory.getExecutorService().execute(() -> {
                 FunctionWordVO currentWord = starFunctionHandler.getCurrentFocusWord();
                 updateUIHandler.post(() -> wordOriginEditHandler.edit(currentWord,
@@ -222,9 +262,10 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                 });
         backButton.setOnClickListener(this);
         // 查询所有单词
+        this.appDatabase = APPDatabase.getInstance(TextSegmentationActivity.this);
         StaticFactory.getExecutorService().execute(() -> allWordSearchList =
-                APPDatabase.getInstance(TextSegmentationActivity.this).wordSearchDao().findAll());
-        wordOriginDao = APPDatabase.getInstance(this).wordOriginDao();
+                appDatabase.wordSearchDao().findAll());
+        wordOriginDao = appDatabase.wordOriginDao();
         StaticFactory.getExecutorService().submit(() -> {
             starFunctionHandler = new AbstractStarFunctionHandler(this) {
                 @Override
@@ -243,7 +284,9 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         this.segmentationSearch = findViewById(R.id.ll_text_segmentation_search);
         this.wordOrigin = findViewById(R.id.tv_text_segmentation_origin);
         this.wordResult = findViewById(R.id.wv_text_segmentation_result);
-        this.editOrigin = findViewById(R.id.tv_text_segmentation_edit_origin);
+        this.editNote = findViewById(R.id.ll_text_segmentation_note);
+        this.editOrigin = findViewById(R.id.ll_text_segmentation_edit_origin);
+        this.editNote.setOnClickListener(this);
         this.editOrigin.setOnClickListener(this);
         this.resultWebViewHandler = new ResultWebViewHandler(this, wordResult);
     }
