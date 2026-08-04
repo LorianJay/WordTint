@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.github.lorenj.wordtint.database.APPDatabase;
+import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarEntity;
 import com.github.lorenj.wordtint.database.entity.WordStarWordIdEntity;
@@ -12,6 +13,7 @@ import com.github.lorenj.wordtint.database.vo.FunctionWordVO;
 import com.github.lorenj.wordtint.enums.WordStructure;
 import com.github.lorenj.wordtint.handler.StarFunctionHandler;
 import com.github.lorenj.wordtint.handler.WordOriginEditHandler;
+import com.google.mlkit.common.sdkinternal.model.CustomModelLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +79,10 @@ public abstract class AbstractStarFunctionHandler implements StarFunctionHandler
         for (WordOriginEntity wordOriginEntity : allOriginWordList) {
             functionWordVO.getValue().put(WordStructure.valueOf(wordOriginEntity.key), wordOriginEntity);
         }
+        // 设置用户注释
+        WordNoteEntity currentWordNoteEntity = appDatabase.wordNoteDao()
+                .findByWordId(currentSelectWordId);
+        functionWordVO.setWordNoteEntity(currentWordNoteEntity);
         getDict().put(currentSelectWordId, functionWordVO);
         return functionWordVO;
     }

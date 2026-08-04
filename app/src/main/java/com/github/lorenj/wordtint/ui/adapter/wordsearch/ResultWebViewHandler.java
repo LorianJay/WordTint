@@ -67,9 +67,7 @@ public class ResultWebViewHandler {
             } catch (Exception e) {
                 Log.e("ResultWebViewHandler", e.getMessage(), e);
             }
-            if (readValue != null) {
-                readValue = readValue.replace("\\n", "\n");
-            }
+            readValue = readValue.replace("\\n", "\n");
             renderHtml = renderHtml.replace(htmlRegex, readValue);
         }
         resultWebView.loadDataWithBaseURL("file:///android_asset/", renderHtml, "text/html", "utf-8", null);
