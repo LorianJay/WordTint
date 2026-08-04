@@ -87,3 +87,4 @@ INSERT INTO "word_book_section" VALUES (86, 2, 'normal-28', 103, 'ORANGE');
 INSERT INTO "word_book_section" VALUES (87, 2, 'normal-29', 104, 'ORANGE');
 INSERT INTO "word_book_section" VALUES (88, 2, 'normal-30', 105, 'ORANGE');
 INSERT INTO "word_book_section" VALUES (89, 2, 'supplement-31', 201, 'YELLOW');
+INSERT INTO "word_book_section" VALUES (90, 3, 'text-segment', 1, 'GREEN');

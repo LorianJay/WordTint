@@ -28,4 +28,9 @@ public interface WordOriginDao {
     @Query("DELETE FROM word_origin WHERE word_id = :wordId and `key` in (:keyList)")
     void deleteAllByWordIdAndKey(int wordId, List<String> keyList);
 
+    @Insert
+    long insert(WordOriginEntity wordOriginEntity);
+
+    @Query("DELETE FROM word_origin WHERE word_id = :wordId")
+    void deleteAllByWordId(int wordId);
 }

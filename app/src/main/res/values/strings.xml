@@ -181,5 +181,9 @@
     <string name="recent_year">最近一年</string>
     <string name="recent_five_year">最近五年</string>
     <string name="right_diamond"><![CDATA[>]]></string>
+    <string name="add_success">单词 %1$s 已经添加</string>
+    <string name="delete_success">单词 %1$s 删除成功</string>
+    <string name="word_exist">单词已经存在</string>
+    <string name="delete_word">删除单词</string>
 
 </resources>

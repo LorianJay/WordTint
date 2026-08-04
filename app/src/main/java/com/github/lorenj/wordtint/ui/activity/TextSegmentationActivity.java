@@ -1,6 +1,5 @@
 package com.github.lorenj.wordtint.ui.activity;
 
-import android.hardware.lights.LightState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,15 +11,13 @@ import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.WindowCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +27,7 @@ import com.github.lorenj.wordtint.R;
 import com.github.lorenj.wordtint.context.factory.StaticFactory;
 import com.github.lorenj.wordtint.database.APPDatabase;
 import com.github.lorenj.wordtint.database.dao.WordOriginDao;
+import com.github.lorenj.wordtint.database.entity.WordBookSectionWordIdEntity;
 import com.github.lorenj.wordtint.database.entity.WordNoteEntity;
 import com.github.lorenj.wordtint.database.entity.WordOriginEntity;
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
@@ -43,14 +41,15 @@ import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.Segmentat
 import com.github.lorenj.wordtint.ui.adapter.morefeatures.segmentation.TextSegmentationViewModel;
 import com.github.lorenj.wordtint.ui.adapter.wordsearch.ResultWebViewHandler;
 import com.github.lorenj.wordtint.handler.impl.WordOriginEditHandlerImpl;
+import com.github.lorenj.wordtint.utils.WordUtils;
 import com.google.android.material.appbar.AppBarLayout;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class TextSegmentationActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -82,6 +81,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 数据库
      */
     private WordOriginDao wordOriginDao;
+    private APPDatabase appDatabase;
     /**
      * 单词收藏需要获取当前的单词id
      */
@@ -91,7 +91,7 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 单词搜索的布局
      */
     private RelativeLayout segmentationSearch;
-    private LinearLayout editOrigin, editNote;
+    private LinearLayout editOrigin, editNote, addWord, deleteWord;
     private TextView wordOrigin;
     private WebView wordResult;
     private ResultWebViewHandler resultWebViewHandler;
@@ -99,7 +99,11 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
      * 顶部栏
      */
     private AppBarLayout appBarLayout;
-    private APPDatabase appDatabase;
+    private Toast globalToast;
+    /**
+     * 单词书籍TEXT_SEGMENT的id默认为90
+     */
+    public static int TEXT_SEGMENT_SECTION_ID = 90;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +163,75 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
                         () -> updateUIHandler.post(() -> visibleWordAllMessage(currentWord))));
             });
         }
+        if (itemId == R.id.ll_text_segmentation_add_word) {
+            StaticFactory.getExecutorService().execute(() -> {
+                WordOriginEntity wordOriginEntity = new WordOriginEntity();
+                wordOriginEntity.wordId = Math.toIntExact(WordUtils.calculateWordId(lastSelectedWord));
+                wordOriginEntity.key = WordStructure.WORD_ORIGIN.name();
+                wordOriginEntity.value = lastSelectedWord;
+                appDatabase.runInTransaction(() -> {
+                    // 判断单词是否已经存在
+                    List<WordOriginEntity> checkWordExist = appDatabase.wordOriginDao().findAllOriginWordById(wordOriginEntity.wordId);
+                    if (checkWordExist != null &&
+                            !checkWordExist.isEmpty()) {
+                        updateUIHandler.post(() -> {
+                            if (globalToast != null) globalToast.cancel();
+                            globalToast = Toast.makeText(TextSegmentationActivity.this,
+                                    this.getString(R.string.word_exist),
+                                    Toast.LENGTH_SHORT);
+                            globalToast.show();
+                        });
+                        return;
+                    }
+                    // 插入单词
+                    appDatabase.wordOriginDao().insert(wordOriginEntity);
+                    // 获取单词order
+                    Integer order = appDatabase.wordBookSectionDao()
+                            .getMaxOrderBySectionId(TEXT_SEGMENT_SECTION_ID)
+                            .orElse(1);
+                    WordBookSectionWordIdEntity wordBookSectionWordIdEntity = new WordBookSectionWordIdEntity();
+                    wordBookSectionWordIdEntity.sectionId = TEXT_SEGMENT_SECTION_ID;
+                    wordBookSectionWordIdEntity.wordId = Math.toIntExact(wordOriginEntity.wordId);
+                    wordBookSectionWordIdEntity.order = order + 1;
+                    appDatabase.wordBookSectionDao().insert(wordBookSectionWordIdEntity);
+                    // 插入search表
+                    WordSearchEntity wordSearchEntity = new WordSearchEntity();
+                    wordSearchEntity.wordId = wordOriginEntity.wordId;
+                    wordSearchEntity.wordOrigin = wordOriginEntity.value;
+                    appDatabase.wordSearchDao().insert(wordSearchEntity);
+                    allWordSearchList.add(wordSearchEntity);
+                    updateUIHandler.post(() -> {
+                        if (globalToast != null) globalToast.cancel();
+                        globalToast = Toast.makeText(TextSegmentationActivity.this,
+                                String.format(getString(R.string.add_success), lastSelectedWord),
+                                Toast.LENGTH_SHORT);
+                        globalToast.show();
+                    });
+                });
+            });
+        }
+        if (itemId == R.id.ll_text_segmentation_delete_word) {
+            StaticFactory.getExecutorService().execute(() -> appDatabase.runInTransaction(() -> {
+                // 确保单词只存在于TEXT_SEGMENT_SECTION_ID中
+                WordBookSectionWordIdEntity wordBookSectionWordIdEntity = appDatabase.wordBookSectionDao()
+                        .findBySectionIdAndWordId(TEXT_SEGMENT_SECTION_ID, currentFocusWordId);
+                if (wordBookSectionWordIdEntity == null) return;
+                appDatabase.wordBookSectionDao().deleteBySectionIdAndWordId(TEXT_SEGMENT_SECTION_ID, currentFocusWordId);
+                appDatabase.wordOriginDao().deleteAllByWordId(currentFocusWordId);
+                appDatabase.wordSearchDao().deleteByWordId(currentFocusWordId);
+                allWordSearchList = allWordSearchList.stream()
+                        .filter(tmp -> tmp.wordId != currentFocusWordId)
+                        .collect(Collectors.toList());
+                updateUIHandler.post(() -> {
+                    if (globalToast != null) globalToast.cancel();
+                    globalToast = Toast.makeText(TextSegmentationActivity.this,
+                            String.format(getString(R.string.delete_success), lastSelectedWord),
+                            Toast.LENGTH_SHORT);
+                    globalToast.show();
+                });
+            }));
+        }
+
     }
 
     @Override
@@ -286,8 +359,12 @@ public class TextSegmentationActivity extends AppCompatActivity implements View.
         this.wordResult = findViewById(R.id.wv_text_segmentation_result);
         this.editNote = findViewById(R.id.ll_text_segmentation_note);
         this.editOrigin = findViewById(R.id.ll_text_segmentation_edit_origin);
+        this.addWord = findViewById(R.id.ll_text_segmentation_add_word);
+        this.deleteWord = findViewById(R.id.ll_text_segmentation_delete_word);
         this.editNote.setOnClickListener(this);
         this.editOrigin.setOnClickListener(this);
+        this.addWord.setOnClickListener(this);
+        this.deleteWord.setOnClickListener(this);
         this.resultWebViewHandler = new ResultWebViewHandler(this, wordResult);
     }
 

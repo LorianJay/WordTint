@@ -1,6 +1,7 @@
 package com.github.lorenj.wordtint.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.github.lorenj.wordtint.database.entity.WordSearchEntity;
@@ -22,4 +23,11 @@ public interface WordSearchDao {
 
     @Query("SELECT * FROM word_search")
     List<WordSearchEntity> findAll();
+
+    @Insert
+    void insert(WordSearchEntity wordSearchEntity);
+
+    @Query("DELETE FROM word_search WHERE word_id = :wordId")
+    void deleteByWordId(int wordId);
+
 }
